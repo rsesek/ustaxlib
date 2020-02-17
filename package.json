@@ -1,0 +1,19 @@
+{
+  "name": "ustaxlib",
+  "version": "0.1.0",
+  "description": "A library for modeling individual US tax returns.",
+  "main": "src/index.js",
+  "scripts": {
+    "test": "jest"
+  },
+  "author": "Robert Sesek",
+  "license": "ISC",
+  "dependencies": {
+    "typescript": "^3.7.5"
+  },
+  "devDependencies": {
+    "@types/jest": "^25.1.2",
+    "jest": "^25.1.0",
+    "ts-jest": "^25.2.0"
+  }
+}
