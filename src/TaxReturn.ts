@@ -1,5 +1,6 @@
 import Form from './Form';
 import { Person, Relation } from './Person';
+import { NotFoundError, InconsistencyError, UnsupportedFeatureError } from './Errors';
 
 export default class TaxReturn {
   private _year: number;
@@ -36,11 +37,27 @@ export default class TaxReturn {
   }
 
   addForm(form: Form) {
+    if (!form.allowMultipleCopies) {
+      const other = this.getForms(form.name);
+      if (other.length > 0) {
+        throw new InconsistencyError(`Cannot have more than one type of form ${form.name}`);
+      }
+    }
+    this._forms.push(form);
   }
-};
 
-export class InconsistencyError extends Error {
-};
+  getForm(name: string): Form {
+    const forms = this.getForms(name);
+    if (forms.length == 0) {
+      throw new NotFoundError(`No form named ${name}`);
+    }
+    if (forms.length > 1) {
+      throw new InconsistencyError(`More than 1 form named ${name}`);
+    }
+    return forms[0];
+  }
 
-export class UnsupportedFeatureError extends Error {
+  getForms(name: string): Form[] {
+    return this._forms.filter(f => f.name == name);
+  }
 };
