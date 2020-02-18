@@ -96,9 +96,3 @@ test('get non-existent form', () => {
   expect(() => tr.getForm('form')).toThrow(NotFoundError);
   expect(tr.getForms('form')).toEqual([]);
 });
-
-test('input', () => {
-  const tr = new TaxReturn(2019, { 'Filing Status': 'S' });
-  expect(tr.getInput('Filing Status')).toBe('S');
-  expect(() => tr.getInput('Unknown')).toThrow(NotFoundError);
-});

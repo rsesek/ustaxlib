@@ -53,12 +53,22 @@ test('reference line', () => {
 });
 
 test('input line', () => {
-  const tr = new TaxReturn(2019, { 'key': 'value' });
+  class TestForm extends Form {
+    get name() { return 'F1'; }
 
-  const l1 = new InputLine<string>('1', 'key');
-  expect(l1.value(tr)).toBe('value');
+    protected getLines() {
+      return [
+        new InputLine<string>('1', 'key'),
+        new InputLine<string>('2', 'key2')
+      ];
+    }
+  };
+  const tr = new TaxReturn(2019);
+  const f = new TestForm({ 'key': 'value' });
 
-  const l2 = new InputLine<string>('2', 'key2');
+  expect(f.getLine('1').value(tr)).toBe('value');
+
+  const l2 = f.getLine('2');
   expect(() => l2.value(tr)).toThrow(NotFoundError);
 });
 
@@ -83,8 +93,8 @@ test('line stack', () => {
     }
   };
 
-  const tr = new TaxReturn(2019, { 'input': 100 });
-  tr.addForm(new FormZ());
+  const tr = new TaxReturn(2019);
+  tr.addForm(new FormZ({ 'input': 100 }));
   tr.addForm(new FormZ2());
 
   const l = new ReferenceLine<number>('32', 'Z-2', '2c');

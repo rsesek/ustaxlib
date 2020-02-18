@@ -4,25 +4,16 @@ import { NotFoundError, InconsistencyError, UnsupportedFeatureError } from './Er
 
 export default class TaxReturn {
   private _year: number;
-  private _input: object;
 
   private _people: Person[] = [];
   private _forms: Form[] = [];
 
-  constructor(year: number, input?: object) {
+  constructor(year: number) {
     this._year = year;
-    this._input = input;
   }
 
   get year(): number {
     return this._year;
-  }
-
-  getInput<T>(name: string): T {
-    if (!(name in this._input)) {
-      throw new NotFoundError(`No input with key ${name}`);
-    }
-    return this._input[name] as T;
   }
 
   addPerson(person: Person) {

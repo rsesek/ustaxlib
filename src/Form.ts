@@ -3,10 +3,12 @@ import { InconsistencyError, NotFoundError } from './Errors';
 
 export default abstract class Form {
   private _lines: Line<any>[] = [];
+  private _input?: object;
 
   abstract get name(): string;
 
-  constructor() {
+  constructor(input?: object) {
+    this._input = input;
     this.getLines().map(this.addLine.bind(this));
   }
 
@@ -17,9 +19,13 @@ export default abstract class Form {
   }
 
   private addLine(line: Line<any>) {
+    if (line.form !== undefined) {
+      throw new InconsistencyError('Line is already in a Form');
+    }
     try {
       this.getLine(line.id);
     } catch {
+      line.form = this;
       this._lines.push(line);
       return;
     }
@@ -32,5 +38,12 @@ export default abstract class Form {
       throw new NotFoundError(id);
     }
     return lines[0];
+  }
+
+  getInput<T>(name: string): T {
+    if (!(name in this._input)) {
+      throw new NotFoundError(`No input with key ${name} on form ${this.name}`);
+    }
+    return this._input[name] as T;
   }
 };

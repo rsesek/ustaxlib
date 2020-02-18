@@ -1,8 +1,11 @@
 import TaxReturn from './TaxReturn';
+import Form from './Form';
 
 export abstract class Line<T> {
   private _id: string;
   private _description?: string;
+
+  form: Form;
 
   constructor(id: string, description?: string) {
     this._id = id;
@@ -59,6 +62,6 @@ export class InputLine<T> extends Line<T> {
   }
 
   value(tr: TaxReturn): T {
-    return tr.getInput<T>(this._input);
+    return this.form.getInput<T>(this._input);
   }
 };

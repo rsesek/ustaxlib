@@ -51,3 +51,32 @@ test('add duplicate line', () => {
 
   expect(() => new TestForm()).toThrow(InconsistencyError);
 });
+
+test('add line to two forms', () => {
+  const l = new ComputedLine<string>('bad', () => 'bad');
+
+  class TestForm1 extends Form {
+    get name(): string { return '1'; }
+
+    protected getLines() { return [ l ]; }
+  };
+  class TestForm2 extends Form {
+    get name(): string { return '2'; }
+
+    protected getLines() { return [ l ]; }
+  };
+
+  const f1 = new TestForm1();
+  expect(() => new TestForm2()).toThrow(InconsistencyError);
+});
+
+test('input', () => {
+  class TestForm extends Form {
+    get name() { return '1040'; }
+
+    protected getLines() { return []; }
+  };
+  const f = new TestForm({ 'Filing Status': 'S' });
+  expect(f.getInput('Filing Status')).toBe('S');
+  expect(() => f.getInput('Unknown')).toThrow(NotFoundError);
+});
