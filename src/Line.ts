@@ -49,3 +49,16 @@ export class ReferenceLine<T> extends Line<T> {
     return tr.getForm(this._form).getLine(this._line).value(tr);
   }
 };
+
+export class InputLine<T> extends Line<T> {
+  private _input: string;
+
+  constructor(id: string, input: string, description?: string) {
+    super(id, description);
+    this._input = input;
+  }
+
+  value(tr: TaxReturn): T {
+    return tr.getInput<T>(this._input);
+  }
+};
