@@ -11,8 +11,8 @@ test('add and get line', () => {
       return 'Test Form';
     }
 
-    protected addLines() {
-      this.addLine(l);
+    protected getLines() {
+      return [l];
     }
   };
 
@@ -26,7 +26,8 @@ test('get non-existent line', () => {
       return 'Test Form';
     }
 
-    protected addLines() {
+    protected getLines() {
+      return [];
     }
   };
 
@@ -43,9 +44,8 @@ test('add duplicate line', () => {
       return 'Test Form';
     }
 
-    protected addLines() {
-      this.addLine(l1);
-      this.addLine(l2);
+    protected getLines() {
+      return [l1, l2];
     }
   };
 

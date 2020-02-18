@@ -7,16 +7,16 @@ export default abstract class Form {
   abstract get name(): string;
 
   constructor() {
-    this.addLines();
+    this.getLines().map(this.addLine.bind(this));
   }
 
-  protected abstract addLines(): void;
+  protected abstract getLines(): Line<any>[];
 
   get allowMultipleCopies(): boolean {
     return false;
   }
 
-  protected addLine(line: Line<any>) {
+  private addLine(line: Line<any>) {
     try {
       this.getLine(line.id);
     } catch {

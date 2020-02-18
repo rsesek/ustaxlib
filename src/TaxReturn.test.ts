@@ -56,7 +56,7 @@ test('single-copy forms', () => {
   class TestForm extends Form {
     get name(): string { return 'Test Form'; }
 
-    protected addLines() {}
+    protected getLines() { return []; }
   };
 
   const tr = new TaxReturn(2019);
@@ -72,7 +72,7 @@ test('multiple-copy forms', () => {
 
     get allowMultipleCopies(): boolean { return true; }
 
-    protected addLines() {}
+    protected getLines() { return []; }
   };
 
   const tr = new TaxReturn(2019);
