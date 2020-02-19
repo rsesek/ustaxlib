@@ -1,13 +1,13 @@
 import { Line } from './Line';
 import { InconsistencyError, NotFoundError } from './Errors';
 
-export default abstract class Form {
+export default abstract class Form<I = unknown> {
   private _lines: Line<any>[] = [];
-  private _input?: object;
+  private _input?: I;
 
   abstract get name(): string;
 
-  constructor(input?: object) {
+  constructor(input?: I) {
     this._input = input;
     this.getLines().map(this.addLine.bind(this));
   }
@@ -40,10 +40,10 @@ export default abstract class Form {
     return lines[0];
   }
 
-  getInput<T>(name: string): T {
+  getInput<K extends keyof I>(name: K): I[K] {
     if (!(name in this._input)) {
       throw new NotFoundError(`No input with key ${name} on form ${this.name}`);
     }
-    return this._input[name] as T;
+    return this._input[name];
   }
 };

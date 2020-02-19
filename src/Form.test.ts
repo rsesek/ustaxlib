@@ -71,12 +71,16 @@ test('add line to two forms', () => {
 });
 
 test('input', () => {
-  class TestForm extends Form {
+  interface TestInput {
+    filingStatus: string;
+    money: number;
+  };
+  class TestForm extends Form<TestInput> {
     get name() { return '1040'; }
 
     protected getLines() { return []; }
   };
-  const f = new TestForm({ 'Filing Status': 'S' });
-  expect(f.getInput('Filing Status')).toBe('S');
-  expect(() => f.getInput('Unknown')).toThrow(NotFoundError);
+
+  const f = new TestForm({ filingStatus: 'S', money: 100.0 });
+  expect(f.getInput('filingStatus')).toBe('S');
 });
