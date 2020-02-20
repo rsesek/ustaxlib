@@ -84,3 +84,17 @@ test('input', () => {
   const f = new TestForm({ filingStatus: 'S', money: 100.0 });
   expect(f.getInput('filingStatus')).toBe('S');
 });
+
+test('get value', () => {
+  class TestForm extends Form {
+    get name() { return 'Form'; }
+
+    protected getLines() {
+      return [ new ComputedLine<number>('line', () => 42) ];
+    }
+  };
+
+  const f = new TestForm();
+  const tr = new TaxReturn(2019);
+  expect(f.getValue(tr, 'line')).toBe(42);
+});

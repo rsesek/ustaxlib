@@ -1,3 +1,4 @@
+import TaxReturn from './TaxReturn';
 import { Line } from './Line';
 import { InconsistencyError, NotFoundError } from './Errors';
 
@@ -34,6 +35,11 @@ export default abstract class Form<I = unknown> {
       throw new NotFoundError(id);
     }
     return lines[0];
+  }
+
+  getValue<T>(tr: TaxReturn, id: string): T {
+    const line: Line<T> = this.getLine(id);
+    return line.value(tr);
   }
 
   getInput<K extends keyof I>(name: K): I[K] {
