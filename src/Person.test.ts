@@ -1,4 +1,4 @@
-import { Person, Relation } from './Person';
+import Person, { Relation } from './Person';
 
 test('static constructors', () => {
   let p = Person.self('Billy Bob');

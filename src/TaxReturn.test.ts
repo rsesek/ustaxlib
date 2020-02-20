@@ -1,5 +1,5 @@
 import TaxReturn from './TaxReturn';
-import { Person } from './Person';
+import Person from './Person';
 import Form, { SupportsMultipleCopies } from './Form';
 import { NotFoundError, InconsistencyError } from './Errors';
 

@@ -4,7 +4,7 @@ export enum Relation {
   Dependent,
 };
 
-export class Person {
+export default class Person {
   private _name: string;
   private _relation: Relation;
 

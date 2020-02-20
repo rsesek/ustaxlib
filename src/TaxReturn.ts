@@ -1,5 +1,5 @@
 import Form, { SupportsMultipleCopies, supportsMultipleCopies } from './Form';
-import { Person, Relation } from './Person';
+import Person, { Relation } from './Person';
 import { NotFoundError, InconsistencyError, UnsupportedFeatureError } from './Errors';
 
 export default class TaxReturn {
