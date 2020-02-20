@@ -14,10 +14,6 @@ export default abstract class Form<I = unknown> {
 
   protected abstract getLines(): Line<any>[];
 
-  get allowMultipleCopies(): boolean {
-    return false;
-  }
-
   private addLine(line: Line<any>) {
     if (line.form !== undefined) {
       throw new InconsistencyError('Line is already in a Form');
@@ -46,4 +42,12 @@ export default abstract class Form<I = unknown> {
     }
     return this._input[name];
   }
+};
+
+export interface SupportsMultipleCopies extends Form {
+  aggregate(forms: Form[]): this;
+};
+
+export function supportsMultipleCopies(f: object): f is SupportsMultipleCopies {
+  return f instanceof Form && 'aggregate' in f;
 };
