@@ -47,8 +47,8 @@ export default class TaxReturn {
     this._forms.push(form);
   }
 
-  getForm(name: string): Form {
-    const forms = this.getForms(name);
+  getForm<T extends Form>(name: string): T {
+    const forms = this.getForms<T>(name);
     if (forms.length == 0) {
       throw new NotFoundError(`No form named ${name}`);
     }
@@ -58,7 +58,7 @@ export default class TaxReturn {
     return forms[0];
   }
 
-  getForms(name: string): Form[] {
-    return this._forms.filter(f => f.name == name);
+  getForms<T extends Form>(name: string): T[] {
+    return this._forms.filter(f => f.name == name) as T[];
   }
 };
