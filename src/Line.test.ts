@@ -62,8 +62,8 @@ test('input line', () => {
 
     protected getLines() {
       return [
-        new InputLine<string, Input>('1', 'key'),
-        new InputLine<string, Input>('2', 'key2')
+        new InputLine<Input>('1', 'key'),
+        new InputLine<Input>('2', 'key2')
       ];
     }
   };
