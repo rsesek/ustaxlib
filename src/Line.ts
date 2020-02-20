@@ -53,15 +53,17 @@ export class ReferenceLine<T> extends Line<T> {
   }
 };
 
-export class InputLine<T> extends Line<T> {
-  private _input: string;
+export class InputLine<T, U = unknown> extends Line<T> {
+  private _input: keyof U;
 
-  constructor(id: string, input: string, description?: string) {
+  form: Form<U>;
+
+  constructor(id: string, input: keyof U, description?: string) {
     super(id, description);
     this._input = input;
   }
 
   value(tr: TaxReturn): T {
-    return this.form.getInput<T>(this._input);
+    return this.form.getInput(this._input) as any;
   }
 };

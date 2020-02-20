@@ -53,13 +53,17 @@ test('reference line', () => {
 });
 
 test('input line', () => {
+  interface Input {
+    key: string;
+    key2?: string;
+  }
   class TestForm extends Form {
     get name() { return 'F1'; }
 
     protected getLines() {
       return [
-        new InputLine<string>('1', 'key'),
-        new InputLine<string>('2', 'key2')
+        new InputLine<string, Input>('1', 'key'),
+        new InputLine<string, Input>('2', 'key2')
       ];
     }
   };
@@ -77,7 +81,7 @@ test('line stack', () => {
     get name() { return 'Z'; }
 
     protected getLines() {
-      return [ new InputLine('3', 'input') ];
+      return [ new InputLine<any, any>('3', 'input') ];
     }
   };
 
