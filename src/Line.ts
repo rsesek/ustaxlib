@@ -67,3 +67,20 @@ export class InputLine<T, U = unknown> extends Line<T> {
     return this.form.getInput(this._input) as any;
   }
 };
+
+export class AccumulatorLine extends Line<number> {
+  private _form: string;
+  private _line: string;
+
+  constructor(id: string, form: string, line: string, description?: string) {
+    super(id, description || `Accumulator F${form}.L${line}`);
+    this._form = form;
+    this._line = line;
+  }
+
+  value(tr: TaxReturn): number {
+    const forms = tr.getForms(this._form);
+    const reducer = (acc: number, curr: Form) => acc + curr.getValue<number>(tr, this._line);
+    return forms.reduce(reducer, 0);
+  }
+};

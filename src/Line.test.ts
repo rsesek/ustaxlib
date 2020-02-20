@@ -1,5 +1,5 @@
-import { Line, InputLine, ReferenceLine, ComputedLine } from './Line';
-import Form from './Form';
+import { Line, AccumulatorLine, InputLine, ReferenceLine, ComputedLine } from './Line';
+import Form, { SupportsMultipleCopies } from './Form';
 import TaxReturn from './TaxReturn';
 import { NotFoundError } from './Errors';
 
@@ -103,4 +103,24 @@ test('line stack', () => {
 
   const l = new ReferenceLine<number>('32', 'Z-2', '2c');
   expect(l.value(tr)).toBe(20);
+});
+
+test('accumulator line', () => {
+  class TestForm extends Form implements SupportsMultipleCopies {
+    get name() { return 'Form B'; }
+
+    aggregate() { return null; }
+
+    protected getLines() {
+      return [ new ConstantLine<number>('g', 100.25) ]
+    }
+  };
+
+  const tr = new TaxReturn(2019);
+  tr.addForm(new TestForm());
+  tr.addForm(new TestForm());
+  tr.addForm(new TestForm());
+
+  const l = new AccumulatorLine('line', 'Form B', 'g');
+  expect(l.value(tr)).toBe(300.75);
 });
