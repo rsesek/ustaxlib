@@ -20,7 +20,7 @@ export default class Form1040 extends Form<Form1040['_lines'], Form1040Input> {
   protected readonly _lines = {
     '1': new AccumulatorLine('W-2', '1', 'Wages, salaries, tips, etc.'),
     '2a': new AccumulatorLine('1099-INT', '8', 'Tax-exempt interest'),
-    '2b': new AccumulatorLine('1009-INT', '1', 'Taxable interest'),
+    '2b': new AccumulatorLine('1099-INT', '1', 'Taxable interest'),
     '3a': new AccumulatorLine('1099-DIV', '1b', 'Qualified dividends'),
     '3b': new AccumulatorLine('1099-DIV', '1a', 'Ordinary dividends'),
     // 4a and 4b are complex

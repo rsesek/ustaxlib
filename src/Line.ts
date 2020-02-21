@@ -58,7 +58,7 @@ export class InputLine<U = unknown, T extends keyof U = any> extends Line<U[T]> 
   form: Form<any, U>;
 
   constructor(input: T, description?: string) {
-    super(description);
+    super(description || `Input from ${input}`);
     this._input = input;
   }
 
