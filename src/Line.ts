@@ -5,7 +5,7 @@ export abstract class Line<T> {
   private _id: string;
   private _description?: string;
 
-  form: Form;
+  form: Form<any, any>;
 
   constructor(id: string, description?: string) {
     this._id = id;
@@ -56,7 +56,7 @@ export class ReferenceLine<T> extends Line<T> {
 export class InputLine<U = unknown, T extends keyof U = any> extends Line<U[T]> {
   private _input: T;
 
-  form: Form<U>;
+  form: Form<any, U>;
 
   constructor(id: string, input: T, description?: string) {
     super(id, description);
@@ -80,7 +80,7 @@ export class AccumulatorLine extends Line<number> {
 
   value(tr: TaxReturn): number {
     const forms = tr.getForms(this._form);
-    const reducer = (acc: number, curr: Form) => acc + curr.getValue<number>(tr, this._line);
+    const reducer = (acc: number, curr: Form<any>) => acc + (curr.getValue(tr, this._line) as number);
     return forms.reduce(reducer, 0);
   }
 };

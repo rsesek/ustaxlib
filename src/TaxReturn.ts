@@ -6,7 +6,7 @@ export default class TaxReturn {
   private _year: number;
 
   private _people: Person[] = [];
-  private _forms: Form[] = [];
+  private _forms: Form<any, unknown>[] = [];
 
   constructor(year: number) {
     this._year = year;
@@ -37,7 +37,7 @@ export default class TaxReturn {
     return people[0];
   }
 
-  addForm(form: Form) {
+  addForm(form: Form<any>) {
     if (!form.supportsMultipleCopies) {
       const other = this.getForms(form.name);
       if (other.length > 0) {
@@ -47,7 +47,7 @@ export default class TaxReturn {
     this._forms.push(form);
   }
 
-  maybeGetForm<T extends Form>(name: string): T | null {
+  maybeGetForm<T extends Form<any>>(name: string): T | null {
     const forms = this.getForms<T>(name);
     if (forms.length == 0) {
       return null;
@@ -58,14 +58,14 @@ export default class TaxReturn {
     return forms[0];
   }
 
-  getForm<T extends Form>(name: string): T {
+  getForm<T extends Form<any>>(name: string): T {
     const form = this.maybeGetForm<T>(name);
     if (!form)
       throw new NotFoundError(`No form named ${name}`);
     return form;
   }
 
-  getForms<T extends Form>(name: string): T[] {
+  getForms<T extends Form<any>>(name: string): T[] {
     return this._forms.filter(f => f.name == name) as T[];
   }
 };

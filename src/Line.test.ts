@@ -31,12 +31,11 @@ test('computed line', () => {
 });
 
 test('reference line', () => {
-  class TestForm extends Form {
-    get name() { return 'Form 1'; }
-
-    protected getLines() {
-      return [ new ConstantLine('6b', 12.34) ];
-    }
+  class TestForm extends Form<TestForm['_lines']> {
+    readonly name = 'Form 1';
+    protected readonly _lines = {
+      '6b': new ConstantLine('6b', 12.34)
+    };
   };
 
   const tr = new TaxReturn(2019);
@@ -57,15 +56,12 @@ test('input line', () => {
     key: string;
     key2?: string;
   }
-  class TestForm extends Form {
-    get name() { return 'F1'; }
-
-    protected getLines() {
-      return [
-        new InputLine<Input>('1', 'key'),
-        new InputLine<Input>('2', 'key2')
-      ];
-    }
+  class TestForm extends Form<TestForm['_lines'], Input> {
+    readonly name = 'F1';
+    protected readonly _lines = {
+      '1': new InputLine<Input>('1', 'key'),
+      '2': new InputLine<Input>('2', 'key2')
+    };
   };
   const tr = new TaxReturn(2019);
   const f = new TestForm({ 'key': 'value' });
@@ -77,24 +73,20 @@ test('input line', () => {
 });
 
 test('line stack', () => {
-  class FormZ extends Form {
-    get name() { return 'Z'; }
-
-    protected getLines() {
-      return [ new InputLine<any, any>('3', 'input') ];
+  class FormZ extends Form<FormZ['_lines'], {'input': number}> {
+    readonly name = 'Z';
+    protected readonly _lines = {
+      '3': new InputLine<any, any>('3', 'input')
     }
   };
 
-  class FormZ2 extends Form {
-    get name() { return 'Z-2'; }
-
-    protected getLines() {
-      return [
-        new ComputedLine<number>('2c', (tr: TaxReturn, l: Line<number>): any => {
+  class FormZ2 extends Form<FormZ2['_lines']> {
+    readonly name = 'Z-2';
+    protected readonly _lines = {
+      '2c': new ComputedLine<number>('2c', (tr: TaxReturn, l: Line<number>): any => {
           return tr.getForm('Z').getLine('3').value(tr) * 0.2;
         })
-      ];
-    }
+    };
   };
 
   const tr = new TaxReturn(2019);
@@ -106,14 +98,12 @@ test('line stack', () => {
 });
 
 test('accumulator line', () => {
-  class TestForm extends Form {
-    get name() { return 'Form B'; }
-
+  class TestForm extends Form<TestForm['_lines']> {
+    readonly name = 'Form B';
     readonly supportsMultipleCopies = true;
-
-    protected getLines() {
-      return [ new ConstantLine<number>('g', 100.25) ]
-    }
+    protected readonly _lines = {
+      g: new ConstantLine<number>('g', 100.25)
+    };
   };
 
   const tr = new TaxReturn(2019);

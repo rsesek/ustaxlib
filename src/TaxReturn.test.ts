@@ -53,10 +53,9 @@ test('get non-existent person', () => {
 });
 
 test('single-copy forms', () => {
-  class TestForm extends Form {
-    get name(): string { return 'Test Form'; }
-
-    protected getLines() { return []; }
+  class TestForm extends Form<null> {
+    readonly name = 'Test Form';
+    protected readonly _lines = null;
   };
 
   const tr = new TaxReturn(2019);
@@ -67,12 +66,10 @@ test('single-copy forms', () => {
 });
 
 test('multiple-copy forms', () => {
-  class TestForm extends Form {
-    get name(): string { return 'Test Form'; }
-
+  class TestForm extends Form<null> {
+    readonly name = 'Test Form';
     readonly supportsMultipleCopies = true;
-
-    protected getLines() { return []; }
+    protected readonly _lines = null;
   };
 
   const tr = new TaxReturn(2019);
