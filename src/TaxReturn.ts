@@ -44,6 +44,7 @@ export default class TaxReturn {
         throw new InconsistencyError(`Cannot have more than one type of form ${form.name}`);
       }
     }
+    form.init();
     this._forms.push(form);
   }
 

@@ -2,13 +2,12 @@ import TaxReturn from './TaxReturn';
 import Form from './Form';
 
 export abstract class Line<T> {
-  private _id: string;
   private _description?: string;
 
-  form: Form<any, any>;
+  _id: string;  // _id is set by Form.init().
+  form: Form<any, any>;  // Set by Form.init();
 
-  constructor(id: string, description?: string) {
-    this._id = id;
+  constructor(description?: string) {
     this._description = description;
   }
 
@@ -28,8 +27,8 @@ type ComputeFunc<T> = (tr: TaxReturn, l: ComputedLine<T>) => T;
 export class ComputedLine<T> extends Line<T> {
   private _compute: ComputeFunc<T>;
 
-  constructor(id: string, compute: ComputeFunc<T>, description?: string) {
-    super(id, description);
+  constructor(compute: ComputeFunc<T>, description?: string) {
+    super(description);
     this._compute = compute;
   }
 
@@ -42,8 +41,8 @@ export class ReferenceLine<T> extends Line<T> {
   private _form: string;
   private _line: string;
 
-  constructor(id: string, form: string, line: string, description?: string) {
-    super(id, description || `Reference F${form}.L${line}`);
+  constructor(form: string, line: string, description?: string) {
+    super(description || `Reference F${form}.L${line}`);
     this._form = form;
     this._line = line;
   }
@@ -58,8 +57,8 @@ export class InputLine<U = unknown, T extends keyof U = any> extends Line<U[T]> 
 
   form: Form<any, U>;
 
-  constructor(id: string, input: T, description?: string) {
-    super(id, description);
+  constructor(input: T, description?: string) {
+    super(description);
     this._input = input;
   }
 
@@ -72,8 +71,8 @@ export class AccumulatorLine extends Line<number> {
   private _form: string;
   private _line: string;
 
-  constructor(id: string, form: string, line: string, description?: string) {
-    super(id, description || `Accumulator F${form}.L${line}`);
+  constructor(form: string, line: string, description?: string) {
+    super(description || `Accumulator F${form}.L${line}`);
     this._form = form;
     this._line = line;
   }

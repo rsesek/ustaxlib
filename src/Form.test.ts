@@ -4,7 +4,7 @@ import Form from './Form';
 import { InconsistencyError, NotFoundError } from './Errors';
 
 test('add and get line', () => {
-  const l = new ComputedLine<number>('1', () => 42);
+  const l = new ComputedLine<number>(() => 42);
 
   class TestForm extends Form<TestForm['_lines']> {
     readonly name = 'Test Form';
@@ -50,7 +50,7 @@ test('get value', () => {
     readonly name = 'Form';
 
     protected readonly _lines = {
-      line: new ComputedLine<number>('line', () => 42),
+      line: new ComputedLine<number>(() => 42),
     };
   };
 

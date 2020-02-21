@@ -6,8 +6,8 @@ import { NotFoundError } from './Errors';
 class ConstantLine<T> extends Line<T> {
   private _k: T;
 
-  constructor(id: string, k: T) {
-    super(id, `Constant ${k}`);
+  constructor(k: T) {
+    super(`Constant ${k}`);
     this._k = k;
   }
 
@@ -18,7 +18,7 @@ class ConstantLine<T> extends Line<T> {
 
 test('computed line', () => {
   const tr = new TaxReturn(2019);
-  const l = new ComputedLine<number>('A',
+  const l = new ComputedLine<number>(
     (taxReturn: TaxReturn, line: ComputedLine<number>): number => {
       expect(taxReturn).toBe(tr);
       expect(line).toBe(l);
@@ -26,7 +26,6 @@ test('computed line', () => {
     },
     'Computed Line A');
   expect(l.value(tr)).toBe(42);
-  expect(l.id).toBe('A');
   expect(l.description).toBe('Computed Line A');
 });
 
@@ -34,20 +33,20 @@ test('reference line', () => {
   class TestForm extends Form<TestForm['_lines']> {
     readonly name = 'Form 1';
     protected readonly _lines = {
-      '6b': new ConstantLine('6b', 12.34)
+      '6b': new ConstantLine(12.34)
     };
   };
 
   const tr = new TaxReturn(2019);
   tr.addForm(new TestForm());
 
-  const l1 = new ReferenceLine<number>('C', 'Form 1', '6b');
+  const l1 = new ReferenceLine<number>('Form 1', '6b');
   expect(l1.value(tr)).toBe(12.34);
 
-  const l2 = new ReferenceLine<number>('x', 'Form 2', '6b');
+  const l2 = new ReferenceLine<number>('Form 2', '6b');
   expect(() => l2.value(tr)).toThrow(NotFoundError);
 
-  const l3 = new ReferenceLine<number>('y', 'Form 1', '7a');
+  const l3 = new ReferenceLine<number>('Form 1', '7a');
   expect(() => l3.value(tr)).toThrow(NotFoundError);
 });
 
@@ -59,14 +58,16 @@ test('input line', () => {
   class TestForm extends Form<TestForm['_lines'], Input> {
     readonly name = 'F1';
     protected readonly _lines = {
-      '1': new InputLine<Input>('1', 'key'),
-      '2': new InputLine<Input>('2', 'key2')
+      '1': new InputLine<Input>('key'),
+      '2': new InputLine<Input>('key2')
     };
   };
   const tr = new TaxReturn(2019);
   const f = new TestForm({ 'key': 'value' });
+  tr.addForm(f);
 
   expect(f.getLine('1').value(tr)).toBe('value');
+  expect(f.getLine('1').id).toBe('1');
 
   const l2 = f.getLine('2');
   expect(() => l2.value(tr)).toThrow(NotFoundError);
@@ -76,14 +77,14 @@ test('line stack', () => {
   class FormZ extends Form<FormZ['_lines'], {'input': number}> {
     readonly name = 'Z';
     protected readonly _lines = {
-      '3': new InputLine<any, any>('3', 'input')
+      '3': new InputLine<any, any>('input')
     }
   };
 
   class FormZ2 extends Form<FormZ2['_lines']> {
     readonly name = 'Z-2';
     protected readonly _lines = {
-      '2c': new ComputedLine<number>('2c', (tr: TaxReturn, l: Line<number>): any => {
+      '2c': new ComputedLine<number>((tr: TaxReturn, l: Line<number>): any => {
           return tr.getForm('Z').getLine('3').value(tr) * 0.2;
         })
     };
@@ -93,7 +94,7 @@ test('line stack', () => {
   tr.addForm(new FormZ({ 'input': 100 }));
   tr.addForm(new FormZ2());
 
-  const l = new ReferenceLine<number>('32', 'Z-2', '2c');
+  const l = new ReferenceLine<number>('Z-2', '2c');
   expect(l.value(tr)).toBe(20);
 });
 
@@ -102,7 +103,7 @@ test('accumulator line', () => {
     readonly name = 'Form B';
     readonly supportsMultipleCopies = true;
     protected readonly _lines = {
-      g: new ConstantLine<number>('g', 100.25)
+      g: new ConstantLine<number>(100.25)
     };
   };
 
@@ -111,6 +112,6 @@ test('accumulator line', () => {
   tr.addForm(new TestForm());
   tr.addForm(new TestForm());
 
-  const l = new AccumulatorLine('line', 'Form B', 'g');
+  const l = new AccumulatorLine('Form B', 'g');
   expect(l.value(tr)).toBe(300.75);
 });

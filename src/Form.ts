@@ -16,14 +16,18 @@ export default abstract class Form<L extends { [key: string]: Line<any> },
     this._input = input;
   }
 
+  init() {
+    for (const id in this._lines) {
+      let l = this._lines[id];
+      l._id = id;
+      l.form = this;
+    }
+  }
+
   getLine<K extends keyof L>(id: K): L[K] {
     if (!(id in this._lines))
       throw new NotFoundError(`Form ${this.name} does not have line ${id}`);
-    const line = this._lines[id];
-    // We cannot apply this to every line in the constructor because |_lines|
-    // is abstract, so do it on getLine().
-    line.form = this;
-    return line;
+    return this._lines[id];
   }
 
   getValue<K extends keyof L>(tr: TaxReturn, id: K): ReturnType<L[K]['value']> {
