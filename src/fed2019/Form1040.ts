@@ -12,8 +12,10 @@ export interface Form1040Input {
   filingStatus: FilingStatus;
 };
 
+const reduceBySum = (list: number[]) => list.reduce((acc, curr) => acc + curr, 0);
+
 export default class Form1040 extends Form<Form1040Input> {
-  get name(): string { return 'Form 1040'; }
+  get name(): string { return '1040'; }
 
   protected getLines(): Line<any>[] {
     return [
@@ -31,7 +33,7 @@ export default class Form1040 extends Form<Form1040Input> {
       new ComputedLine<number>('7b', (tr: TaxReturn): number => {
         const lineIds = ['1', '2b', '3b', '4b', '4d', '5b', '6', '7a'];
         const lines = lineIds.map(l => this.getValue<number>(tr, l));
-        return lines.reduce((acc, cur) => acc + cur, 0);
+        return reduceBySum(lines);
       }, 'Total income'),
 
       new ReferenceLine<number>('8a', 'Schedule 1', '22', 'Adjustments to income'),
@@ -60,6 +62,45 @@ export default class Form1040 extends Form<Form1040Input> {
         const value = this.getValue<number>(tr, '8b') - this.getValue<number>(tr, '11a');
         return value < 0 ? 0 : value;
       }, 'Taxable income'),
+
+      new ComputedLine<number>('16', (tr: TaxReturn) => {
+        return 0;
+      }, 'Total tax'),
+
+      new ComputedLine<number>('17', (tr: TaxReturn) => {
+        const fedTaxWithheldBoxes = [
+          ['W-2', '2'], ['1099-R', '4'], ['1099-DIV', '4'], ['1099-INT', '4']
+        ];
+        const withholding = fedTaxWithheldBoxes.map(b => (new AccumulatorLine('F1040.L17+', b[0], b[1])).value(tr));
+
+        let additionalMedicare = 0;
+        const f8959 = tr.maybeGetForm('8595')
+        if (f8959) {
+          additionalMedicare = f8959.getValue<number>(tr, '24');
+        }
+
+        return reduceBySum(withholding) + additionalMedicare;
+      }, 'Federal income tax withheld'),
+
+      // 18 not supported
+
+      new ReferenceLine<number>('19', '1040', '17', 'Total payments'),
+
+      new ComputedLine<number>('20', (tr: TaxReturn) => {
+        const l16 = this.getValue<number>(tr, '16');
+        const l19 = this.getValue<number>(tr, '19');
+        if (l19 > l16)
+          return l19 - l16;
+        return 0;
+      }, 'Amount overpaid'),
+
+      new ComputedLine<number>('23', (tr: TaxReturn) => {
+        const l16 = this.getValue<number>(tr, '16');
+        const l19 = this.getValue<number>(tr, '19');
+        if (l19 < l16)
+          return l16 - l19;
+        return 0;
+      }, 'Amount you owe'),
     ];
   }
 };
