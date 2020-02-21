@@ -42,8 +42,8 @@ export class ReferenceLine<T> extends Line<T> {
   private _form: string;
   private _line: string;
 
-  constructor(id: string, form: string, line: string) {
-    super(id, `Reference F${form}.L${line}`);
+  constructor(id: string, form: string, line: string, description?: string) {
+    super(id, description || `Reference F${form}.L${line}`);
     this._form = form;
     this._line = line;
   }
