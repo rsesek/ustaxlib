@@ -1,4 +1,4 @@
-import Form, { SupportsMultipleCopies } from '../Form';
+import Form from '../Form';
 import { Line, InputLine } from '../Line';
 import Person from '../Person';
 
@@ -33,8 +33,10 @@ export interface W2Input {
 
 class Input<T extends keyof W2Input> extends InputLine<W2Input, T> {};
 
-export default class W2 extends Form<W2Input> implements SupportsMultipleCopies {
+export default class W2 extends Form<W2Input> {
   get name(): string { return 'W-2'; }
+
+  readonly supportsMultipleCopies = true;
 
   aggregate(f: Form[]): this { return null; }
 

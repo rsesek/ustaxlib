@@ -1,4 +1,4 @@
-import Form, { SupportsMultipleCopies, supportsMultipleCopies } from './Form';
+import Form from './Form';
 import Person, { Relation } from './Person';
 import { NotFoundError, InconsistencyError, UnsupportedFeatureError } from './Errors';
 
@@ -38,7 +38,7 @@ export default class TaxReturn {
   }
 
   addForm(form: Form) {
-    if (!supportsMultipleCopies(form)) {
+    if (!form.supportsMultipleCopies) {
       const other = this.getForms(form.name);
       if (other.length > 0) {
         throw new InconsistencyError(`Cannot have more than one type of form ${form.name}`);

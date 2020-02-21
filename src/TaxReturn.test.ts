@@ -1,6 +1,6 @@
 import TaxReturn from './TaxReturn';
 import Person from './Person';
-import Form, { SupportsMultipleCopies } from './Form';
+import Form from './Form';
 import { NotFoundError, InconsistencyError } from './Errors';
 
 test('constructor', () => {
@@ -67,10 +67,10 @@ test('single-copy forms', () => {
 });
 
 test('multiple-copy forms', () => {
-  class TestForm extends Form implements SupportsMultipleCopies {
+  class TestForm extends Form {
     get name(): string { return 'Test Form'; }
 
-    aggregate(forms: Form[]): this { return null; }
+    readonly supportsMultipleCopies = true;
 
     protected getLines() { return []; }
   };

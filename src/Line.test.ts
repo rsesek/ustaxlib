@@ -1,5 +1,5 @@
 import { Line, AccumulatorLine, InputLine, ReferenceLine, ComputedLine } from './Line';
-import Form, { SupportsMultipleCopies } from './Form';
+import Form from './Form';
 import TaxReturn from './TaxReturn';
 import { NotFoundError } from './Errors';
 
@@ -106,10 +106,10 @@ test('line stack', () => {
 });
 
 test('accumulator line', () => {
-  class TestForm extends Form implements SupportsMultipleCopies {
+  class TestForm extends Form {
     get name() { return 'Form B'; }
 
-    aggregate() { return null; }
+    readonly supportsMultipleCopies = true;
 
     protected getLines() {
       return [ new ConstantLine<number>('g', 100.25) ]

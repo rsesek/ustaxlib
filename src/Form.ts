@@ -8,6 +8,8 @@ export default abstract class Form<I = unknown> {
 
   abstract get name(): string;
 
+  readonly supportsMultipleCopies: boolean = false;
+
   constructor(input?: I) {
     this._input = input;
     this.getLines().map(this.addLine.bind(this));
@@ -48,12 +50,4 @@ export default abstract class Form<I = unknown> {
     }
     return this._input[name];
   }
-};
-
-export interface SupportsMultipleCopies extends Form {
-  aggregate(forms: Form[]): this;
-};
-
-export function supportsMultipleCopies(f: object): f is SupportsMultipleCopies {
-  return f instanceof Form && 'aggregate' in f;
 };
