@@ -47,15 +47,22 @@ export default class TaxReturn {
     this._forms.push(form);
   }
 
-  getForm<T extends Form>(name: string): T {
+  maybeGetForm<T extends Form>(name: string): T | null {
     const forms = this.getForms<T>(name);
     if (forms.length == 0) {
-      throw new NotFoundError(`No form named ${name}`);
+      return null;
     }
     if (forms.length > 1) {
       throw new InconsistencyError(`More than 1 form named ${name}`);
     }
     return forms[0];
+  }
+
+  getForm<T extends Form>(name: string): T {
+    const form = this.maybeGetForm<T>(name);
+    if (!form)
+      throw new NotFoundError(`No form named ${name}`);
+    return form;
   }
 
   getForms<T extends Form>(name: string): T[] {
