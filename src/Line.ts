@@ -40,14 +40,18 @@ export class ComputedLine<T> extends Line<T> {
 export class ReferenceLine<T> extends Line<T> {
   private _form: string;
   private _line: string;
+  private _fallback?: T;
 
-  constructor(form: string, line: string, description?: string) {
+  constructor(form: string, line: string, description?: string, fallback?: T) {
     super(description || `Reference F${form}.L${line}`);
     this._form = form;
     this._line = line;
+    this._fallback = fallback;
   }
 
   value(tr: TaxReturn): T {
+    if (this._fallback !== undefined && !tr.maybeGetForm(this._form))
+      return this._fallback;
     return tr.getForm(this._form).getLine(this._line).value(tr);
   }
 };
