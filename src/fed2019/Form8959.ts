@@ -3,12 +3,13 @@ import TaxReturn from '../TaxReturn';
 import { Line, AccumulatorLine, ComputedLine, ReferenceLine } from '../Line';
 
 import Form1040, { FilingStatus } from './Form1040';
+import FormW2 from './FormW2';
 
 export default class Form8959 extends Form<Form8959['_lines']> {
   readonly name = '8959';
 
   protected readonly _lines = {
-    '1': new AccumulatorLine('W-2', '5', 'Medicare wages'),
+    '1': new AccumulatorLine(FormW2, '5', 'Medicare wages'),
     // 2 is not supported (Unreported tips from Form 4137)
     // 3 is not supported (Wages from Form 8919)
     '4': new ComputedLine((tr: TaxReturn): number => {
@@ -16,7 +17,7 @@ export default class Form8959 extends Form<Form8959['_lines']> {
       return this.getValue(tr, '1');
     }),
     '5': new ComputedLine((tr: TaxReturn): number => {
-      return Form8959.filingStatusLimit(tr.getForm<Form1040>('1040').getInput('filingStatus'));
+      return Form8959.filingStatusLimit(tr.getForm(Form1040).getInput('filingStatus'));
     }),
     '6': new ComputedLine((tr: TaxReturn): number => {
       const value = this.getValue(tr, '5') - this.getValue(tr, '4');
@@ -33,8 +34,8 @@ export default class Form8959 extends Form<Form8959['_lines']> {
       return this.getValue(tr, '7');
     }),
 
-    '19': new AccumulatorLine('W-2', '6', 'Medicare tax withheld'),
-    '20': new ReferenceLine<number>('8595', '1'),
+    '19': new AccumulatorLine(FormW2, '6', 'Medicare tax withheld'),
+    '20': new ReferenceLine(Form8959 as any, '1'),
     '21': new ComputedLine((tr: TaxReturn): number => {
       return this.getValue(tr, '20') * 0.0145;
     }, 'Regular Medicare withholding on Medicare wages'),

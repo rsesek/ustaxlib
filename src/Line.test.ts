@@ -1,5 +1,5 @@
 import { Line, AccumulatorLine, InputLine, ReferenceLine, ComputedLine } from './Line';
-import Form from './Form';
+import Form, { FormClass } from './Form';
 import TaxReturn from './TaxReturn';
 import { NotFoundError } from './Errors';
 
@@ -33,21 +33,54 @@ test('reference line', () => {
   class TestForm extends Form<TestForm['_lines']> {
     readonly name = 'Form 1';
     protected readonly _lines = {
-      '6b': new ConstantLine(12.34)
+      '6b': new ConstantLine(12.34),
+      's': new ConstantLine('abc'),
     };
   };
 
   const tr = new TaxReturn(2019);
   tr.addForm(new TestForm());
 
-  const l1 = new ReferenceLine<number>('Form 1', '6b');
-  expect(l1.value(tr)).toBe(12.34);
+  const l1 = new ReferenceLine(TestForm, '6b');
+  let n: number = l1.value(tr);
+  expect(n).toBe(12.34);
 
-  const l2 = new ReferenceLine<number>('Form 2', '6b');
-  expect(() => l2.value(tr)).toThrow(NotFoundError);
+  const l2 = new ReferenceLine(TestForm, 's');
+  let s: string = l2.value(tr);
+  expect(s).toBe('abc');
 
-  const l3 = new ReferenceLine<number>('Form 1', '7a');
-  expect(() => l3.value(tr)).toThrow(NotFoundError);
+  //TYPEERROR:
+  //const l3 = new ReferenceLine(TestForm, '7a');
+  //let n2: string = l1.value(tr);
+  //let s2: number = l2.value(tr);
+});
+
+test('self reference line', () => {
+  class OtherForm extends Form<OtherForm['_lines']> {
+    readonly name = 'Form A';
+    protected readonly _lines = {
+      '6c': new ConstantLine(55)
+    };
+  };
+  class TestForm extends Form<TestForm['_lines']> {
+    readonly name = 'Form 1';
+    protected readonly _lines = {
+      'a': new ConstantLine(100.2),
+      'b': new ReferenceLine(OtherForm, '6c'),
+      'c': new ReferenceLine((TestForm as unknown) as FormClass<Form<any>>, 'b'),
+      'd': new ReferenceLine(TestForm as any, 'b'),
+    };
+  };
+
+  const tr = new TaxReturn(2019);
+  const f = new TestForm();
+  tr.addForm(f);
+  tr.addForm(new OtherForm());
+
+  expect(f.getValue(tr, 'a')).toBe(100.2);
+  expect(f.getValue(tr, 'b')).toBe(55);
+  expect(f.getValue(tr, 'c')).toBe(55);
+  expect(f.getValue(tr, 'd')).toBe(55);
 });
 
 test('input line', () => {
@@ -85,7 +118,7 @@ test('line stack', () => {
     readonly name = 'Z-2';
     protected readonly _lines = {
       '2c': new ComputedLine<number>((tr: TaxReturn, l: Line<number>): any => {
-          return tr.getForm('Z').getLine('3').value(tr) * 0.2;
+          return tr.getForm(FormZ).getLine('3').value(tr) * 0.2;
         })
     };
   };
@@ -94,7 +127,7 @@ test('line stack', () => {
   tr.addForm(new FormZ({ 'input': 100 }));
   tr.addForm(new FormZ2());
 
-  const l = new ReferenceLine<number>('Z-2', '2c');
+  const l = new ReferenceLine(FormZ2, '2c');
   expect(l.value(tr)).toBe(20);
 });
 
@@ -112,6 +145,6 @@ test('accumulator line', () => {
   tr.addForm(new TestForm());
   tr.addForm(new TestForm());
 
-  const l = new AccumulatorLine('Form B', 'g');
+  const l = new AccumulatorLine(TestForm, 'g');
   expect(l.value(tr)).toBe(300.75);
 });

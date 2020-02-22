@@ -12,6 +12,10 @@ export default abstract class Form<L extends { [key: string]: Line<any> },
 
   private readonly _input?: I;
 
+  // Avoid using this; prefer the getLine() helpers declared below. This
+  // is only exposed for propagating line type information.
+  get lines(): L { return this._lines; }
+
   constructor(input?: I) {
     this._input = input;
   }
@@ -42,3 +46,11 @@ export default abstract class Form<L extends { [key: string]: Line<any> },
     return this._input[name];
   }
 };
+
+export type FormClass<T extends Form<any>> = new (...args: any[]) => T;
+
+export function isFormT<T extends Form<any>>(form: Form<any>,
+                                             formClass: FormClass<T>):
+                                                form is T {
+  return form.constructor === formClass;
+}

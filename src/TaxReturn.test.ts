@@ -62,7 +62,8 @@ test('single-copy forms', () => {
   const f = new TestForm();
   tr.addForm(f);
   expect(() => tr.addForm(new TestForm)).toThrow(InconsistencyError);
-  expect(tr.getForm(f.name)).toBe(f);
+  expect(tr.getForm(TestForm)).toBe(f);
+  expect(tr.findForm(TestForm)).toBe(f);
 });
 
 test('multiple-copy forms', () => {
@@ -79,9 +80,10 @@ test('multiple-copy forms', () => {
   tr.addForm(f1);
   tr.addForm(f2);
 
-  expect(() => tr.getForm(f1.name)).toThrow(InconsistencyError);
+  expect(() => tr.getForm(TestForm)).toThrow(InconsistencyError);
+  expect(() => tr.findForm(TestForm)).toThrow(InconsistencyError);
 
-  const forms = tr.getForms(f1.name);
+  const forms = tr.findForms(TestForm);
   expect(forms.length).toBe(2);
   expect(forms).toContain(f1);
   expect(forms).toContain(f2);
@@ -89,7 +91,64 @@ test('multiple-copy forms', () => {
 });
 
 test('get non-existent form', () => {
+  class TestForm extends Form<null> {
+    readonly name = 'Test Form';
+    protected readonly _lines = null;
+  }
   const tr = new TaxReturn(2019);
-  expect(() => tr.getForm('form')).toThrow(NotFoundError);
-  expect(tr.getForms('form')).toEqual([]);
+  expect(() => tr.getForm(TestForm)).toThrow(NotFoundError);
+  expect(tr.findForm(TestForm)).toBeNull();
+  expect(tr.findForms(TestForm)).toEqual([]);
+});
+
+type FormClass<T extends Form<any>> = Function & { prototype: T };
+
+class TR {
+  private _forms: Form<any>[] = [];
+
+  add(form: Form<any>) {
+    this._forms.push(form);
+  }
+
+  find(name: string): Form<any> {
+    const forms = this._forms.filter(f => f.name == name);
+    if (forms.length > 0)
+      return forms[0];
+    return null;
+  }
+
+  find2<T extends Form<any>>(cls: FormClass<T>): T[] {
+    let forms: T[] = [];
+    const isT = (form: Form<any>): form is T => form.constructor === cls;
+    for (let form of this._forms) {
+      if (isT(form))
+        forms.push(form);
+    }
+    return forms;
+  }
+};
+
+test('type test', () => {
+  class FormA extends Form<FormA['_lines']> {
+    readonly name = 'Form A';
+    protected readonly _lines = {};
+  };
+  class FormB extends Form<FormB['_lines']> {
+    readonly name = 'Form B';
+    readonly supportsMultipleCopies = true;
+    protected readonly _lines = {};
+  };
+
+  const tr = new TR();
+
+  tr.add(new FormA());
+  tr.add(new FormB());
+
+  expect(tr.find('Form A')).not.toBeNull();
+
+  expect(tr.find2(FormB).length).toBe(1);
+
+  tr.add(new FormB());
+  expect(tr.find2(FormB).length).toBe(2);
+
 });

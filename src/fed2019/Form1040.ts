@@ -1,9 +1,12 @@
-import Form from '../Form';
+import Form, { FormClass } from '../Form';
 import TaxReturn from '../TaxReturn';
 import { Line, AccumulatorLine, ComputedLine, ReferenceLine } from '../Line';
 import { UnsupportedFeatureError } from '../Errors';
 
 import Form8959 from './Form8959';
+import Form1099INT from './Form1099INT';
+import Form1099DIV from './Form1099DIV';
+import FormW2 from './FormW2';
 
 export enum FilingStatus {
   Single,
@@ -21,26 +24,33 @@ export default class Form1040 extends Form<Form1040['_lines'], Form1040Input> {
   readonly name = '1040';
 
   protected readonly _lines = {
-    '1': new AccumulatorLine('W-2', '1', 'Wages, salaries, tips, etc.'),
-    '2a': new AccumulatorLine('1099-INT', '8', 'Tax-exempt interest'),
-    '2b': new AccumulatorLine('1099-INT', '1', 'Taxable interest'),
-    '3a': new AccumulatorLine('1099-DIV', '1b', 'Qualified dividends'),
-    '3b': new AccumulatorLine('1099-DIV', '1a', 'Ordinary dividends'),
+    '1': new AccumulatorLine(FormW2, '1', 'Wages, salaries, tips, etc.'),
+    '2a': new AccumulatorLine(Form1099INT, '8', 'Tax-exempt interest'),
+    '2b': new AccumulatorLine(Form1099INT, '1', 'Taxable interest'),
+    '3a': new AccumulatorLine(Form1099DIV, '1b', 'Qualified dividends'),
+    '3b': new AccumulatorLine(Form1099DIV, '1a', 'Ordinary dividends'),
     // 4a and 4b are complex
     '4b': new ComputedLine(() => 0),
     '4d': new ComputedLine(() => 0),
     // 4c and 4d are not supported
     // 5a and 5b are not supported
-    '6': new ReferenceLine<number>('Schedule D', '21', 'Capital gain/loss', 0),
-    '7a': new ReferenceLine<number>('Schedule 1', '9', 'Other income from Schedule 1', 0),
+    '6': new ReferenceLine(/*'Schedule D'*/ undefined, '21', 'Capital gain/loss', 0),
+    '7a': new ReferenceLine(/*'Schedule 1'*/ undefined, '9', 'Other income from Schedule 1', 0),
 
     '7b': new ComputedLine((tr: TaxReturn): number => {
-      const lineIds = ['1', '2b', '3b', '4b', '4d', /*'5b',*/ '6', '7a'];
-      const lines: number[] = lineIds.map(l => this.getValue(tr, l as keyof Form1040['_lines']));
-      return reduceBySum(lines);
+      let income = 0;
+      income += this.getValue(tr, '1');
+      income += this.getValue(tr, '2b');
+      income += this.getValue(tr, '3b');
+      income += this.getValue(tr, '4b');
+      income += this.getValue(tr, '4d');
+      //income += this.getValue(tr, '5b');
+      income += this.getValue(tr, '6');
+      income += this.getValue(tr, '7a');
+      return income;
     }, 'Total income'),
 
-    '8a': new ReferenceLine<number>('Schedule 1', '22', 'Adjustments to income', 0),
+    '8a': new ReferenceLine(undefined /*'Schedule 1'*/, '22', 'Adjustments to income', 0),
 
     '8b': new ComputedLine((tr: TaxReturn): number => {
       return this.getValue(tr, '7b') - this.getValue(tr, '8a');
@@ -113,7 +123,7 @@ export default class Form1040 extends Form<Form1040['_lines'], Form1040Input> {
     }, 'Tax'),
 
     '12b': new ComputedLine((tr: TaxReturn): number => {
-      return this.getValue(tr, '12a') + tr.getForm<Schedule2>('Schedule 2').getValue(tr, '3');
+      return this.getValue(tr, '12a') + tr.getForm(Schedule2).getValue(tr, '3');
     }, 'Additional tax'),
 
     // Not supported: 13a - child tax credit
@@ -130,7 +140,7 @@ export default class Form1040 extends Form<Form1040['_lines'], Form1040Input> {
       return value < 0 ? 0 : value;
     }),
 
-    '15': new ReferenceLine<number>('Schedule 2', '10', undefined, 0),
+    '15': new ReferenceLine(undefined /*'Schedule 2'*/, '10', undefined, 0),
 
     '16': new ComputedLine((tr: TaxReturn): number => {
       return this.getValue(tr, '14') + this.getValue(tr, '15');
@@ -138,12 +148,15 @@ export default class Form1040 extends Form<Form1040['_lines'], Form1040Input> {
 
     '17': new ComputedLine((tr: TaxReturn): number => {
       const fedTaxWithheldBoxes = [
-        ['W-2', '2'], ['1099-R', '4'], ['1099-DIV', '4'], ['1099-INT', '4']
+        new AccumulatorLine(FormW2, '2'),
+        //new AccumulatorLine(Form1099R, '4'),
+        new AccumulatorLine(Form1099DIV, '4'),
+        new AccumulatorLine(Form1099INT, '4'),
       ];
-      const withholding = fedTaxWithheldBoxes.map(b => (new AccumulatorLine(b[0], b[1])).value(tr));
+      const withholding: number[] = fedTaxWithheldBoxes.map(b => b.value(tr));
 
       let additionalMedicare = 0;
-      const f8959 = tr.maybeGetForm('8595')
+      const f8959 = tr.findForm(Form8959)
       if (f8959) {
         additionalMedicare = f8959.getValue(tr, '24');
       }
@@ -153,11 +166,11 @@ export default class Form1040 extends Form<Form1040['_lines'], Form1040Input> {
 
     // 18 not supported
 
-    '19': new ReferenceLine<number>('1040', '17', 'Total payments'),
+    '19': new ReferenceLine(Form1040 as any, '17', 'Total payments'),
 
     '20': new ComputedLine((tr: TaxReturn): number => {
-      const l16 = this.getValue(tr, '16');
-      const l19 = this.getValue(tr, '19');
+      const l16: number = this.getValue(tr, '16');
+      const l19: number = this.getValue(tr, '19');
       if (l19 > l16)
         return l19 - l16;
       return 0;
@@ -180,8 +193,9 @@ export class Schedule2 extends Form<Schedule2['_lines']> {
     '1': new ComputedLine((tr: TaxReturn): number => {
       // TODO - this is just using Taxable Income, rather than AMT-limited
       // income
-      const taxableIncome = tr.getForm('1040').getValue(tr, '11b');
-      switch (tr.getForm<Form1040>('1040').getInput('filingStatus')) {
+      const f1040 = tr.getForm(Form1040);
+      const taxableIncome = f1040.getValue(tr, '11b');
+      switch (f1040.getInput('filingStatus')) {
         case FilingStatus.Single:
           if (taxableIncome < 510300)
             return 0;
@@ -205,7 +219,7 @@ export class Schedule2 extends Form<Schedule2['_lines']> {
     // 6 is not supported (Additional tax on IRAs, other qualified retirement plans, and other tax-favored accounts)
     // 7 is not supported (Household employment taxes.)
     '8': new ComputedLine((tr: TaxReturn): number => {
-      const f1040 = tr.getForm<Form1040>('1040');
+      const f1040 = tr.getForm(Form1040);
       const wages = f1040.getLine('1').value(tr);
       const agi = f1040.getLine('8b').value(tr);
 
@@ -235,12 +249,12 @@ export class Schedule2 extends Form<Schedule2['_lines']> {
       let value = 0;
 
       if (additionalMedicare) {
-        const f8959 = tr.getForm('8959');
+        const f8959 = tr.getForm(Form8959);
         value += f8959.getValue(tr, '18');
       }
 
       if (niit) {
-        const f8960 = tr.getForm('8960');
+        //const f8960 = tr.getForm('8960');
       }
 
       return value;

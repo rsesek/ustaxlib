@@ -1,6 +1,6 @@
 import { ComputedLine, Line } from './Line';
 import TaxReturn from './TaxReturn';
-import Form from './Form';
+import Form, { isFormT } from './Form';
 import { InconsistencyError, NotFoundError } from './Errors';
 
 test('add and get line', () => {
@@ -65,6 +65,22 @@ test('get value', () => {
   expect(() => fAsAny.getValue(tr, 'other')).toThrow(NotFoundError);
   //TYPEERROR:
   //expect(() => f.getValue(tr, 'other')).toThrow(NotFoundError);
+});
+
+test('form types', () => {
+  class FormA extends Form<any> {
+    readonly name = 'A';
+    protected readonly _lines = {};
+  };
+  class FormB extends Form<any> {
+    readonly name = 'B';
+    protected readonly _lines = {};
+  };
+
+  expect(isFormT(new FormA(), FormA)).toBe(true);
+  expect(isFormT(new FormB(), FormA)).toBe(false);
+  expect(isFormT(new FormA(), FormB)).toBe(false);
+  expect(isFormT(new FormB(), FormB)).toBe(true);
 });
 
 /*

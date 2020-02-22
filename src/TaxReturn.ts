@@ -1,4 +1,4 @@
-import Form from './Form';
+import Form, { FormClass, isFormT } from './Form';
 import Person, { Relation } from './Person';
 import { NotFoundError, InconsistencyError, UnsupportedFeatureError } from './Errors';
 
@@ -39,7 +39,7 @@ export default class TaxReturn {
 
   addForm(form: Form<any>) {
     if (!form.supportsMultipleCopies) {
-      const other = this.getForms(form.name);
+      const other = this.findForms(form.constructor as FormClass<Form<any>>);
       if (other.length > 0) {
         throw new InconsistencyError(`Cannot have more than one type of form ${form.name}`);
       }
@@ -48,25 +48,24 @@ export default class TaxReturn {
     this._forms.push(form);
   }
 
-  maybeGetForm<T extends Form<any>>(name: string): T | null {
-    const forms = this.getForms<T>(name);
-    if (forms.length == 0) {
+  findForm<T extends Form<any>>(cls: FormClass<T>): T | null {
+    const forms = this.findForms(cls);
+    if (forms.length == 0)
       return null;
-    }
-    if (forms.length > 1) {
-      throw new InconsistencyError(`More than 1 form named ${name}`);
-    }
+    if (forms.length > 1)
+      throw new InconsistencyError(`Form ${forms[0].name} has multiple copies`);
     return forms[0];
   }
 
-  getForm<T extends Form<any>>(name: string): T {
-    const form = this.maybeGetForm<T>(name);
-    if (!form)
-      throw new NotFoundError(`No form named ${name}`);
-    return form;
+  findForms<T extends Form<any>>(cls: FormClass<T>): T[] {
+    const forms: T[] = this._forms.filter((form: Form<any>): form is T => isFormT(form, cls));
+    return forms;
   }
 
-  getForms<T extends Form<any>>(name: string): T[] {
-    return this._forms.filter(f => f.name == name) as T[];
+  getForm<T extends Form<any>>(cls: FormClass<T>): T {
+    const form = this.findForm(cls);
+    if (!form)
+      throw new NotFoundError(`No form ${cls}`);
+    return form;
   }
 };

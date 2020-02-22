@@ -1,5 +1,5 @@
 import TaxReturn from './TaxReturn';
-import Form from './Form';
+import Form, { FormClass } from './Form';
 
 export abstract class Line<T> {
   private _description?: string;
@@ -37,12 +37,18 @@ export class ComputedLine<T> extends Line<T> {
   }
 };
 
-export class ReferenceLine<T> extends Line<T> {
-  private _form: string;
-  private _line: string;
+export class ReferenceLine<F extends Form<any>,
+                           L extends keyof F['lines'],
+                           T extends ReturnType<F['lines'][L]['value']>>
+                               extends Line<T> {
+  private _form: FormClass<F>;
+  private _line: L;
   private _fallback?: T;
 
-  constructor(form: string, line: string, description?: string, fallback?: T) {
+  // If creating a ReferenceLine and F is the same class as the
+  // the one the Line is in, erase |form|'s type with |as any| to
+  // keep TypeScript happy.
+  constructor(form: FormClass<F>, line: L, description?: string, fallback?: T) {
     super(description || `Reference F${form}.L${line}`);
     this._form = form;
     this._line = line;
@@ -50,9 +56,11 @@ export class ReferenceLine<T> extends Line<T> {
   }
 
   value(tr: TaxReturn): T {
-    if (this._fallback !== undefined && !tr.maybeGetForm(this._form))
+    const form: F = tr.findForm(this._form);
+    if (this._fallback !== undefined && !form)
       return this._fallback;
-    return tr.getForm(this._form).getLine(this._line).value(tr);
+    const value: T = form.getValue(tr, this._line);
+    return value;
   }
 };
 
@@ -71,19 +79,21 @@ export class InputLine<U = unknown, T extends keyof U = any> extends Line<U[T]> 
   }
 };
 
-export class AccumulatorLine extends Line<number> {
-  private _form: string;
-  private _line: string;
+export class AccumulatorLine<F extends Form<any>,
+                             L extends keyof F['lines']>
+                                 extends Line<number> {
+  private _form: FormClass<F>;
+  private _line: L;
 
-  constructor(form: string, line: string, description?: string) {
+  constructor(form: FormClass<F>, line: L, description?: string) {
     super(description || `Accumulator F${form}.L${line}`);
     this._form = form;
     this._line = line;
   }
 
   value(tr: TaxReturn): number {
-    const forms = tr.getForms(this._form);
-    const reducer = (acc: number, curr: Form<any>) => acc + (curr.getValue(tr, this._line) as number);
+    const forms: F[] = tr.findForms(this._form);
+    const reducer = (acc: number, curr: F) => acc + curr.getValue(tr, this._line);
     return forms.reduce(reducer, 0);
   }
 };
