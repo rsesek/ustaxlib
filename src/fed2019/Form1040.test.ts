@@ -2,6 +2,7 @@ import Person from '../Person';
 import TaxReturn from '../TaxReturn';
 
 import Form1040, { FilingStatus } from './Form1040';
+import Form1099DIV from './Form1099DIV';
 import Form1099INT from './Form1099INT';
 import FormW2 from './FormW2';
 
@@ -38,4 +39,24 @@ test('interest income', () => {
 
   expect(f1040.getValue(tr, '2a')).toBe(95);
   expect(f1040.getValue(tr, '2b')).toBe(103.5);
+});
+
+test('dividend income', () => {
+  const p = Person.self('A');
+  const tr = new TaxReturn(2019);
+  const f1099div = new Form1099DIV({
+    payer: 'Brokerage',
+    payee: p,
+    ordinaryDividends: 100,
+    qualifiedDividends: 75,
+    totalCapitalGain: 100
+  });
+  tr.addForm(f1099div);
+  tr.addForm(f1099div);
+
+  const f1040 = new Form1040();
+  tr.addForm(f1040);
+
+  expect(f1040.getValue(tr, '3a')).toBe(75 * 2);
+  expect(f1040.getValue(tr, '3b')).toBe(200);
 });
