@@ -11,8 +11,20 @@ test('w2 wages', () => {
   const pa = Person.self('A');
   const pb = Person.spouse('B');
   const tr = new TaxReturn(2019);
-  tr.addForm(new FormW2({ employer: 'AA', employee: pa, wages: 1000000.00, fedIncomeTax: 0 }));
-  tr.addForm(new FormW2({ employer: 'BB', employee: pb, wages: 36.32, fedIncomeTax: 0 }));
+  tr.addForm(new FormW2({
+    employer: 'AA',
+    employee: pa,
+    wages: 1000000.00,
+    fedIncomeTax: 0,
+    medicareWages: 0,
+  }));
+  tr.addForm(new FormW2({
+    employer: 'BB',
+    employee: pb,
+    wages: 36.32,
+    fedIncomeTax: 0,
+    medicareWages: 0,
+  }));
   const f1040 = new Form1040({ filingStatus: FilingStatus.MarriedFilingJoint });
   tr.addForm(f1040);
   tr.addForm(new Schedule2);

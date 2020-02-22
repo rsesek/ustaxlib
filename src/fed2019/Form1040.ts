@@ -236,6 +236,7 @@ export class Schedule2 extends Form<Schedule2['_lines']> {
 
       if (additionalMedicare) {
         const f8959 = tr.getForm('8959');
+        value += f8959.getValue(tr, '18');
       }
 
       if (niit) {
