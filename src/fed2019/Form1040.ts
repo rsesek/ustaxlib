@@ -3,6 +3,8 @@ import TaxReturn from '../TaxReturn';
 import { Line, AccumulatorLine, ComputedLine, ReferenceLine } from '../Line';
 import { UnsupportedFeatureError } from '../Errors';
 
+import Form8959 from './Form8959';
+
 export enum FilingStatus {
   Single,
   MarriedFilingSeparate,
@@ -207,23 +209,24 @@ export class Schedule2 extends Form<Schedule2['_lines']> {
       const wages = f1040.getLine('1').value(tr);
       const agi = f1040.getLine('8b').value(tr);
 
-      let additionalMedicare: boolean, niit: boolean;
+      let niit: boolean;
+      const filingStatus = f1040.getInput('filingStatus');
+
+      const additionalMedicare = wages > Form8959.filingStatusLimit(filingStatus);
+
       switch (f1040.getInput('filingStatus')) {
         case FilingStatus.Single:
           if (wages > 200000) {
-            additionalMedicare = true;
             niit = true;
           }
           break;
         case FilingStatus.MarriedFilingJoint:
           if (wages > 250000) {
-            additionalMedicare = true;
             niit = true;
           }
           break;
         case FilingStatus.MarriedFilingSeparate:
           if (wages > 125000) {
-            additionalMedicare = true;
             niit = true;
           }
           break;
