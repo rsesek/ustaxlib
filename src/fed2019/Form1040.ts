@@ -111,16 +111,15 @@ export default class Form1040 extends Form<Form1040['_lines'], Form1040Input> {
     }, 'Tax'),
 
     '12b': new ComputedLine((tr: TaxReturn): number => {
-      // TODO: add Sched 2.L3
-      return this.getValue(tr, '12a');
-    }),
+      return this.getValue(tr, '12a') + tr.getForm<Schedule2>('Schedule 2').getValue(tr, '3');
+    }, 'Additional tax'),
 
     // Not supported: 13a - child tax credit
 
     '13b': new ComputedLine((tr: TaxReturn): number => {
       // TODO: add Sched 3.L7
       return 0;
-    }),
+    }, 'Additional credits'),
 
     '14': new ComputedLine((tr: TaxReturn): number => {
       const l12b = this.getValue(tr, '12b');
@@ -170,5 +169,83 @@ export default class Form1040 extends Form<Form1040['_lines'], Form1040Input> {
       return 0;
     }, 'Amount you owe'),
   };
+};
 
+export class Schedule2 extends Form<Schedule2['_lines']> {
+  readonly name = 'Schedule 2';
+
+  protected readonly _lines = {
+    '1': new ComputedLine((tr: TaxReturn): number => {
+      // TODO - this is just using Taxable Income, rather than AMT-limited
+      // income
+      const taxableIncome = tr.getForm('1040').getValue(tr, '11b');
+      switch (tr.getForm<Form1040>('1040').getInput('filingStatus')) {
+        case FilingStatus.Single:
+          if (taxableIncome < 510300)
+            return 0;
+        case FilingStatus.MarriedFilingJoint:
+          if (taxableIncome < 1020600)
+            return 0;
+        case FilingStatus.MarriedFilingSeparate:
+          if (taxableIncome < 510300)
+            return 0;
+      }
+      throw new UnsupportedFeatureError('The AMT is not supported');
+    }, 'AMT'),
+    // 2 is not supported (Excess advance premium tax credit repayment)
+    '3': new ComputedLine((tr: TaxReturn): number => {
+      // Should include line 2.
+      return this.getValue(tr, '1');
+    }),
+
+    // 4 is not supported (Self-employment tax.)
+    // 5 is not supported (Unreported social security and Medicare tax from)
+    // 6 is not supported (Additional tax on IRAs, other qualified retirement plans, and other tax-favored accounts)
+    // 7 is not supported (Household employment taxes.)
+    '8': new ComputedLine((tr: TaxReturn): number => {
+      const f1040 = tr.getForm<Form1040>('1040');
+      const wages = f1040.getLine('1').value(tr);
+      const agi = f1040.getLine('8b').value(tr);
+
+      let additionalMedicare: boolean, niit: boolean;
+      switch (f1040.getInput('filingStatus')) {
+        case FilingStatus.Single:
+          if (wages > 200000) {
+            additionalMedicare = true;
+            niit = true;
+          }
+          break;
+        case FilingStatus.MarriedFilingJoint:
+          if (wages > 250000) {
+            additionalMedicare = true;
+            niit = true;
+          }
+          break;
+        case FilingStatus.MarriedFilingSeparate:
+          if (wages > 125000) {
+            additionalMedicare = true;
+            niit = true;
+          }
+          break;
+      }
+
+      let value = 0;
+
+      if (additionalMedicare) {
+        const f8959 = tr.getForm('8959');
+      }
+
+      if (niit) {
+        const f8960 = tr.getForm('8960');
+      }
+
+      return value;
+    }),
+    // 9 is not supported (Section 965 net tax liability installment from Form 965-A)
+
+    '10': new ComputedLine((tr: TaxReturn): number => {
+      // Should be lines 4 - 8.
+      return this.getValue(tr, '8');
+    })
+  };
 };

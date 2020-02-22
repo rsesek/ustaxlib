@@ -1,7 +1,7 @@
 import Person from '../Person';
 import TaxReturn from '../TaxReturn';
 
-import Form1040, { FilingStatus } from './Form1040';
+import Form1040, { FilingStatus, Schedule2 } from './Form1040';
 import Form1099DIV from './Form1099DIV';
 import Form1099INT from './Form1099INT';
 import FormW2 from './FormW2';
@@ -14,6 +14,7 @@ test('w2 wages', () => {
   tr.addForm(new FormW2({ employer: 'BB', employee: pb, wages: 36.32, fedIncomeTax: 0 }));
   const f1040 = new Form1040({ filingStatus: FilingStatus.MarriedFilingJoint });
   tr.addForm(f1040);
+  tr.addForm(new Schedule2);
   expect(f1040.getValue(tr, '1')).toBe(1000036.32);
   f1040.getValue(tr, '23');
 });
