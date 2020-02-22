@@ -32,7 +32,7 @@ export default class Form1040 extends Form<Form1040['_lines'], Form1040Input> {
     '6': new ReferenceLine<number>('Schedule D', '21', 'Capital gain/loss', 0),
     '7a': new ReferenceLine<number>('Schedule 1', '9', 'Other income from Schedule 1', 0),
 
-    '7b': new ComputedLine<number>((tr: TaxReturn): number => {
+    '7b': new ComputedLine((tr: TaxReturn): number => {
       const lineIds = ['1', '2b', '3b', '4b', '4d', /*'5b',*/ '6', '7a'];
       const lines: number[] = lineIds.map(l => this.getValue(tr, l as keyof Form1040['_lines']));
       return reduceBySum(lines);
@@ -40,14 +40,14 @@ export default class Form1040 extends Form<Form1040['_lines'], Form1040Input> {
 
     '8a': new ReferenceLine<number>('Schedule 1', '22', 'Adjustments to income', 0),
 
-    '8b': new ComputedLine<number>((tr: TaxReturn): number => {
+    '8b': new ComputedLine((tr: TaxReturn): number => {
       return this.getValue(tr, '7b') - this.getValue(tr, '8a');
     }, 'Adjusted gross income'),
 
     // TODO - Deduction
-    '9': new ComputedLine<number>(() => 0, 'Deduction'),
+    '9': new ComputedLine(() => 0, 'Deduction'),
 
-    '10': new ComputedLine<number>((tr: TaxReturn): number => {
+    '10': new ComputedLine((tr: TaxReturn): number => {
       const taxableIncome = this.getValue(tr, '8b');
       let use8995a = false;
       switch (this.getInput('filingStatus')) {
@@ -58,15 +58,15 @@ export default class Form1040 extends Form<Form1040['_lines'], Form1040Input> {
       return 0;
     }, 'Qualified business income deduction'),
 
-    '11a': new ComputedLine<number>((tr: TaxReturn): number => {
+    '11a': new ComputedLine((tr: TaxReturn): number => {
       return this.getValue(tr, '9') + this.getValue(tr, '10');
     }),
-    '11b': new ComputedLine<number>((tr: TaxReturn): number => {
+    '11b': new ComputedLine((tr: TaxReturn): number => {
       const value = this.getValue(tr, '8b') - this.getValue(tr, '11a');
       return value < 0 ? 0 : value;
     }, 'Taxable income'),
 
-    '12a': new ComputedLine<number>((tr: TaxReturn): number => {
+    '12a': new ComputedLine((tr: TaxReturn): number => {
       // Not supported:
       // Form 8814 (election to report child's interest or dividends)
       // Form 4972 (relating to lump-sum distributions)
@@ -110,19 +110,19 @@ export default class Form1040 extends Form<Form1040['_lines'], Form1040Input> {
       throw new UnsupportedFeatureError('Unexpected return type');
     }, 'Tax'),
 
-    '12b': new ComputedLine<number>((tr: TaxReturn): number => {
+    '12b': new ComputedLine((tr: TaxReturn): number => {
       // TODO: add Sched 2.L3
       return this.getValue(tr, '12a');
     }),
 
     // Not supported: 13a - child tax credit
 
-    '13b': new ComputedLine<number>((tr: TaxReturn): number => {
+    '13b': new ComputedLine((tr: TaxReturn): number => {
       // TODO: add Sched 3.L7
       return 0;
     }),
 
-    '14': new ComputedLine<number>((tr: TaxReturn): number => {
+    '14': new ComputedLine((tr: TaxReturn): number => {
       const l12b = this.getValue(tr, '12b');
       const l13b = this.getValue(tr, '13b');
       const value = l12b - l13b;
@@ -131,11 +131,11 @@ export default class Form1040 extends Form<Form1040['_lines'], Form1040Input> {
 
     '15': new ReferenceLine<number>('Schedule 2', '10', undefined, 0),
 
-    '16': new ComputedLine<number>((tr: TaxReturn): number => {
+    '16': new ComputedLine((tr: TaxReturn): number => {
       return this.getValue(tr, '14') + this.getValue(tr, '15');
     }, 'Total tax'),
 
-    '17': new ComputedLine<number>((tr: TaxReturn): number => {
+    '17': new ComputedLine((tr: TaxReturn): number => {
       const fedTaxWithheldBoxes = [
         ['W-2', '2'], ['1099-R', '4'], ['1099-DIV', '4'], ['1099-INT', '4']
       ];
@@ -154,7 +154,7 @@ export default class Form1040 extends Form<Form1040['_lines'], Form1040Input> {
 
     '19': new ReferenceLine<number>('1040', '17', 'Total payments'),
 
-    '20': new ComputedLine<number>((tr: TaxReturn): number => {
+    '20': new ComputedLine((tr: TaxReturn): number => {
       const l16 = this.getValue(tr, '16');
       const l19 = this.getValue(tr, '19');
       if (l19 > l16)
@@ -162,7 +162,7 @@ export default class Form1040 extends Form<Form1040['_lines'], Form1040Input> {
       return 0;
     }, 'Amount overpaid'),
 
-    '23': new ComputedLine<number>((tr: TaxReturn): number => {
+    '23': new ComputedLine((tr: TaxReturn): number => {
       const l16 = this.getValue(tr, '16');
       const l19 = this.getValue(tr, '19');
       if (l19 < l16)
