@@ -4,8 +4,10 @@
   "description": "A library for modeling individual US tax returns.",
   "main": "src/index.js",
   "scripts": {
+    "dev": "jest --watch",
     "test": "jest",
-    "check": "tsc --noEmit"
+    "check": "tsc --noEmit",
+    "debug": "node --inspect-brk --stack-trace-limit=1000 node_modules/.bin/jest --coverage=false"
   },
   "author": "Robert Sesek",
   "license": "ISC",
