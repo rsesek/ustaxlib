@@ -7,7 +7,7 @@ import Form8959 from './Form8959';
 import Form1099INT from './Form1099INT';
 import Form1099DIV from './Form1099DIV';
 import FormW2 from './FormW2';
-import ScheduleD from './ScheduleD';
+import ScheduleD, { ScheduleDTaxWorksheet } from './ScheduleD';
 
 export enum FilingStatus {
   Single,
@@ -93,43 +93,15 @@ export default class Form1040 extends Form<Form1040['_lines'], Form1040Input> {
       // Form 8814 (election to report child's interest or dividends)
       // Form 4972 (relating to lump-sum distributions)
       const taxableIncome = this.getValue(tr, '11b');
-      if (taxableIncome < 100000)
-        throw new UnsupportedFeatureError('Tax-table tax liability not supported');
 
-      const l11b = this.getValue(tr, '11b');
+      if (this.getValue(tr, '3a') > 0 && !tr.findForm(ScheduleD))
+        throw new UnsupportedFeatureError('Qualified Dividends and Captial Gains Tax Worksheet not supported, Schedule D requried');
 
-      switch (this.getInput('filingStatus')) {
-        case FilingStatus.Single:
-          if (taxableIncome < 160725)
-            return (l11b * 0.24) - 5825.50;
-          else if (taxableIncome < 204100)
-            return (l11b * 0.32) - 18683.50;
-          else if (taxableIncome < 510300)
-            return (l11b * 0.35) - 24806.50;
-          else
-            return (l11b * 0.38) - 35012.50;
-        case FilingStatus.MarriedFilingJoint:
-          if (taxableIncome < 168400)
-            return (l11b * 0.22) - 8283.00;
-          else if (taxableIncome < 321450)
-            return (l11b * 0.24) - 11651.00;
-          else if (taxableIncome < 408200)
-            return (l11b * 0.32) - 37367.00;
-          else if (taxableIncome < 612350)
-            return (l11b * 0.35) - 49613.00;
-          else
-            return (l11b * 0.37) - 61860.00;
-        case FilingStatus.MarriedFilingSeparate:
-          if (taxableIncome < 160725)
-            return (l11b * 0.24) - 5825.50;
-          else if (taxableIncome < 204100)
-            return (l11b * 0.32) - 18683.50;
-          else if (taxableIncome < 306175)
-            return (l11b * 0.35) - 24806.50;
-          else
-            return (l11b * 0.37) - 30930.00;
-      }
-      throw new UnsupportedFeatureError('Unexpected return type');
+      const schedD = tr.findForm(ScheduleDTaxWorksheet);
+      if (schedD)
+        return schedD.getValue(tr, '47');
+
+      return computeTax(taxableIncome, this.getInput('filingStatus'));
     }, 'Tax'),
 
     '12b': new ComputedLine((tr: TaxReturn): number => {
@@ -276,4 +248,42 @@ export class Schedule2 extends Form<Schedule2['_lines']> {
       return this.getValue(tr, '8');
     })
   };
+};
+
+export function computeTax(income: number, filingStatus: FilingStatus): number {
+  if (income < 100000)
+    throw new UnsupportedFeatureError('Tax-table tax liability not supported');
+
+  switch (filingStatus) {
+    case FilingStatus.Single:
+      if (income < 160725)
+        return (income * 0.24) - 5825.50;
+      else if (income < 204100)
+        return (income * 0.32) - 18683.50;
+      else if (income < 510300)
+        return (income * 0.35) - 24806.50;
+      else
+        return (income * 0.38) - 35012.50;
+    case FilingStatus.MarriedFilingJoint:
+      if (income < 168400)
+        return (income * 0.22) - 8283.00;
+      else if (income < 321450)
+        return (income * 0.24) - 11651.00;
+      else if (income < 408200)
+        return (income * 0.32) - 37367.00;
+      else if (income < 612350)
+        return (income * 0.35) - 49613.00;
+      else
+        return (income * 0.37) - 61860.00;
+    case FilingStatus.MarriedFilingSeparate:
+      if (income < 160725)
+        return (income * 0.24) - 5825.50;
+      else if (income < 204100)
+        return (income * 0.32) - 18683.50;
+      else if (income < 306175)
+        return (income * 0.35) - 24806.50;
+      else
+        return (income * 0.37) - 30930.00;
+  }
+  throw new UnsupportedFeatureError('Unexpected return type');
 };

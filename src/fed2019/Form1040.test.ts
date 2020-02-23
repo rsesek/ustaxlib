@@ -5,7 +5,7 @@ import Form1040, { FilingStatus, Schedule2 } from './Form1040';
 import Form1099DIV from './Form1099DIV';
 import Form1099INT from './Form1099INT';
 import Form1099B, { GainType } from './Form1099B';
-import ScheduleD from './ScheduleD';
+import ScheduleD, { ScheduleDTaxWorksheet } from './ScheduleD';
 import Form8959 from './Form8959';
 import Form8949 from './Form8949';
 import FormW2 from './FormW2';
@@ -83,6 +83,11 @@ test('capital gain/loss', () => {
   const p = Person.self('A');
   const tr = new TaxReturn(2019);
   tr.addForm(new Form1040({ filingStatus: FilingStatus.Single }));
+  tr.addForm(new FormW2({
+    employer: 'Money',
+    employee: p,
+    wages: 100000
+  }));
   tr.addForm(new Form1099B({
     payer: 'Brokerage',
     payee: p,
@@ -94,5 +99,7 @@ test('capital gain/loss', () => {
   }));
   tr.addForm(new Form8949);
   tr.addForm(new ScheduleD());
+  tr.addForm(new ScheduleDTaxWorksheet());
   tr.getForm(ScheduleD).getValue(tr, '21');
+  tr.getForm(Form1040).getValue(tr, '12a');
 });
