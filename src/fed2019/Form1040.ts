@@ -7,6 +7,7 @@ import Form8959 from './Form8959';
 import Form1099INT from './Form1099INT';
 import Form1099DIV from './Form1099DIV';
 import FormW2 from './FormW2';
+import ScheduleD from './ScheduleD';
 
 export enum FilingStatus {
   Single,
@@ -34,7 +35,16 @@ export default class Form1040 extends Form<Form1040['_lines'], Form1040Input> {
     '4d': new ComputedLine(() => 0),
     // 4c and 4d are not supported
     // 5a and 5b are not supported
-    '6': new ReferenceLine(/*'Schedule D'*/ undefined, '21', 'Capital gain/loss', 0),
+    '6': new ComputedLine((tr: TaxReturn): number => {
+      const schedD = tr.findForm(ScheduleD);
+      if (!schedD)
+        return 0;
+
+      const l6 = schedD.getValue(tr, '16');
+      if (l6 > 0)
+        return l6;
+      return schedD.getValue(tr, '21');
+    }, 'Capital gain/loss'),
     '7a': new ReferenceLine(/*'Schedule 1'*/ undefined, '9', 'Other income from Schedule 1', 0),
 
     '7b': new ComputedLine((tr: TaxReturn): number => {

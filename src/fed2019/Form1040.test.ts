@@ -4,7 +4,10 @@ import TaxReturn from '../TaxReturn';
 import Form1040, { FilingStatus, Schedule2 } from './Form1040';
 import Form1099DIV from './Form1099DIV';
 import Form1099INT from './Form1099INT';
+import Form1099B, { GainType } from './Form1099B';
+import ScheduleD from './ScheduleD';
 import Form8959 from './Form8959';
+import Form8949 from './Form8949';
 import FormW2 from './FormW2';
 
 test('w2 wages', () => {
@@ -74,4 +77,22 @@ test('dividend income', () => {
 
   expect(f1040.getValue(tr, '3a')).toBe(75 * 2);
   expect(f1040.getValue(tr, '3b')).toBe(200);
+});
+
+test('capital gain/loss', () => {
+  const p = Person.self('A');
+  const tr = new TaxReturn(2019);
+  tr.addForm(new Form1040({ filingStatus: FilingStatus.Single }));
+  tr.addForm(new Form1099B({
+    payer: 'Brokerage',
+    payee: p,
+    description: '10 FNDC',
+    proceeds: 1000,
+    costBasis: 800,
+    gainType: GainType.LongTerm,
+    basisReportedToIRS: true
+  }));
+  Form8949.addForms(tr, []);
+  tr.addForm(new ScheduleD());
+  tr.getForm(ScheduleD).getValue(tr, '21');
 });

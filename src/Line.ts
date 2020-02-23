@@ -93,7 +93,12 @@ export class AccumulatorLine<F extends Form<any>,
 
   value(tr: TaxReturn): number {
     const forms: F[] = tr.findForms(this._form);
-    const reducer = (acc: number, curr: F) => acc + curr.getValue(tr, this._line);
-    return forms.reduce(reducer, 0);
+    return sumLineOfForms(tr, forms, this._line);
   }
 };
+
+export function sumLineOfForms<F extends Form<any>, L extends keyof F['lines']>(
+    tr: TaxReturn, forms: F[], line: L): number {
+  const reducer = (acc: number, curr: F) => acc + curr.getValue(tr, line);
+  return forms.reduce(reducer, 0);
+}
