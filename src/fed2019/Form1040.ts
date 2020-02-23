@@ -35,7 +35,7 @@ export default class Form1040 extends Form<Form1040['_lines'], Form1040Input> {
     '4d': new ComputedLine(() => 0),
     // 4c and 4d are not supported
     // 5a and 5b are not supported
-    '6': new ComputedLine((tr: TaxReturn): number => {
+    '6': new ComputedLine((tr): number => {
       const schedD = tr.findForm(ScheduleD);
       if (!schedD)
         return 0;
@@ -47,7 +47,7 @@ export default class Form1040 extends Form<Form1040['_lines'], Form1040Input> {
     }, 'Capital gain/loss'),
     '7a': new ReferenceLine(/*'Schedule 1'*/ undefined, '9', 'Other income from Schedule 1', 0),
 
-    '7b': new ComputedLine((tr: TaxReturn): number => {
+    '7b': new ComputedLine((tr): number => {
       let income = 0;
       income += this.getValue(tr, '1');
       income += this.getValue(tr, '2b');
@@ -62,14 +62,14 @@ export default class Form1040 extends Form<Form1040['_lines'], Form1040Input> {
 
     '8a': new ReferenceLine(undefined /*'Schedule 1'*/, '22', 'Adjustments to income', 0),
 
-    '8b': new ComputedLine((tr: TaxReturn): number => {
+    '8b': new ComputedLine((tr): number => {
       return this.getValue(tr, '7b') - this.getValue(tr, '8a');
     }, 'Adjusted gross income'),
 
     // TODO - Deduction
     '9': new ComputedLine(() => 0, 'Deduction'),
 
-    '10': new ComputedLine((tr: TaxReturn): number => {
+    '10': new ComputedLine((tr): number => {
       const taxableIncome = this.getValue(tr, '8b');
       let use8995a = false;
       switch (this.getInput('filingStatus')) {
@@ -80,15 +80,15 @@ export default class Form1040 extends Form<Form1040['_lines'], Form1040Input> {
       return 0;
     }, 'Qualified business income deduction'),
 
-    '11a': new ComputedLine((tr: TaxReturn): number => {
+    '11a': new ComputedLine((tr): number => {
       return this.getValue(tr, '9') + this.getValue(tr, '10');
     }),
-    '11b': new ComputedLine((tr: TaxReturn): number => {
+    '11b': new ComputedLine((tr): number => {
       const value = this.getValue(tr, '8b') - this.getValue(tr, '11a');
       return value < 0 ? 0 : value;
     }, 'Taxable income'),
 
-    '12a': new ComputedLine((tr: TaxReturn): number => {
+    '12a': new ComputedLine((tr): number => {
       // Not supported:
       // Form 8814 (election to report child's interest or dividends)
       // Form 4972 (relating to lump-sum distributions)
@@ -104,18 +104,18 @@ export default class Form1040 extends Form<Form1040['_lines'], Form1040Input> {
       return computeTax(taxableIncome, this.getInput('filingStatus'));
     }, 'Tax'),
 
-    '12b': new ComputedLine((tr: TaxReturn): number => {
+    '12b': new ComputedLine((tr): number => {
       return this.getValue(tr, '12a') + tr.getForm(Schedule2).getValue(tr, '3');
     }, 'Additional tax'),
 
     // Not supported: 13a - child tax credit
 
-    '13b': new ComputedLine((tr: TaxReturn): number => {
+    '13b': new ComputedLine((tr): number => {
       // TODO: add Sched 3.L7
       return 0;
     }, 'Additional credits'),
 
-    '14': new ComputedLine((tr: TaxReturn): number => {
+    '14': new ComputedLine((tr): number => {
       const l12b = this.getValue(tr, '12b');
       const l13b = this.getValue(tr, '13b');
       const value = l12b - l13b;
@@ -124,11 +124,11 @@ export default class Form1040 extends Form<Form1040['_lines'], Form1040Input> {
 
     '15': new ReferenceLine(undefined /*'Schedule 2'*/, '10', undefined, 0),
 
-    '16': new ComputedLine((tr: TaxReturn): number => {
+    '16': new ComputedLine((tr): number => {
       return this.getValue(tr, '14') + this.getValue(tr, '15');
     }, 'Total tax'),
 
-    '17': new ComputedLine((tr: TaxReturn): number => {
+    '17': new ComputedLine((tr): number => {
       const fedTaxWithheldBoxes = [
         new AccumulatorLine(FormW2, '2'),
         //new AccumulatorLine(Form1099R, '4'),
@@ -150,7 +150,7 @@ export default class Form1040 extends Form<Form1040['_lines'], Form1040Input> {
 
     '19': new ReferenceLine(Form1040 as any, '17', 'Total payments'),
 
-    '20': new ComputedLine((tr: TaxReturn): number => {
+    '20': new ComputedLine((tr): number => {
       const l16: number = this.getValue(tr, '16');
       const l19: number = this.getValue(tr, '19');
       if (l19 > l16)
@@ -158,7 +158,7 @@ export default class Form1040 extends Form<Form1040['_lines'], Form1040Input> {
       return 0;
     }, 'Amount overpaid'),
 
-    '23': new ComputedLine((tr: TaxReturn): number => {
+    '23': new ComputedLine((tr): number => {
       const l16 = this.getValue(tr, '16');
       const l19 = this.getValue(tr, '19');
       if (l19 < l16)
@@ -172,7 +172,7 @@ export class Schedule2 extends Form<Schedule2['_lines']> {
   readonly name = 'Schedule 2';
 
   protected readonly _lines = {
-    '1': new ComputedLine((tr: TaxReturn): number => {
+    '1': new ComputedLine((tr): number => {
       // TODO - this is just using Taxable Income, rather than AMT-limited
       // income
       const f1040 = tr.getForm(Form1040);
@@ -191,7 +191,7 @@ export class Schedule2 extends Form<Schedule2['_lines']> {
       throw new UnsupportedFeatureError('The AMT is not supported');
     }, 'AMT'),
     // 2 is not supported (Excess advance premium tax credit repayment)
-    '3': new ComputedLine((tr: TaxReturn): number => {
+    '3': new ComputedLine((tr): number => {
       // Should include line 2.
       return this.getValue(tr, '1');
     }),
@@ -200,7 +200,7 @@ export class Schedule2 extends Form<Schedule2['_lines']> {
     // 5 is not supported (Unreported social security and Medicare tax from)
     // 6 is not supported (Additional tax on IRAs, other qualified retirement plans, and other tax-favored accounts)
     // 7 is not supported (Household employment taxes.)
-    '8': new ComputedLine((tr: TaxReturn): number => {
+    '8': new ComputedLine((tr): number => {
       const f1040 = tr.getForm(Form1040);
       const wages = f1040.getLine('1').value(tr);
       const agi = f1040.getLine('8b').value(tr);
@@ -243,7 +243,7 @@ export class Schedule2 extends Form<Schedule2['_lines']> {
     }),
     // 9 is not supported (Section 965 net tax liability installment from Form 965-A)
 
-    '10': new ComputedLine((tr: TaxReturn): number => {
+    '10': new ComputedLine((tr): number => {
       // Should be lines 4 - 8.
       return this.getValue(tr, '8');
     })

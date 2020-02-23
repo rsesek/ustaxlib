@@ -19,9 +19,8 @@ class ConstantLine<T> extends Line<T> {
 test('computed line', () => {
   const tr = new TaxReturn(2019);
   const l = new ComputedLine<number>(
-    (taxReturn: TaxReturn, line: ComputedLine<number>): number => {
+    (taxReturn: TaxReturn): number => {
       expect(taxReturn).toBe(tr);
-      expect(line).toBe(l);
       return 42;
     },
     'Computed Line A');
@@ -117,7 +116,7 @@ test('line stack', () => {
   class FormZ2 extends Form<FormZ2['_lines']> {
     readonly name = 'Z-2';
     protected readonly _lines = {
-      '2c': new ComputedLine<number>((tr: TaxReturn, l: Line<number>): any => {
+      '2c': new ComputedLine<number>((tr: TaxReturn): any => {
           return tr.getForm(FormZ).getLine('3').value(tr) * 0.2;
         })
     };

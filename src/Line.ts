@@ -22,7 +22,7 @@ export abstract class Line<T> {
   abstract value(tr: TaxReturn): T;
 };
 
-type ComputeFunc<T> = (tr: TaxReturn, l: ComputedLine<T>) => T;
+type ComputeFunc<T> = (tr: TaxReturn) => T;
 
 export class ComputedLine<T> extends Line<T> {
   private _compute: ComputeFunc<T>;
@@ -33,7 +33,7 @@ export class ComputedLine<T> extends Line<T> {
   }
 
   value(tr: TaxReturn): T {
-    return this._compute(tr, this);
+    return this._compute(tr);
   }
 };
 
@@ -91,7 +91,7 @@ export class AccumulatorLine<F extends Form<any>,
     this._line = line;
   }
 
-  value(tr: TaxReturn): number {
+  value(tr): number {
     const forms: F[] = tr.findForms(this._form);
     return sumLineOfForms(tr, forms, this._line);
   }
