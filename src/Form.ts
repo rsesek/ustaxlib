@@ -45,6 +45,10 @@ export default abstract class Form<L extends { [key: string]: Line<any> },
     }
     return this._input[name];
   }
+
+  hasInput<K extends keyof I>(name: K): boolean {
+    return this._input !== undefined && name in this._input;
+  }
 };
 
 export type FormClass<T extends Form<any>> = new (...args: any[]) => T;

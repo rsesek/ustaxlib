@@ -3,7 +3,7 @@ import Person from '../Person';
 
 import Form1040, { FilingStatus } from './Form1040';
 import Form1099B, { GainType } from './Form1099B';
-import Form8949, { Form8949Box } from './Form8949';
+import Form8949, { Form8949Box, Form8949Total } from './Form8949';
 
 describe('single form', () => {
   for (const box of [Form8949Box.A, Form8949Box.B, Form8949Box.D, Form8949Box.E]) {
@@ -20,21 +20,27 @@ describe('single form', () => {
         gainType: (box == Form8949Box.A || box == Form8949Box.B) ? GainType.ShortTerm : GainType.LongTerm,
         basisReportedToIRS: (box == Form8949Box.A || box == Form8949Box.D),
       }));
-      Form8949.addForms(tr, []);
 
-      const f8949s = tr.findForms(Form8949);
-      expect(f8949s.length).toBe(6);
+      const form = new Form8949();
+      tr.addForm(form);
 
-      for (let form of f8949s) {
-        if (form.getValue(tr, 'Box') == box) {
-          expect(form.getValue(tr, '2(d)')).toBe(100);
-          expect(form.getValue(tr, '2(e)')).toBe(110);
-          expect(form.getValue(tr, '2(g)')).toBe(0);
-        } else {
-          expect(form.getValue(tr, '2(d)')).toBe(0);
-          expect(form.getValue(tr, '2(e)')).toBe(0);
-          expect(form.getValue(tr, '2(g)')).toBe(0);
-        }
+      const allBoxes: (keyof Form8949['lines'])[] = ['boxA', 'boxB', 'boxC', 'boxD', 'boxE', 'boxF'];
+      const otherBoxes = allBoxes.filter(b => b != `box${box}`);
+      const thisBox = `box${box}` as keyof Form8949['lines'];
+
+      let total = form.getValue(tr, thisBox);
+
+      expect(total.proceeds).toBe(100);
+      expect(total.costBasis).toBe(110);
+      expect(total.adjustments).toBe(0);
+      expect(total.gainOrLoss).toBe(-10);
+
+      for (let otherBox of otherBoxes) {
+        total = form.getValue(tr, otherBox);
+        expect(total.proceeds).toBe(0);
+        expect(total.costBasis).toBe(0);
+        expect(total.adjustments).toBe(0);
+        expect(total.gainOrLoss).toBe(0);
       }
     });
   }
@@ -71,26 +77,29 @@ test('multiple forms', () => {
     gainType: GainType.LongTerm,
     basisReportedToIRS: false,
   }));
-  Form8949.addForms(tr, []);
 
-  const f8949s = tr.findForms(Form8949);
-  expect(f8949s.length).toBe(6);
+  const form = new Form8949();
+  tr.addForm(form);
 
-  const boxA = f8949s.filter(f => f.getValue(tr, 'Box') == Form8949Box.A).pop();
-  expect(boxA.getValue(tr, '2(d)')).toBe(55);
-  expect(boxA.getValue(tr, '2(e)')).toBe(50);
-  expect(boxA.getValue(tr, '2(g)')).toBe(0);
+  const boxA = form.getValue(tr, 'boxA');
+  expect(boxA.proceeds).toBe(55);
+  expect(boxA.costBasis).toBe(50);
+  expect(boxA.adjustments).toBe(0);
+  expect(boxA.gainOrLoss).toBe(5);
 
-  const boxE = f8949s.filter(f => f.getValue(tr, 'Box') == Form8949Box.E).pop();
-  expect(boxE.getValue(tr, '2(d)')).toBe(77.40);
-  expect(boxE.getValue(tr, '2(e)')).toBe(60.10);
-  expect(boxE.getValue(tr, '2(g)')).toBe(0);
+  const boxE = form.getValue(tr, 'boxE');
+  expect(boxE.proceeds).toBe(77.40);
+  expect(boxE.costBasis).toBe(60.10);
+  expect(boxE.adjustments).toBe(0);
+  expect(boxE.gainOrLoss).toBeCloseTo(17.3);
 
-  const otherBoxes = f8949s.filter(f => ![Form8949Box.A, Form8949Box.E].includes(f.getValue(tr, 'Box')));
-  for (const other of otherBoxes) {
-    expect(other.getValue(tr, '2(d)')).toBe(0);
-    expect(other.getValue(tr, '2(e)')).toBe(0);
-    expect(other.getValue(tr, '2(g)')).toBe(0);
+  const otherBoxes: (keyof Form8949['lines'])[] = ['boxB', 'boxC', 'boxD', 'boxF'];
+  for (const otherBox of otherBoxes) {
+    const other = form.getValue(tr, otherBox);
+    expect(other.proceeds).toBe(0);
+    expect(other.costBasis).toBe(0);
+    expect(other.adjustments).toBe(0);
+    expect(other.gainOrLoss).toBe(0);
   }
 });
 
@@ -127,33 +136,39 @@ test('adjustments', () => {
     gainType: GainType.LongTerm,
     basisReportedToIRS: true,
   }));
-  Form8949.addForms(tr, [
-    { entry: b1, code: 'W', amount: -10 },
-    { entry: b2, code: 'W', amount: 90 },
-  ]);
 
-  const f8949s = tr.findForms(Form8949);
-  expect(f8949s.length).toBe(6);
+  const form = new Form8949({
+    adjustments: [
+      { entry: b1, code: 'W', amount: -10 },
+      { entry: b2, code: 'W', amount: 90 },
+    ]
+  });
+  tr.addForm(form);
 
-  const boxA = f8949s.filter(f => f.getValue(tr, 'Box') == Form8949Box.B).pop();
-  expect(boxA.getValue(tr, '2(d)')).toBe(55);
-  expect(boxA.getValue(tr, '2(e)')).toBe(50);
-  expect(boxA.getValue(tr, '2(g)')).toBe(-10);
+  const boxB = form.getValue(tr, 'boxB');
+  expect(boxB.proceeds).toBe(55);
+  expect(boxB.costBasis).toBe(50);
+  expect(boxB.adjustments).toBe(-10);
+  expect(boxB.gainOrLoss).toBe(-5);
 
-  const boxD = f8949s.filter(f => f.getValue(tr, 'Box') == Form8949Box.D).pop();
-  expect(boxD.getValue(tr, '2(d)')).toBe(22.40);
-  expect(boxD.getValue(tr, '2(e)')).toBe(10.10);
-  expect(boxD.getValue(tr, '2(g)')).toBe(0);
+  const boxE = form.getValue(tr, 'boxE');
+  expect(boxE.proceeds).toBe(18);
+  expect(boxE.costBasis).toBe(25);
+  expect(boxE.adjustments).toBe(90);
+  expect(boxE.gainOrLoss).toBe(83);
 
-  const boxE = f8949s.filter(f => f.getValue(tr, 'Box') == Form8949Box.E).pop();
-  expect(boxE.getValue(tr, '2(d)')).toBe(18);
-  expect(boxE.getValue(tr, '2(e)')).toBe(25);
-  expect(boxE.getValue(tr, '2(g)')).toBe(90);
+  const boxD = form.getValue(tr, 'boxD');
+  expect(boxD.proceeds).toBe(22.40);
+  expect(boxD.costBasis).toBe(10.10);
+  expect(boxD.adjustments).toBe(0);
+  expect(boxD.gainOrLoss).toBeCloseTo(12.30);
 
-  const otherBoxes = f8949s.filter(f => ![Form8949Box.B, Form8949Box.D, Form8949Box.E].includes(f.getValue(tr, 'Box')));
-  for (const other of otherBoxes) {
-    expect(other.getValue(tr, '2(d)')).toBe(0);
-    expect(other.getValue(tr, '2(e)')).toBe(0);
-    expect(other.getValue(tr, '2(g)')).toBe(0);
+  const otherBoxes: (keyof Form8949['lines'])[] = ['boxA', 'boxC', 'boxF'];
+  for (const otherBox of otherBoxes) {
+    const other = form.getValue(tr, otherBox);
+    expect(other.proceeds).toBe(0);
+    expect(other.costBasis).toBe(0);
+    expect(other.adjustments).toBe(0);
+    expect(other.gainOrLoss).toBe(0);
   }
 });

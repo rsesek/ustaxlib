@@ -92,7 +92,7 @@ test('capital gain/loss', () => {
     gainType: GainType.LongTerm,
     basisReportedToIRS: true
   }));
-  Form8949.addForms(tr, []);
+  tr.addForm(new Form8949);
   tr.addForm(new ScheduleD());
   tr.getForm(ScheduleD).getValue(tr, '21');
 });
