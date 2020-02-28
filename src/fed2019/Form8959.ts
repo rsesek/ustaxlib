@@ -1,6 +1,7 @@
 import Form from '../Form';
 import TaxReturn from '../TaxReturn';
 import { Line, AccumulatorLine, ComputedLine, ReferenceLine } from '../Line';
+import { clampToZero } from '../Math';
 
 import Form1040, { FilingStatus } from './Form1040';
 import FormW2 from './FormW2';
@@ -20,8 +21,7 @@ export default class Form8959 extends Form<Form8959['_lines']> {
       return Form8959.filingStatusLimit(tr.getForm(Form1040).getInput('filingStatus'));
     }),
     '6': new ComputedLine((tr): number => {
-      const value = this.getValue(tr, '5') - this.getValue(tr, '4');
-      return value < 0 ? 0 : value;
+      return clampToZero(this.getValue(tr, '4') - this.getValue(tr, '5'));
     }),
     '7': new ComputedLine((tr): number => {
       return this.getValue(tr, '6') * 0.009;
@@ -40,8 +40,7 @@ export default class Form8959 extends Form<Form8959['_lines']> {
       return this.getValue(tr, '20') * 0.0145;
     }, 'Regular Medicare withholding on Medicare wages'),
     '22': new ComputedLine((tr): number => {
-      const value = this.getValue(tr, '19') - this.getValue(tr, '21');
-      return value < 0 ? 0 : value;
+      return clampToZero(this.getValue(tr, '19') - this.getValue(tr, '21'));
     }, 'Additional Medicare withholding on Medicare wages'),
     // 23 is not supported (Additional Medicare Tax withholding on railroad retirement (RRTA) compensation)
     '24': new ComputedLine((tr): number => {

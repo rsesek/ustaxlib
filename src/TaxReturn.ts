@@ -65,7 +65,7 @@ export default class TaxReturn {
   getForm<T extends Form<any>>(cls: FormClass<T>): T {
     const form = this.findForm(cls);
     if (!form)
-      throw new NotFoundError(`No form ${cls}`);
+      throw new NotFoundError(`No form ${cls.name}`);
     return form;
   }
 };

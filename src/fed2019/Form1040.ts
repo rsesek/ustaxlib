@@ -10,9 +10,9 @@ import FormW2 from './FormW2';
 import ScheduleD, { ScheduleDTaxWorksheet } from './ScheduleD';
 
 export enum FilingStatus {
-  Single,
-  MarriedFilingSeparate,
-  MarriedFilingJoint,
+  Single = 'S',
+  MarriedFilingSeparate = 'MFS',
+  MarriedFilingJoint = 'MFJ',
 };
 
 export interface Form1040Input {
@@ -122,7 +122,7 @@ export default class Form1040 extends Form<Form1040['_lines'], Form1040Input> {
       return value < 0 ? 0 : value;
     }),
 
-    '15': new ReferenceLine(undefined /*'Schedule 2'*/, '10', undefined, 0),
+    '15': new ReferenceLine(Schedule2, '10', undefined, 0),
 
     '16': new ComputedLine((tr): number => {
       return this.getValue(tr, '14') + this.getValue(tr, '15');
@@ -203,7 +203,6 @@ export class Schedule2 extends Form<Schedule2['_lines']> {
     '8': new ComputedLine((tr): number => {
       const f1040 = tr.getForm(Form1040);
       const wages = f1040.getLine('1').value(tr);
-      const agi = f1040.getLine('8b').value(tr);
 
       let niit: boolean;
       const filingStatus = f1040.getInput('filingStatus');

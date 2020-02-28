@@ -1,5 +1,6 @@
 import Person from '../Person';
 import TaxReturn from '../TaxReturn';
+import { NotFoundError } from '../Errors';
 
 import Form1040, { FilingStatus, Schedule2 } from './Form1040';
 import Form1099DIV from './Form1099DIV';
@@ -17,7 +18,7 @@ test('w2 wages', () => {
   tr.addForm(new FormW2({
     employer: 'AA',
     employee: pa,
-    wages: 1000000.00,
+    wages: 130000.00,
     fedIncomeTax: 0,
     medicareWages: 0,
   }));
@@ -31,8 +32,7 @@ test('w2 wages', () => {
   const f1040 = new Form1040({ filingStatus: FilingStatus.MarriedFilingJoint });
   tr.addForm(f1040);
   tr.addForm(new Schedule2);
-  tr.addForm(new Form8959);
-  expect(f1040.getValue(tr, '1')).toBe(1000036.32);
+  expect(f1040.getValue(tr, '1')).toBe(130036.32);
   f1040.getValue(tr, '23');
 });
 
@@ -102,4 +102,24 @@ test('capital gain/loss', () => {
   tr.addForm(new ScheduleDTaxWorksheet());
   tr.getForm(ScheduleD).getValue(tr, '21');
   tr.getForm(Form1040).getValue(tr, '12a');
+});
+
+test('require Form8959', () => {
+  const p = Person.self('A');
+  const tr = new TaxReturn(2019);
+  tr.addForm(new FormW2({
+    employer: 'Company',
+    employee: p,
+    wages: 400000,
+  }));
+  const f1040 = new Form1040({
+    filingStatus: FilingStatus.MarriedFilingSeparate,
+  });
+  tr.addForm(f1040);
+  tr.addForm(new Schedule2);
+
+  expect(() => f1040.getValue(tr, '15')).toThrow(NotFoundError);
+  expect(() => f1040.getValue(tr, '15')).toThrow('Form8959');
+  expect(f1040.getValue(tr, '1')).toBe(400000);
+  expect(f1040.getValue(tr, '8b')).toBe(400000);
 });
