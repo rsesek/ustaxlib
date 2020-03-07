@@ -6,7 +6,9 @@ import Form1040, { FilingStatus, Schedule2 } from './Form1040';
 import Form1099DIV from './Form1099DIV';
 import Form1099INT from './Form1099INT';
 import Form1099B, { GainType } from './Form1099B';
+import Form1099R, { Box7Code } from './Form1099R';
 import ScheduleD, { ScheduleDTaxWorksheet } from './ScheduleD';
+import Form8606 from './Form8606';
 import Form8959 from './Form8959';
 import Form8949 from './Form8949';
 import FormW2 from './FormW2';
@@ -122,4 +124,47 @@ test('require Form8959', () => {
   expect(() => f1040.getValue(tr, '15')).toThrow('Form8959');
   expect(f1040.getValue(tr, '1')).toBe(400000);
   expect(f1040.getValue(tr, '8b')).toBe(400000);
+});
+
+test('backdoor and megabackdoor roth', () => {
+  const p = Person.self('A');
+  const tr = new TaxReturn(2019);
+  tr.addForm(new Form1099R({
+    payer: 'Roth',
+    payee: p,
+    grossDistribution: 6000,
+    taxableAmount: 6000,
+    taxableAmountNotDetermined: true,
+    totalDistribution: true,
+    fedIncomeTax: 0,
+    distributionCodes: [Box7Code._2],
+    iraSepSimple: true
+  }));
+  tr.addForm(new Form1099R({
+    payer: '401k',
+    payee: p,
+    grossDistribution: 27500,
+    taxableAmount: 0,
+    taxableAmountNotDetermined: false,
+    totalDistribution: false,
+    fedIncomeTax: 0,
+    employeeContributionsOrDesignatedRothContributions: 27500,
+    distributionCodes: [Box7Code.G],
+    iraSepSimple: false
+  }));
+  tr.addForm(new Form8606({
+    person: p,
+    nondeductibleContributions: 6000,
+    traditionalIraBasis: 0,
+    distributionFromTradSepOrSimpleIraOrMadeRothConversion: true,
+    contributionsMadeInCurrentYear: 0,
+    distributionsFromAllTradSepSimpleIras: 0,
+    valueOfAllTradSepSimpleIras: 0,
+    amountConvertedFromTradSepSimpleToRoth: 6000
+  }));
+  const f = new Form1040();
+  tr.addForm(f);
+
+  expect(f.getValue(tr, '4a')).toBe(6000);
+  expect(f.getValue(tr, '4b')).toBe(0);
 });

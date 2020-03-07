@@ -1,11 +1,13 @@
 import Form, { FormClass } from '../Form';
 import TaxReturn from '../TaxReturn';
-import { Line, AccumulatorLine, ComputedLine, ReferenceLine } from '../Line';
+import { Line, AccumulatorLine, ComputedLine, ReferenceLine, sumLineOfForms } from '../Line';
 import { UnsupportedFeatureError } from '../Errors';
 
+import Form8606 from './Form8606';
 import Form8959 from './Form8959';
 import Form1099INT from './Form1099INT';
 import Form1099DIV from './Form1099DIV';
+import Form1099R, { Box7Code } from './Form1099R';
 import FormW2 from './FormW2';
 import ScheduleD, { ScheduleDTaxWorksheet } from './ScheduleD';
 
@@ -30,8 +32,14 @@ export default class Form1040 extends Form<Form1040['_lines'], Form1040Input> {
     '2b': new AccumulatorLine(Form1099INT, '1', 'Taxable interest'),
     '3a': new AccumulatorLine(Form1099DIV, '1b', 'Qualified dividends'),
     '3b': new AccumulatorLine(Form1099DIV, '1a', 'Ordinary dividends'),
-    // 4a and 4b are complex
-    '4b': new ComputedLine(() => 0),
+    '4a': new ComputedLine((tr): number => {
+      const f1099Rs = tr.findForms(Form1099R).filter(f => !f.getValue(tr, '7').includes(Box7Code.G));
+      return sumLineOfForms(tr, f1099Rs, '1');
+    }),
+    '4b': new ComputedLine((tr): number => {
+      const f8606s = tr.findForms(Form8606);
+      return sumLineOfForms(tr, f8606s, '15c') + sumLineOfForms(tr, f8606s, '18');
+    }, 'IRA distributions, taxadble amount'),
     '4d': new ComputedLine(() => 0),
     // 4c and 4d are not supported
     // 5a and 5b are not supported
@@ -131,7 +139,7 @@ export default class Form1040 extends Form<Form1040['_lines'], Form1040Input> {
     '17': new ComputedLine((tr): number => {
       const fedTaxWithheldBoxes = [
         new AccumulatorLine(FormW2, '2'),
-        //new AccumulatorLine(Form1099R, '4'),
+        new AccumulatorLine(Form1099R, '4'),
         new AccumulatorLine(Form1099DIV, '4'),
         new AccumulatorLine(Form1099INT, '4'),
       ];
