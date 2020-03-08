@@ -10,6 +10,7 @@ import Form1099INT from './Form1099INT';
 import Form1099DIV from './Form1099DIV';
 import Form1099R, { Box7Code } from './Form1099R';
 import FormW2 from './FormW2';
+import Schedule1 from './Schedule1';
 import Schedule2 from './Schedule2';
 import ScheduleD, { ScheduleDTaxWorksheet } from './ScheduleD';
 
@@ -53,7 +54,7 @@ export default class Form1040 extends Form<Form1040['_lines'], Form1040Input> {
         return l6;
       return schedD.getValue(tr, '21');
     }, 'Capital gain/loss'),
-    '7a': new ReferenceLine(/*'Schedule 1'*/ undefined, '9', 'Other income from Schedule 1', 0),
+    '7a': new ReferenceLine(Schedule1, '9', 'Other income from Schedule 1', 0),
 
     '7b': new ComputedLine((tr): number => {
       let income = 0;
@@ -68,7 +69,7 @@ export default class Form1040 extends Form<Form1040['_lines'], Form1040Input> {
       return income;
     }, 'Total income'),
 
-    '8a': new ReferenceLine(undefined /*'Schedule 1'*/, '22', 'Adjustments to income', 0),
+    '8a': new ReferenceLine(Schedule1, '22', 'Adjustments to income', 0),
 
     '8b': new ComputedLine((tr): number => {
       return this.getValue(tr, '7b') - this.getValue(tr, '8a');
