@@ -2,6 +2,7 @@ import Form, { FormClass } from '../Form';
 import TaxReturn from '../TaxReturn';
 import { Line, AccumulatorLine, ComputedLine, ReferenceLine, sumLineOfForms } from '../Line';
 import { UnsupportedFeatureError } from '../Errors';
+import { reduceBySum } from '../Math';
 
 import Form8606 from './Form8606';
 import Form8959 from './Form8959';
@@ -20,8 +21,6 @@ export enum FilingStatus {
 export interface Form1040Input {
   filingStatus: FilingStatus;
 };
-
-const reduceBySum = (list: number[]) => list.reduce((acc, curr) => acc + curr, 0);
 
 export default class Form1040 extends Form<Form1040['_lines'], Form1040Input> {
   readonly name = '1040';
