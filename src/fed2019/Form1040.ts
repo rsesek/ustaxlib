@@ -12,6 +12,7 @@ import Form1099R, { Box7Code } from './Form1099R';
 import FormW2 from './FormW2';
 import Schedule1 from './Schedule1';
 import Schedule2 from './Schedule2';
+import Schedule3 from './Schedule3';
 import ScheduleD, { ScheduleDTaxWorksheet } from './ScheduleD';
 
 export enum FilingStatus {
@@ -127,10 +128,7 @@ export default class Form1040 extends Form<Form1040['_lines'], Form1040Input> {
 
     // Not supported: 13a - child tax credit
 
-    '13b': new ComputedLine((tr): number => {
-      // TODO: add Sched 3.L7
-      return 0;
-    }, 'Additional credits'),
+    '13b': new ReferenceLine(Schedule3, '7', 'Additional credits', 0),
 
     '14': new ComputedLine((tr): number => {
       const l12b = this.getValue(tr, '12b');
@@ -163,9 +161,18 @@ export default class Form1040 extends Form<Form1040['_lines'], Form1040Input> {
       return reduceBySum(withholding) + additionalMedicare;
     }, 'Federal income tax withheld'),
 
-    // 18 not supported
+    // 18a not supported - Earned income credit (EIC)
+    // 18b not supported - Additional child tax credit. Attach Schedule 8812
+    // 18c not supported - American opportunity credit from Form 8863, line 8
+    '18d': new ReferenceLine(Schedule3, '14', undefined, 0),
+    '18e': new ComputedLine((tr): number => {
+      // Should include 18a-18c.
+      return this.getValue(tr, '18d');
+    }),
 
-    '19': new ReferenceLine(Form1040 as any, '17', 'Total payments'),
+    '19': new ComputedLine((tr): number => {
+      return this.getValue(tr, '17') + this.getValue(tr, '18e');
+    }, 'Total payments'),
 
     '20': new ComputedLine((tr): number => {
       const l16: number = this.getValue(tr, '16');
