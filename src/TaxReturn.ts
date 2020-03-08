@@ -16,6 +16,10 @@ export default class TaxReturn {
     return this._year;
   }
 
+  get forms(): Form<any, unknown>[] {
+    return [...this._forms];
+  }
+
   addPerson(person: Person) {
     if (person.relation == Relation.Dependent) {
       throw new UnsupportedFeatureError('Dependents are not supported');
