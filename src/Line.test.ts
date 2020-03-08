@@ -91,7 +91,8 @@ test('input line', () => {
     readonly name = 'F1';
     protected readonly _lines = {
       '1': new InputLine<Input>('key'),
-      '2': new InputLine<Input>('key2')
+      '2': new InputLine<Input>('key2'),
+      '3': new InputLine<Input>('key2', undefined, 'FALLBACK')
     };
   };
   const tr = new TaxReturn(2019);
@@ -103,6 +104,8 @@ test('input line', () => {
 
   const l2 = f.getLine('2');
   expect(() => l2.value(tr)).toThrow(NotFoundError);
+
+  expect(f.getLine('3').value(tr)).toBe('FALLBACK');
 });
 
 test('line stack', () => {

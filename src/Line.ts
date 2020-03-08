@@ -66,15 +66,19 @@ export class ReferenceLine<F extends Form<any>,
 
 export class InputLine<U = unknown, T extends keyof U = any> extends Line<U[T]> {
   private _input: T;
+  private _fallback: U[T];
 
   form: Form<any, U>;
 
-  constructor(input: T, description?: string) {
+  constructor(input: T, description?: string, fallback?: U[T]) {
     super(description || `Input from ${input}`);
     this._input = input;
+    this._fallback = fallback;
   }
 
   value(tr: TaxReturn): U[T] {
+    if (!this.form.hasInput(this._input) && this._fallback !== undefined)
+      return this._fallback;
     return this.form.getInput<T>(this._input);
   }
 };
