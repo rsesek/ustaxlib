@@ -4,7 +4,10 @@ import { ComputedLine } from '../Line';
 import { UnsupportedFeatureError } from '../Errors';
 
 import Form1040, { FilingStatus } from './Form1040';
+import Form1099DIV from './Form1099DIV';
+import Form1099INT from './Form1099INT';
 import Form8959 from './Form8959';
+import Form8960 from './Form8960';
 
 export default class Schedule2 extends Form<Schedule2['_lines']> {
   readonly name = 'Schedule 2';
@@ -41,39 +44,19 @@ export default class Schedule2 extends Form<Schedule2['_lines']> {
     '8': new ComputedLine((tr): number => {
       const f1040 = tr.getForm(Form1040);
       const wages = f1040.getLine('1').value(tr);
-
-      let niit: boolean;
       const filingStatus = f1040.getInput('filingStatus');
-
-      const additionalMedicare = wages > Form8959.filingStatusLimit(filingStatus);
-
-      switch (f1040.getInput('filingStatus')) {
-        case FilingStatus.Single:
-          if (wages > 200000) {
-            niit = true;
-          }
-          break;
-        case FilingStatus.MarriedFilingJoint:
-          if (wages > 250000) {
-            niit = true;
-          }
-          break;
-        case FilingStatus.MarriedFilingSeparate:
-          if (wages > 125000) {
-            niit = true;
-          }
-          break;
-      }
 
       let value = 0;
 
-      if (additionalMedicare) {
-        const f8959 = tr.getForm(Form8959);
-        value += f8959.getValue(tr, '18');
+      // Additional medicare tax.
+      if (wages > Form8959.filingStatusLimit(filingStatus)) {
+        value += tr.getForm(Form8959).getValue(tr, '18');
       }
 
-      if (niit) {
-        //const f8960 = tr.getForm('8960');
+      // Net investment income tax.
+      if (wages > Form8960.filingStatusLimit(filingStatus) &&
+          (tr.findForms(Form1099DIV).length || tr.findForms(Form1099INT).length)) {
+        value += tr.getForm(Form8960).getValue(tr, '17');
       }
 
       return value;
@@ -86,4 +69,3 @@ export default class Schedule2 extends Form<Schedule2['_lines']> {
     })
   };
 };
-
