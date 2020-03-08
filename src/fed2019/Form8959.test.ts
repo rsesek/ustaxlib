@@ -3,7 +3,8 @@ import TaxReturn from '../TaxReturn';
 
 import FormW2 from './FormW2';
 import Form8959 from './Form8959';
-import Form1040, { Schedule2, FilingStatus } from './Form1040';
+import Form1040, { FilingStatus } from './Form1040';
+import Schedule2 from './Schedule2';
 
 describe('additional medicare tax', () => {
   const filingStatusToResults = {

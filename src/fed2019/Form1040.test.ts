@@ -2,11 +2,12 @@ import Person from '../Person';
 import TaxReturn from '../TaxReturn';
 import { NotFoundError } from '../Errors';
 
-import Form1040, { FilingStatus, Schedule2 } from './Form1040';
+import Form1040, { FilingStatus } from './Form1040';
 import Form1099DIV from './Form1099DIV';
 import Form1099INT from './Form1099INT';
 import Form1099B, { GainType } from './Form1099B';
 import Form1099R, { Box7Code } from './Form1099R';
+import Schedule2 from './Schedule2';
 import ScheduleD, { ScheduleDTaxWorksheet } from './ScheduleD';
 import Form8606 from './Form8606';
 import Form8959 from './Form8959';
