@@ -49,7 +49,7 @@ export class ReferenceLine<F extends Form<any>,
   // the one the Line is in, erase |form|'s type with |as any| to
   // keep TypeScript happy.
   constructor(form: FormClass<F>, line: L, description?: string, fallback?: T) {
-    super(description || `Reference F${form}.L${line}`);
+    super(description || `Reference F${form.name}.L${line}`);
     this._form = form;
     this._line = line;
     this._fallback = fallback;
