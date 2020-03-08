@@ -5,8 +5,9 @@ import { ComputedLine, InputLine, ReferenceLine } from '../Line';
 import { UnsupportedFeatureError } from '../Errors';
 import { reduceBySum } from '../Math';
 
-import Form1040, { Schedule2 } from './Form1040';
+import Form1040 from './Form1040';
 import Form8949 from './Form8949';
+import Schedule2 from './Schedule2';
 import ScheduleD from './ScheduleD';
 
 export enum ForeignIncomeCategory {
