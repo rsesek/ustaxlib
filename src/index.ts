@@ -1,3 +1,4 @@
-export default function helloWorld(): string {
-  return 'Hello World';
-}
+import Person from './Person';
+import TaxReturn from './TaxReturn';
+
+export { Person, TaxReturn };
