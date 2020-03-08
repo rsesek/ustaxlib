@@ -88,7 +88,7 @@ test('capital gain/loss', () => {
   tr.addForm(new FormW2({
     employer: 'Money',
     employee: p,
-    wages: 100000
+    wages: 150000
   }));
   tr.addForm(new Form1099B({
     payer: 'Brokerage',

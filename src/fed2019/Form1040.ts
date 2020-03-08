@@ -73,8 +73,16 @@ export default class Form1040 extends Form<Form1040['_lines'], Form1040Input> {
       return this.getValue(tr, '7b') - this.getValue(tr, '8a');
     }, 'Adjusted gross income'),
 
-    // TODO - Deduction
-    '9': new ComputedLine(() => 0, 'Deduction'),
+    '9': new ComputedLine((): number => {
+      // TODO - Itemized deductions.
+      switch (this.getInput('filingStatus')) {
+        case FilingStatus.Single:
+        case FilingStatus.MarriedFilingSeparate:
+          return 12200;
+        case FilingStatus.MarriedFilingJoint:
+          return 24400;
+      }
+    }, 'Deduction'),
 
     '10': new ComputedLine((tr): number => {
       const taxableIncome = this.getValue(tr, '8b');
@@ -197,7 +205,7 @@ export class Schedule2 extends Form<Schedule2['_lines']> {
       }
       throw new UnsupportedFeatureError('The AMT is not supported');
     }, 'AMT'),
-    // 2 is not supported (Excess advance premium tax credit repayment)
+    '2': new ComputedLine(() => 0, 'Excess advance premium tax credit repayment'),  // Not supported.
     '3': new ComputedLine((tr): number => {
       // Should include line 2.
       return this.getValue(tr, '1');
