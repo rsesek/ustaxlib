@@ -1,7 +1,7 @@
-import Form from '../Form';
-import TaxReturn from '../TaxReturn';
-import { ComputedLine } from '../Line';
-import { UnsupportedFeatureError } from '../Errors';
+import { Form } from '../core';
+import { TaxReturn } from '../core';
+import { ComputedLine } from '../core/Line';
+import { UnsupportedFeatureError } from '../core/Errors';
 
 import Form1040, { FilingStatus } from './Form1040';
 import Form1099DIV from './Form1099DIV';

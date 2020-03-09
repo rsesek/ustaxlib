@@ -1,6 +1,6 @@
-import Person from '../Person';
-import TaxReturn from '../TaxReturn';
-import { NotFoundError } from '../Errors';
+import { Person } from '../core';
+import { TaxReturn } from '../core';
+import { NotFoundError } from '../core/Errors';
 
 import Form1040, { FilingStatus } from './Form1040';
 import Form1099DIV from './Form1099DIV';

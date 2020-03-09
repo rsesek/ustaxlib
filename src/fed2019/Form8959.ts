@@ -1,7 +1,7 @@
-import Form from '../Form';
-import TaxReturn from '../TaxReturn';
-import { Line, AccumulatorLine, ComputedLine, ReferenceLine } from '../Line';
-import { clampToZero } from '../Math';
+import { Form } from '../core';
+import { TaxReturn } from '../core';
+import { Line, AccumulatorLine, ComputedLine, ReferenceLine } from '../core/Line';
+import { clampToZero } from '../core/Math';
 
 import Form1040, { FilingStatus } from './Form1040';
 import FormW2 from './FormW2';

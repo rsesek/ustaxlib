@@ -1,9 +1,9 @@
-import Form from '../Form';
-import TaxReturn from '../TaxReturn';
-import Person from '../Person';
-import { ComputedLine, InputLine, ReferenceLine } from '../Line';
-import { UnsupportedFeatureError } from '../Errors';
-import { reduceBySum } from '../Math';
+import { Form } from '../core';
+import { TaxReturn } from '../core';
+import { Person } from '../core';
+import { ComputedLine, InputLine, ReferenceLine } from '../core/Line';
+import { UnsupportedFeatureError } from '../core/Errors';
+import { reduceBySum } from '../core/Math';
 
 import Form1040 from './Form1040';
 import Form8949 from './Form8949';

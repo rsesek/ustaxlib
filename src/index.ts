@@ -1,4 +1,2 @@
-import Person from './Person';
-import TaxReturn from './TaxReturn';
-
-export { Person, TaxReturn };
+import './core';
+import './fed2019';

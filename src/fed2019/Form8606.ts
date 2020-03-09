@@ -1,8 +1,8 @@
-import Form from '../Form';
-import TaxReturn from '../TaxReturn';
-import Person from '../Person';
-import { Line, AccumulatorLine, ComputedLine, InputLine, ReferenceLine } from '../Line';
-import { clampToZero } from '../Math';
+import { Form } from '../core';
+import { TaxReturn } from '../core';
+import { Person } from '../core';
+import { Line, AccumulatorLine, ComputedLine, InputLine, ReferenceLine } from '../core/Line';
+import { clampToZero } from '../core/Math';
 
 export interface Form8606Input {
   person: Person;

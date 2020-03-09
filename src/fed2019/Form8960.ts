@@ -1,7 +1,7 @@
-import Form from '../Form';
-import TaxReturn from '../TaxReturn';
-import { ComputedLine, ReferenceLine } from '../Line';
-import { clampToZero } from '../Math';
+import { Form } from '../core';
+import { TaxReturn } from '../core';
+import { ComputedLine, ReferenceLine } from '../core/Line';
+import { clampToZero } from '../core/Math';
 
 import Form1040, { FilingStatus } from './Form1040';
 import Schedule1 from './Schedule1';

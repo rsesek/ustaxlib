@@ -1,0 +1,22 @@
+export { default as Form1040 } from './Form1040';
+export { default as Form1099B } from './Form1099B';
+export { default as Form1099DIV } from './Form1099DIV';
+export { default as Form1099INT } from './Form1099INT';
+export { default as Form1099R } from './Form1099R';
+export { default as Form1116 } from './Form1116';
+export { default as Form8606 } from './Form8606';
+export { default as Form8949 } from './Form8949';
+export { default as Form8959 } from './Form8959';
+export { default as Form8960 } from './Form8960';
+export { default as Schedule1 } from './Schedule1';
+export { default as Schedule2 } from './Schedule2';
+export { default as Schedule3 } from './Schedule3';
+export { default as ScheduleD } from './ScheduleD';
+export { default as W2 } from './FormW2';
+
+export * from './Form1040';
+export * from './Form1099B';
+export * from './Form1099R';
+export * from './Form1116';
+export * from './Form8949';
+export * from './FormW2';

@@ -1,6 +1,6 @@
-import Form from '../Form';
-import { InputLine } from '../Line';
-import Person from '../Person';
+import { Form } from '../core';
+import { InputLine } from '../core/Line';
+import { Person } from '../core';
 
 export interface Form1099INTInput {
   payer: string;

@@ -1,5 +1,5 @@
-import Person from '../Person';
-import TaxReturn from '../TaxReturn';
+import { Person } from '../core';
+import { TaxReturn } from '../core';
 
 import FormW2 from './FormW2';
 import Form8959 from './Form8959';

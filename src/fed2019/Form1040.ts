@@ -1,8 +1,8 @@
-import Form, { FormClass } from '../Form';
-import TaxReturn from '../TaxReturn';
-import { Line, AccumulatorLine, ComputedLine, ReferenceLine, sumLineOfForms } from '../Line';
-import { UnsupportedFeatureError } from '../Errors';
-import { reduceBySum } from '../Math';
+import Form, { FormClass } from '../core/Form';
+import { TaxReturn } from '../core';
+import { Line, AccumulatorLine, ComputedLine, ReferenceLine, sumLineOfForms } from '../core/Line';
+import { UnsupportedFeatureError } from '../core/Errors';
+import { reduceBySum } from '../core/Math';
 
 import Form8606 from './Form8606';
 import Form8959 from './Form8959';

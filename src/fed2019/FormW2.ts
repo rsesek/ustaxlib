@@ -1,6 +1,6 @@
-import Form from '../Form';
-import { Line, InputLine } from '../Line';
-import Person from '../Person';
+import { Form } from '../core';
+import { Line, InputLine } from '../core/Line';
+import { Person } from '../core';
 
 export enum Box13 {
   StatutoryEmployee,

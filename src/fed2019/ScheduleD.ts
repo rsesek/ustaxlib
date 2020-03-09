@@ -1,9 +1,9 @@
-import Form from '../Form';
-import Person from '../Person';
-import TaxReturn from '../TaxReturn';
-import { Line, AccumulatorLine, ComputedLine, ReferenceLine, sumLineOfForms } from '../Line';
-import { clampToZero } from '../Math';
-import { UnsupportedFeatureError } from '../Errors';
+import { Form } from '../core';
+import { Person } from '../core';
+import { TaxReturn } from '../core';
+import { Line, AccumulatorLine, ComputedLine, ReferenceLine, sumLineOfForms } from '../core/Line';
+import { clampToZero } from '../core/Math';
+import { UnsupportedFeatureError } from '../core/Errors';
 
 import Form8949, { Form8949Box } from './Form8949';
 import Form1099DIV from './Form1099DIV';

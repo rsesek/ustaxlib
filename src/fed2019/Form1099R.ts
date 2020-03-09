@@ -1,7 +1,7 @@
-import Form from '../Form';
-import Person from '../Person';
-import TaxReturn from '../TaxReturn';
-import { InputLine } from '../Line';
+import { Form } from '../core';
+import { Person } from '../core';
+import { TaxReturn } from '../core';
+import { InputLine } from '../core/Line';
 
 export enum Box7Code {
   _1  = '1',  // Early distribution, no known exception

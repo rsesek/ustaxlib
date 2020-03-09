@@ -1,7 +1,7 @@
-import Form from '../Form';
-import Person from '../Person';
-import TaxReturn from '../TaxReturn';
-import { Line, InputLine, ComputedLine, sumLineOfForms } from '../Line';
+import { Form } from '../core';
+import { Person } from '../core';
+import { TaxReturn } from '../core';
+import { Line, InputLine, ComputedLine, sumLineOfForms } from '../core/Line';
 
 import Form1099B, { GainType } from './Form1099B';
 

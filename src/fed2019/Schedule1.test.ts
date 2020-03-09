@@ -1,6 +1,6 @@
-import TaxReturn from '../TaxReturn';
-import Person from '../Person';
-import { UnsupportedFeatureError } from '../Errors';
+import { TaxReturn } from '../core';
+import { Person } from '../core';
+import { UnsupportedFeatureError } from '../core/Errors';
 
 import Form1040, { FilingStatus } from './Form1040';
 import Schedule1, { Schedule1Input } from './Schedule1';

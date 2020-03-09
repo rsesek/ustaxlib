@@ -1,8 +1,8 @@
-import Form from '../Form';
-import TaxReturn from '../TaxReturn';
-import { ComputedLine, InputLine } from '../Line';
-import { NotFoundError, UnsupportedFeatureError } from '../Errors';
-import { undefinedToZero } from '../Math';
+import { Form } from '../core';
+import { TaxReturn } from '../core';
+import { ComputedLine, InputLine } from '../core/Line';
+import { NotFoundError, UnsupportedFeatureError } from '../core/Errors';
+import { undefinedToZero } from '../core/Math';
 
 import Form1040 from './Form1040';
 
