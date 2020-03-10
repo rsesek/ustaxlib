@@ -78,7 +78,7 @@ export default class Form1116 extends Form<Form1116['_lines'], Form1116Input> {
     }),
     '7': new ComputedLine((tr): number => this.getValue(tr, '1a') - this.getValue(tr, '6')),
     // Skip the complicated Part II matrix and just use the input value.
-    '8': new Input('totalForeignTaxesPaidOrAccrued'), 
+    '8': new Input('totalForeignTaxesPaidOrAccrued'),
     '9': new ReferenceLine(Form1116 as any, '8'),
     // 10 not supported - Carryback or carryover
     '11': new ComputedLine((tr): number => this.getValue(tr, '9') /* + this.getValue(tr, '10') */),

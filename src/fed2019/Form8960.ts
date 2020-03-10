@@ -15,7 +15,7 @@ export default class Form8960 extends Form<Form8960['_lines']> {
     '2': new ReferenceLine(Form1040, '3b', 'Ordinary dividends'),
     // 3 not supported - Annuities
     // 4a not supported - Rental real estate, royalties, partnerships, S corporations, trusts, etc
-    // 4b not supported - Adjustment for net income or loss derived in the ordinary course of a nonsection 1411 trade or business 
+    // 4b not supported - Adjustment for net income or loss derived in the ordinary course of a nonsection 1411 trade or business
     // 4c not supported - 4a+4b
     '5a': new ComputedLine((tr): number => {
       return (new ReferenceLine(Form1040, '6')).value(tr) +

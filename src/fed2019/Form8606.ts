@@ -1,6 +1,6 @@
 import { Form, Person, TaxReturn } from '../core';
 import { Line, AccumulatorLine, ComputedLine, InputLine, ReferenceLine } from '../core/Line';
-import { clampToZero } from '../core/Math';
+import { clampToZero, undefinedToZero } from '../core/Math';
 
 export interface Form8606Input {
   person: Person;
@@ -33,11 +33,9 @@ export default class Form8606 extends Form<Form8606['_lines'], Form8606Input> {
     '7': new Input('distributionsFromAllTradSepSimpleIras'),
     '8': new Input('amountConvertedFromTradSepSimpleToRoth'),
     '9': new ComputedLine((tr): number => {
-      let value = 0;
-      value += this.getValue(tr, '6') || 0;
-      value += this.getValue(tr, '7') || 0;
-      value += this.getValue(tr, '8') || 0;
-      return value;
+      return undefinedToZero(this.getValue(tr, '6')) +
+             undefinedToZero(this.getValue(tr, '7')) +
+             undefinedToZero(this.getValue(tr, '8'));
     }),
     '10': new ComputedLine((tr): number => this.getValue(tr, '5') / this.getValue(tr, '9')),
     '11': new ComputedLine((tr): number => this.getValue(tr, '8') * this.getValue(tr, '10'), 'Nontaxable portion converted to Roth'),
@@ -51,7 +49,7 @@ export default class Form8606 extends Form<Form8606['_lines'], Form8606Input> {
     }, 'Total basis in Traditional IRAs'),
     '15a': new ComputedLine((tr): number => this.getValue(tr, '7') - this.getValue(tr, '12')),
     '15b': new ComputedLine((): number => 0, 'Amount attributable to qualified disaster distributions'),
-    // 15b not supported - amount on line 15a attributable 
+    // 15b not supported - amount on line 15a attributable
     '15c': new ComputedLine((tr): number => this.getValue(tr, '15a') - this.getValue(tr, '15b'), 'Taxable amount'),
 
     // Part 2

@@ -1,7 +1,7 @@
 import { Form, TaxReturn } from '../core';
 import { Line, AccumulatorLine, ComputedLine, ReferenceLine, sumLineOfForms } from '../core/Line';
 import { UnsupportedFeatureError } from '../core/Errors';
-import { reduceBySum } from '../core/Math';
+import { clampToZero, reduceBySum } from '../core/Math';
 
 import Form8606 from './Form8606';
 import Form8959 from './Form8959';
@@ -101,8 +101,7 @@ export default class Form1040 extends Form<Form1040['_lines'], Form1040Input> {
       return this.getValue(tr, '9') + this.getValue(tr, '10');
     }),
     '11b': new ComputedLine((tr): number => {
-      const value = this.getValue(tr, '8b') - this.getValue(tr, '11a');
-      return value < 0 ? 0 : value;
+      return clampToZero(this.getValue(tr, '8b') - this.getValue(tr, '11a'));
     }, 'Taxable income'),
 
     '12a': new ComputedLine((tr): number => {
@@ -130,10 +129,7 @@ export default class Form1040 extends Form<Form1040['_lines'], Form1040Input> {
     '13b': new ReferenceLine(Schedule3, '7', 'Additional credits', 0),
 
     '14': new ComputedLine((tr): number => {
-      const l12b = this.getValue(tr, '12b');
-      const l13b = this.getValue(tr, '13b');
-      const value = l12b - l13b;
-      return value < 0 ? 0 : value;
+      return clampToZero(this.getValue(tr, '12b') - this.getValue(tr, '13b'));
     }),
 
     '15': new ReferenceLine(Schedule2, '10', undefined, 0),
@@ -174,19 +170,11 @@ export default class Form1040 extends Form<Form1040['_lines'], Form1040Input> {
     }, 'Total payments'),
 
     '20': new ComputedLine((tr): number => {
-      const l16: number = this.getValue(tr, '16');
-      const l19: number = this.getValue(tr, '19');
-      if (l19 > l16)
-        return l19 - l16;
-      return 0;
+      return clampToZero(this.getValue(tr, '19') - this.getValue(tr, '16'));
     }, 'Amount overpaid'),
 
     '23': new ComputedLine((tr): number => {
-      const l16 = this.getValue(tr, '16');
-      const l19 = this.getValue(tr, '19');
-      if (l19 < l16)
-        return l16 - l19;
-      return 0;
+      return clampToZero(this.getValue(tr, '16') - this.getValue(tr, '19'));
     }, 'Amount you owe'),
   };
 };
