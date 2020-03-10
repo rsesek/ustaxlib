@@ -7,7 +7,8 @@
     "test": "jest",
     "check": "tsc --noEmit",
     "debug": "node --inspect-brk --stack-trace-limit=1000 node_modules/.bin/jest --coverage=false",
-    "prepublish": "tsc"
+    "prepublish": "tsc",
+    "build": "tsc && cp package.json dist"
   },
   "author": "Robert Sesek",
   "license": "ISC",
