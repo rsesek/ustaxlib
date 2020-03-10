@@ -6,7 +6,7 @@ import Form1116, { ForeignIncomeCategory } from './Form1116';
 import Form1099B, { GainType } from './Form1099B';
 import Form1099DIV from './Form1099DIV';
 import Form8949 from './Form8949';
-import FormW2 from './FormW2';
+import W2 from './W2';
 import ScheduleD from './ScheduleD';
 
 test('supported income category', () => {
@@ -48,7 +48,7 @@ test('foreign tax credit', () => {
   tr.addForm(new Form1040({
     filingStatus: FilingStatus.MarriedFilingJoint
   }));
-  tr.addForm(new FormW2({
+  tr.addForm(new W2({
     employer: 'ACME',
     employee: p,
     wages: 697000,
@@ -88,7 +88,7 @@ test('no net capital losses in total income', () => {
   tr.addForm(new Form1040({
     filingStatus: FilingStatus.MarriedFilingJoint
   }));
-  tr.addForm(new FormW2({
+  tr.addForm(new W2({
     employer: 'Megacorp',
     employee: p,
     wages: 200000

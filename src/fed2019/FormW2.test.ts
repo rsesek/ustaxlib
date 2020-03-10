@@ -1,6 +1,6 @@
 import { Person, TaxReturn } from '../core';
 
-import W2 from './FormW2';
+import W2 from './W2';
 
 test('input', () => {
   const p = Person.self('Bob');

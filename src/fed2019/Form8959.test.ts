@@ -1,6 +1,6 @@
 import { Person, TaxReturn } from '../core';
 
-import FormW2 from './FormW2';
+import W2 from './W2';
 import Form8959 from './Form8959';
 import Form1040, { FilingStatus } from './Form1040';
 import Schedule2 from './Schedule2';
@@ -23,7 +23,7 @@ describe('additional medicare tax', () => {
       const p = Person.self('A');
       const tr = new TaxReturn(2019);
       tr.addForm(new Form1040({ filingStatus }));
-      tr.addForm(new FormW2({
+      tr.addForm(new W2({
         employer: 'Acme',
         employee: p,
         wages: 300000,
@@ -58,7 +58,7 @@ describe('no additional medicare tax', () => {
       const p = Person.self('A');
       const tr = new TaxReturn(2019);
       tr.addForm(new Form1040({ filingStatus }));
-      tr.addForm(new FormW2({
+      tr.addForm(new W2({
         employer: 'Acme',
         employee: p,
         wages: 110000,

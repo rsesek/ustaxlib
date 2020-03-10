@@ -1,6 +1,6 @@
 import { Person, TaxReturn } from '../core';
 
-import FormW2 from './FormW2';
+import W2 from './W2';
 import Form1040, { FilingStatus } from './Form1040';
 import Form1099B, { GainType } from './Form1099B';
 import Form1099DIV from './Form1099DIV';
@@ -46,7 +46,7 @@ describe('net investment income tax', () => {
       }));
       tr.addForm(new Form8949);
       tr.addForm(new ScheduleD);
-      tr.addForm(new FormW2({
+      tr.addForm(new W2({
         employer: 'Acme',
         employee: p,
         wages: 300000,
@@ -106,7 +106,7 @@ describe('no net investment income tax', () => {
       }));
       tr.addForm(new Form8949);
       tr.addForm(new ScheduleD);
-      tr.addForm(new FormW2({
+      tr.addForm(new W2({
         employer: 'Acme',
         employee: p,
         wages: 70000,

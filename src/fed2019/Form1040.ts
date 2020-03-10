@@ -8,7 +8,7 @@ import Form8959 from './Form8959';
 import Form1099INT from './Form1099INT';
 import Form1099DIV from './Form1099DIV';
 import Form1099R, { Box7Code } from './Form1099R';
-import FormW2 from './FormW2';
+import W2 from './W2';
 import Schedule1 from './Schedule1';
 import Schedule2 from './Schedule2';
 import Schedule3 from './Schedule3';
@@ -28,7 +28,7 @@ export default class Form1040 extends Form<Form1040['_lines'], Form1040Input> {
   readonly name = '1040';
 
   protected readonly _lines = {
-    '1': new AccumulatorLine(FormW2, '1', 'Wages, salaries, tips, etc.'),
+    '1': new AccumulatorLine(W2, '1', 'Wages, salaries, tips, etc.'),
     '2a': new AccumulatorLine(Form1099INT, '8', 'Tax-exempt interest'),
     '2b': new AccumulatorLine(Form1099INT, '1', 'Taxable interest'),
     '3a': new AccumulatorLine(Form1099DIV, '1b', 'Qualified dividends'),
@@ -144,7 +144,7 @@ export default class Form1040 extends Form<Form1040['_lines'], Form1040Input> {
 
     '17': new ComputedLine((tr): number => {
       const fedTaxWithheldBoxes = [
-        new AccumulatorLine(FormW2, '2'),
+        new AccumulatorLine(W2, '2'),
         new AccumulatorLine(Form1099R, '4'),
         new AccumulatorLine(Form1099DIV, '4'),
         new AccumulatorLine(Form1099INT, '4'),

@@ -12,11 +12,11 @@ export { default as Schedule1 } from './Schedule1';
 export { default as Schedule2 } from './Schedule2';
 export { default as Schedule3 } from './Schedule3';
 export { default as ScheduleD } from './ScheduleD';
-export { default as W2 } from './FormW2';
+export { default as W2 } from './W2';
 
 export * from './Form1040';
 export * from './Form1099B';
 export * from './Form1099R';
 export * from './Form1116';
 export * from './Form8949';
-export * from './FormW2';
+export * from './W2';

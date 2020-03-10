@@ -11,20 +11,20 @@ import ScheduleD, { ScheduleDTaxWorksheet } from './ScheduleD';
 import Form8606 from './Form8606';
 import Form8959 from './Form8959';
 import Form8949 from './Form8949';
-import FormW2 from './FormW2';
+import W2 from './W2';
 
 test('w2 wages', () => {
   const pa = Person.self('A');
   const pb = Person.spouse('B');
   const tr = new TaxReturn(2019);
-  tr.addForm(new FormW2({
+  tr.addForm(new W2({
     employer: 'AA',
     employee: pa,
     wages: 130000.00,
     fedIncomeTax: 0,
     medicareWages: 0,
   }));
-  tr.addForm(new FormW2({
+  tr.addForm(new W2({
     employer: 'BB',
     employee: pb,
     wages: 36.32,
@@ -85,7 +85,7 @@ test('capital gain/loss', () => {
   const p = Person.self('A');
   const tr = new TaxReturn(2019);
   tr.addForm(new Form1040({ filingStatus: FilingStatus.Single }));
-  tr.addForm(new FormW2({
+  tr.addForm(new W2({
     employer: 'Money',
     employee: p,
     wages: 150000
@@ -109,7 +109,7 @@ test('capital gain/loss', () => {
 test('require Form8959', () => {
   const p = Person.self('A');
   const tr = new TaxReturn(2019);
-  tr.addForm(new FormW2({
+  tr.addForm(new W2({
     employer: 'Company',
     employee: p,
     wages: 400000,
