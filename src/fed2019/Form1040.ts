@@ -192,39 +192,47 @@ export default class Form1040 extends Form<Form1040['_lines'], Form1040Input> {
 };
 
 export function computeTax(income: number, filingStatus: FilingStatus): number {
-  if (income < 100000)
-    throw new UnsupportedFeatureError('Tax-table tax liability not supported');
+  // From https://www.irs.gov/pub/irs-drop/rp-18-57.pdf, Section 3.01 and
+  // https://www.irs.gov/pub/irs-pdf/p17.pdf, 2019 Tax Rate Schedules (p254).
+  const taxBrackets = {
+    // Format is:
+    // [ limit-of-taxable-income, marginal-rate, base-tax ]
+    // If Income is over Row[0], pay Row[2] + (Row[1] * (Income - PreviousRow[0]))
+    [FilingStatus.MarriedFilingJoint]: [
+      [ 19400, 0.10, 0 ],
+      [ 78950, 0.12, 1940 ],
+      [ 168400, 0.22, 9086 ],
+      [ 321450, 0.24, 28765 ],
+      [ 408200, 0.32, 65497 ],
+      [ 612350, 0.35, 93257 ],
+      [ Infinity, 0.37, 164709.50 ]
+    ],
+    [FilingStatus.Single]: [
+      [ 9700, 0.10, 0 ],
+      [ 39475, 0.12, 970 ],
+      [ 84200, 0.22, 4543 ],
+      [ 160725, 0.24, 14382.50 ],
+      [ 204100, 0.32, 32748.50 ],
+      [ 510300, 0.35, 46628.50 ],
+      [ Infinity, 0.37, 153798.50 ]
+    ],
+    [FilingStatus.MarriedFilingSeparate]: [
+      [ 9700, 0.10, 0 ],
+      [ 39475, 0.12, 970 ],
+      [ 84200, 0.22, 4543 ],
+      [ 160725, 0.24, 14382.50 ],
+      [ 204100, 0.32, 32748.50 ],
+      [ 306175, 0.35, 46628.50 ],
+      [ Infinity, 0.37, 82354.75 ]
+    ]
+  }[filingStatus];
 
-  switch (filingStatus) {
-    case FilingStatus.Single:
-      if (income < 160725)
-        return (income * 0.24) - 5825.50;
-      else if (income < 204100)
-        return (income * 0.32) - 18683.50;
-      else if (income < 510300)
-        return (income * 0.35) - 24806.50;
-      else
-        return (income * 0.38) - 35012.50;
-    case FilingStatus.MarriedFilingJoint:
-      if (income < 168400)
-        return (income * 0.22) - 8283.00;
-      else if (income < 321450)
-        return (income * 0.24) - 11651.00;
-      else if (income < 408200)
-        return (income * 0.32) - 37367.00;
-      else if (income < 612350)
-        return (income * 0.35) - 49613.00;
-      else
-        return (income * 0.37) - 61860.00;
-    case FilingStatus.MarriedFilingSeparate:
-      if (income < 160725)
-        return (income * 0.24) - 5825.50;
-      else if (income < 204100)
-        return (income * 0.32) - 18683.50;
-      else if (income < 306175)
-        return (income * 0.35) - 24806.50;
-      else
-        return (income * 0.37) - 30930.00;
-  }
-  throw new UnsupportedFeatureError('Unexpected return type');
+  let i = 0;
+  while (taxBrackets[i][0] < income)
+    ++i;
+
+  const bracket = taxBrackets[i];
+  const bracketStart = i == 0 ? 0 : taxBrackets[i - 1][0];
+
+  return ((income - bracketStart) * bracket[1]) + bracket[2];
 };
