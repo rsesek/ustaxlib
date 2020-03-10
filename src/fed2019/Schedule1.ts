@@ -1,5 +1,4 @@
-import { Form } from '../core';
-import { TaxReturn } from '../core';
+import { Form, TaxReturn } from '../core';
 import { ComputedLine, InputLine } from '../core/Line';
 import { NotFoundError, UnsupportedFeatureError } from '../core/Errors';
 import { undefinedToZero } from '../core/Math';

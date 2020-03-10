@@ -1,5 +1,4 @@
-import { TaxReturn } from '../core';
-import { Person } from '../core';
+import { Person, TaxReturn } from '../core';
 import { NotFoundError } from '../core/Errors';
 
 import Form1040, { FilingStatus } from './Form1040';

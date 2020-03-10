@@ -1,6 +1,4 @@
-import { Form } from '../core';
-import { Person } from '../core';
-import { TaxReturn } from '../core';
+import { Form, Person, TaxReturn } from '../core';
 import { Line, AccumulatorLine, ComputedLine, ReferenceLine, sumLineOfForms } from '../core/Line';
 import { clampToZero } from '../core/Math';
 import { UnsupportedFeatureError } from '../core/Errors';

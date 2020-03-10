@@ -1,5 +1,4 @@
-import { TaxReturn } from '../core';
-import { Person } from '../core';
+import { Person, TaxReturn } from '../core';
 
 import Form1040, { FilingStatus } from './Form1040';
 import Form8606 from './Form8606';

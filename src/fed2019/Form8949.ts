@@ -1,6 +1,4 @@
-import { Form } from '../core';
-import { Person } from '../core';
-import { TaxReturn } from '../core';
+import { Form, Person, TaxReturn } from '../core';
 import { Line, InputLine, ComputedLine, sumLineOfForms } from '../core/Line';
 
 import Form1099B, { GainType } from './Form1099B';

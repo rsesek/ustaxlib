@@ -1,6 +1,4 @@
-import { Form } from '../core';
-import { TaxReturn } from '../core';
-import { Person } from '../core';
+import { Form, Person, TaxReturn } from '../core';
 import { ComputedLine, InputLine, ReferenceLine } from '../core/Line';
 import { UnsupportedFeatureError } from '../core/Errors';
 import { reduceBySum } from '../core/Math';

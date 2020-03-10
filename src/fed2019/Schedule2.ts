@@ -1,5 +1,4 @@
-import { Form } from '../core';
-import { TaxReturn } from '../core';
+import { Form, TaxReturn } from '../core';
 import { ComputedLine } from '../core/Line';
 import { UnsupportedFeatureError } from '../core/Errors';
 

@@ -1,6 +1,4 @@
-import { Form } from '../core';
-import { Person } from '../core';
-import { TaxReturn } from '../core';
+import { Form, Person, TaxReturn } from '../core';
 import { InputLine } from '../core/Line';
 
 export enum Box7Code {

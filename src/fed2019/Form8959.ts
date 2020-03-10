@@ -1,5 +1,4 @@
-import { Form } from '../core';
-import { TaxReturn } from '../core';
+import { Form, TaxReturn } from '../core';
 import { Line, AccumulatorLine, ComputedLine, ReferenceLine } from '../core/Line';
 import { clampToZero } from '../core/Math';
 
