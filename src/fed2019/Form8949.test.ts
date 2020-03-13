@@ -1,14 +1,15 @@
-import { Person, TaxReturn } from '../core';
+import { Person } from '../core';
 
 import Form1040, { FilingStatus } from './Form1040';
 import Form1099B, { GainType } from './Form1099B';
 import Form8949, { Form8949Box, Form8949Total } from './Form8949';
+import TaxReturn from './TaxReturn';
 
 describe('single form', () => {
   for (const box of [Form8949Box.A, Form8949Box.B, Form8949Box.D, Form8949Box.E]) {
     test(`box ${Form8949Box[box]}`, () => {
       const p = Person.self('A');
-      const tr = new TaxReturn(2019);
+      const tr = new TaxReturn();
       tr.addForm(new Form1040({ filingStatus: FilingStatus.Single }));
       tr.addForm(new Form1099B({
         payer: 'Brokerage',
@@ -47,7 +48,7 @@ describe('single form', () => {
 
 test('multiple forms', () => {
   const p = Person.self('A');
-  const tr = new TaxReturn(2019);
+  const tr = new TaxReturn();
   tr.addForm(new Form1040({ filingStatus: FilingStatus.Single }));
   tr.addForm(new Form1099B({
     payer: 'Brokerage',
@@ -104,7 +105,7 @@ test('multiple forms', () => {
 
 test('adjustments', () => {
   const p = Person.self('A');
-  const tr = new TaxReturn(2019);
+  const tr = new TaxReturn();
   tr.addForm(new Form1040({ filingStatus: FilingStatus.Single }));
   const b1 = new Form1099B({
     payer: 'Brokerage',

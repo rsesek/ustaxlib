@@ -1,4 +1,4 @@
-import { Person, TaxReturn } from '../core';
+import { Person } from '../core';
 import { NotFoundError } from '../core/Errors';
 
 import Form1040, { FilingStatus } from './Form1040';
@@ -7,6 +7,7 @@ import Form1116 from './Form1116';
 import Form8949 from './Form8949';
 import Schedule3 from './Schedule3';
 import ScheduleD from './ScheduleD';
+import TaxReturn from './TaxReturn';
 
 test('foreign tax credit, form 1116 not required', () => {
   const filingStatusToForeignTax = {
@@ -17,7 +18,7 @@ test('foreign tax credit, form 1116 not required', () => {
 
   for (const filingStatus of Object.values(FilingStatus)) {
     const p = Person.self('A');
-    const tr = new TaxReturn(2019);
+    const tr = new TaxReturn();
     tr.addForm(new Form1040({ filingStatus }));
     tr.addForm(new Form8949);
     tr.addForm(new ScheduleD);
@@ -45,7 +46,7 @@ test('foreign tax credit, form 1116 required', () => {
 
   for (const filingStatus of Object.values(FilingStatus)) {
     const p = Person.self('A');
-    const tr = new TaxReturn(2019);
+    const tr = new TaxReturn();
     tr.addForm(new Form1040({ filingStatus }));
     tr.addForm(new Form8949);
     tr.addForm(new ScheduleD);

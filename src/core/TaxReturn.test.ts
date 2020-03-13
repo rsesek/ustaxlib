@@ -3,19 +3,20 @@ import Person from './Person';
 import Form from './Form';
 import { NotFoundError, InconsistencyError } from './Errors';
 
-test('constructor', () => {
-  const tr = new TaxReturn(2019);
-  expect(tr.year).toBe(2019);
-});
+class TestTaxReturn extends TaxReturn {
+  get year() { return 2019; }
+
+  includeJointPersonForms = false;
+};
 
 test('does not support Dependents', () => {
-  const tr = new TaxReturn(2019);
+  const tr = new TestTaxReturn();
   const p = Person.dependent('Baby');
   expect(() => tr.addPerson(p)).toThrow('Dependents are not supported');
 });
 
 test('add more than one Self', () => {
-  const tr = new TaxReturn(2019);
+  const tr = new TestTaxReturn();
   const p1 = Person.self('A');
   tr.addPerson(p1);
   const p2 = Person.self('B');
@@ -23,7 +24,7 @@ test('add more than one Self', () => {
 });
 
 test('add more than one Spouse', () => {
-  const tr = new TaxReturn(2019);
+  const tr = new TestTaxReturn();
   const p1 = Person.spouse('A');
   tr.addPerson(p1);
   const p2 = Person.spouse('B');
@@ -31,7 +32,7 @@ test('add more than one Spouse', () => {
 });
 
 test('add Self and Spouse', () => {
-  const tr = new TaxReturn(2019);
+  const tr = new TestTaxReturn();
   const self = Person.self('Billy Bob');
   const spouse = Person.spouse('Jilly Bob');
   tr.addPerson(self);
@@ -44,7 +45,7 @@ test('add Self and Spouse', () => {
 });
 
 test('get non-existent person', () => {
-  const tr = new TaxReturn(2019);
+  const tr = new TestTaxReturn();
   const self = Person.self('Billy Bob');
   tr.addPerson(self);
 
@@ -58,7 +59,7 @@ test('single-copy forms', () => {
     protected readonly _lines = null;
   };
 
-  const tr = new TaxReturn(2019);
+  const tr = new TestTaxReturn();
   const f = new TestForm();
   tr.addForm(f);
   expect(() => tr.addForm(new TestForm)).toThrow(InconsistencyError);
@@ -73,7 +74,7 @@ test('multiple-copy forms', () => {
     protected readonly _lines = null;
   };
 
-  const tr = new TaxReturn(2019);
+  const tr = new TestTaxReturn();
   const f1 = new TestForm();
   const f2 = new TestForm();
   const f3 = new TestForm();
@@ -95,7 +96,7 @@ test('get non-existent form', () => {
     readonly name = 'Test Form';
     protected readonly _lines = null;
   }
-  const tr = new TaxReturn(2019);
+  const tr = new TestTaxReturn();
   expect(() => tr.getForm(TestForm)).toThrow(NotFoundError);
   expect(tr.findForm(TestForm)).toBeNull();
   expect(tr.findForms(TestForm)).toEqual([]);

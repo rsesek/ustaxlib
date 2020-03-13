@@ -3,6 +3,11 @@ import TaxReturn from './TaxReturn';
 import Form, { isFormT } from './Form';
 import { InconsistencyError, NotFoundError } from './Errors';
 
+class TestTaxReturn extends TaxReturn {
+  get year() { return 2019; }
+  get includeJointPersonForms() { return true; }
+};
+
 test('add and get line', () => {
   const l = new ComputedLine<number>(() => 42);
 
@@ -55,7 +60,7 @@ test('get value', () => {
   };
 
   const f = new TestForm();
-  const tr = new TaxReturn(2019);
+  const tr = new TestTaxReturn();
   expect(f.getValue(tr, 'line')).toBe(42);
 
   //TYPEERROR:

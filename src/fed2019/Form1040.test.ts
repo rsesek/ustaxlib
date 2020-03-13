@@ -1,4 +1,4 @@
-import { Person, TaxReturn } from '../core';
+import { Person } from '../core';
 import { NotFoundError } from '../core/Errors';
 
 import Form1040, { FilingStatus } from './Form1040';
@@ -11,12 +11,13 @@ import ScheduleD, { ScheduleDTaxWorksheet } from './ScheduleD';
 import Form8606 from './Form8606';
 import Form8959 from './Form8959';
 import Form8949 from './Form8949';
+import TaxReturn from './TaxReturn';
 import W2 from './W2';
 
 test('w2 wages', () => {
   const pa = Person.self('A');
   const pb = Person.spouse('B');
-  const tr = new TaxReturn(2019);
+  const tr = new TaxReturn();
   tr.addForm(new W2({
     employer: 'AA',
     employee: pa,
@@ -40,7 +41,7 @@ test('w2 wages', () => {
 
 test('interest income', () => {
   const p = Person.self('A');
-  const tr = new TaxReturn(2019);
+  const tr = new TaxReturn();
   tr.addForm(new Form1099INT({
     payer: 'Bank',
     payee: p,
@@ -63,7 +64,7 @@ test('interest income', () => {
 
 test('dividend income', () => {
   const p = Person.self('A');
-  const tr = new TaxReturn(2019);
+  const tr = new TaxReturn();
   const f1099div = new Form1099DIV({
     payer: 'Brokerage',
     payee: p,
@@ -83,7 +84,7 @@ test('dividend income', () => {
 
 test('capital gain/loss', () => {
   const p = Person.self('A');
-  const tr = new TaxReturn(2019);
+  const tr = new TaxReturn();
   tr.addForm(new Form1040({ filingStatus: FilingStatus.Single }));
   tr.addForm(new W2({
     employer: 'Money',
@@ -108,7 +109,7 @@ test('capital gain/loss', () => {
 
 test('require Form8959', () => {
   const p = Person.self('A');
-  const tr = new TaxReturn(2019);
+  const tr = new TaxReturn();
   tr.addForm(new W2({
     employer: 'Company',
     employee: p,
@@ -128,7 +129,7 @@ test('require Form8959', () => {
 
 test('backdoor and megabackdoor roth', () => {
   const p = Person.self('A');
-  const tr = new TaxReturn(2019);
+  const tr = new TaxReturn();
   tr.addForm(new Form1099R({
     payer: 'Roth',
     payee: p,

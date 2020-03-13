@@ -1,4 +1,4 @@
-import { Person, TaxReturn } from '../core';
+import { Person } from '../core';
 
 import W2 from './W2';
 import Form1040, { FilingStatus } from './Form1040';
@@ -10,6 +10,7 @@ import Form8959 from './Form8959';
 import Form8960 from './Form8960';
 import Schedule2 from './Schedule2';
 import ScheduleD from './ScheduleD';
+import TaxReturn from './TaxReturn';
 
 describe('net investment income tax', () => {
   const filingStatusToResult = {
@@ -21,7 +22,7 @@ describe('net investment income tax', () => {
   for (const filingStatus of Object.values(FilingStatus)) {
     test(`filing status ${filingStatus}`, () => {
       const p = Person.self('A');
-      const tr = new TaxReturn(2019);
+      const tr = new TaxReturn();
       tr.addForm(new Form1040({ filingStatus }));
       tr.addForm(new Form1099DIV({
         payer: 'Brokerage',
@@ -81,7 +82,7 @@ describe('no net investment income tax', () => {
   for (const filingStatus of Object.values(FilingStatus)) {
     test(`filing status ${filingStatus}`, () => {
       const p = Person.self('A');
-      const tr = new TaxReturn(2019);
+      const tr = new TaxReturn();
       tr.addForm(new Form1040({ filingStatus }));
       tr.addForm(new Form1099DIV({
         payer: 'Brokerage',

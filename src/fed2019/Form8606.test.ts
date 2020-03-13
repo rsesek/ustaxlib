@@ -1,11 +1,12 @@
-import { Person, TaxReturn } from '../core';
+import { Person } from '../core';
 
 import Form1040, { FilingStatus } from './Form1040';
 import Form8606 from './Form8606';
+import TaxReturn from './TaxReturn';
 
 test('skip part 1', () => {
   const p = Person.self('A');
-  const tr = new TaxReturn(2019);
+  const tr = new TaxReturn();
   const f = new Form8606({
     person: p,
     nondeductibleContributions: 6000,
@@ -19,7 +20,7 @@ test('skip part 1', () => {
 
 test('Roth conversion no basis', () => {
   const p = Person.self('A');
-  const tr = new TaxReturn(2019);
+  const tr = new TaxReturn();
   const f = new Form8606({
     person: p,
     nondeductibleContributions: 6000,

@@ -1,12 +1,13 @@
-import { Person, TaxReturn } from '../core';
+import { Person } from '../core';
 import { UnsupportedFeatureError } from '../core/Errors';
 
 import Form1040, { FilingStatus } from './Form1040';
 import Schedule1, { Schedule1Input } from './Schedule1';
+import TaxReturn from './TaxReturn';
 
 test('state tax refund', () => {
   const p = Person.self('A');
-  const tr = new TaxReturn(2019);
+  const tr = new TaxReturn();
   tr.addForm(new Form1040({
     filingStatus: FilingStatus.Single
   }));
@@ -33,7 +34,7 @@ test('unsupported inputs', () => {
   ];
   for (const input of keys) {
     const p = Person.self('A');
-    const tr = new TaxReturn(2019);
+    const tr = new TaxReturn();
     const f = new Schedule1({
       [input]: 100
     });

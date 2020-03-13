@@ -3,6 +3,11 @@ import Form, { FormClass } from './Form';
 import TaxReturn from './TaxReturn';
 import { NotFoundError } from './Errors';
 
+class TestTaxReturn extends TaxReturn {
+  get year() { return 2019; }
+  get includeJointPersonForms() { return false; }
+};
+
 class ConstantLine<T> extends Line<T> {
   private _k: T;
 
@@ -17,7 +22,7 @@ class ConstantLine<T> extends Line<T> {
 };
 
 test('computed line', () => {
-  const tr = new TaxReturn(2019);
+  const tr = new TestTaxReturn();
   const l = new ComputedLine<number>(
     (taxReturn: TaxReturn): number => {
       expect(taxReturn).toBe(tr);
@@ -37,7 +42,7 @@ test('reference line', () => {
     };
   };
 
-  const tr = new TaxReturn(2019);
+  const tr = new TestTaxReturn();
   tr.addForm(new TestForm());
 
   const l1 = new ReferenceLine(TestForm, '6b');
@@ -71,7 +76,7 @@ test('self reference line', () => {
     };
   };
 
-  const tr = new TaxReturn(2019);
+  const tr = new TestTaxReturn();
   const f = new TestForm();
   tr.addForm(f);
   tr.addForm(new OtherForm());
@@ -95,7 +100,7 @@ test('input line', () => {
       '3': new InputLine<Input>('key2', undefined, 'FALLBACK')
     };
   };
-  const tr = new TaxReturn(2019);
+  const tr = new TestTaxReturn();
   const f = new TestForm({ 'key': 'value' });
   tr.addForm(f);
 
@@ -125,7 +130,7 @@ test('line stack', () => {
     };
   };
 
-  const tr = new TaxReturn(2019);
+  const tr = new TestTaxReturn();
   tr.addForm(new FormZ({ 'input': 100 }));
   tr.addForm(new FormZ2());
 
@@ -142,7 +147,7 @@ test('accumulator line', () => {
     };
   };
 
-  const tr = new TaxReturn(2019);
+  const tr = new TestTaxReturn();
   tr.addForm(new TestForm());
   tr.addForm(new TestForm());
   tr.addForm(new TestForm());

@@ -2,19 +2,13 @@ import Form, { FormClass, isFormT } from './Form';
 import Person, { Relation } from './Person';
 import { NotFoundError, InconsistencyError, UnsupportedFeatureError } from './Errors';
 
-export default class TaxReturn {
-  private _year: number;
-
+export default abstract class TaxReturn {
   private _people: Person[] = [];
   private _forms: Form<any, unknown>[] = [];
 
-  constructor(year: number) {
-    this._year = year;
-  }
+  abstract get year(): number;
 
-  get year(): number {
-    return this._year;
-  }
+  abstract get includeJointPersonForms(): boolean;
 
   get forms(): Form<any, unknown>[] {
     return [...this._forms];

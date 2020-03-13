@@ -1,4 +1,4 @@
-import { Person, TaxReturn } from '../core';
+import { Person } from '../core';
 import { UnsupportedFeatureError } from '../core/Errors';
 
 import Form1040, { FilingStatus } from './Form1040';
@@ -7,11 +7,12 @@ import Form1099B, { GainType } from './Form1099B';
 import Form1099DIV from './Form1099DIV';
 import Form8949 from './Form8949';
 import W2 from './W2';
+import TaxReturn from './TaxReturn';
 import ScheduleD from './ScheduleD';
 
 test('supported income category', () => {
   const p = Person.self('A');
-  const tr = new TaxReturn(2019);
+  const tr = new TaxReturn();
   const f = new Form1116({
     person: p,
     incomeCategory: ForeignIncomeCategory.C,
@@ -29,7 +30,7 @@ test('unsupported income categories', () => {
       continue;
 
     const p = Person.self('B');
-    const tr = new TaxReturn(2019);
+    const tr = new TaxReturn();
     const f = new Form1116({
       person: p,
       incomeCategory: category,
@@ -44,7 +45,7 @@ test('unsupported income categories', () => {
 
 test('foreign tax credit', () => {
   const p = Person.self('A');
-  const tr = new TaxReturn(2019);
+  const tr = new TaxReturn();
   tr.addForm(new Form1040({
     filingStatus: FilingStatus.MarriedFilingJoint
   }));
@@ -84,7 +85,7 @@ test('foreign tax credit', () => {
 
 test('no net capital losses in total income', () => {
   const p = Person.self('A');
-  const tr = new TaxReturn(2019);
+  const tr = new TaxReturn();
   tr.addForm(new Form1040({
     filingStatus: FilingStatus.MarriedFilingJoint
   }));
