@@ -7,6 +7,7 @@ import TaxReturn from './TaxReturn';
 test('skip part 1', () => {
   const p = Person.self('A');
   const tr = new TaxReturn();
+  tr.addPerson(p);
   const f = new Form8606({
     person: p,
     nondeductibleContributions: 6000,
@@ -21,6 +22,7 @@ test('skip part 1', () => {
 test('Roth conversion no basis', () => {
   const p = Person.self('A');
   const tr = new TaxReturn();
+  tr.addPerson(p);
   const f = new Form8606({
     person: p,
     nondeductibleContributions: 6000,

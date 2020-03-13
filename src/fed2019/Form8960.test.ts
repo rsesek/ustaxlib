@@ -23,6 +23,7 @@ describe('net investment income tax', () => {
     test(`filing status ${filingStatus}`, () => {
       const p = Person.self('A');
       const tr = new TaxReturn();
+      tr.addPerson(p);
       tr.addForm(new Form1040({ filingStatus }));
       tr.addForm(new Form1099DIV({
         payer: 'Brokerage',
@@ -83,6 +84,7 @@ describe('no net investment income tax', () => {
     test(`filing status ${filingStatus}`, () => {
       const p = Person.self('A');
       const tr = new TaxReturn();
+      tr.addPerson(p);
       tr.addForm(new Form1040({ filingStatus }));
       tr.addForm(new Form1099DIV({
         payer: 'Brokerage',

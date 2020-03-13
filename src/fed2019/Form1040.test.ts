@@ -18,6 +18,8 @@ test('w2 wages', () => {
   const pa = Person.self('A');
   const pb = Person.spouse('B');
   const tr = new TaxReturn();
+  tr.addPerson(pa);
+  tr.addPerson(pb);
   tr.addForm(new W2({
     employer: 'AA',
     employee: pa,
@@ -42,6 +44,7 @@ test('w2 wages', () => {
 test('interest income', () => {
   const p = Person.self('A');
   const tr = new TaxReturn();
+  tr.addPerson(p);
   tr.addForm(new Form1099INT({
     payer: 'Bank',
     payee: p,
@@ -65,6 +68,7 @@ test('interest income', () => {
 test('dividend income', () => {
   const p = Person.self('A');
   const tr = new TaxReturn();
+  tr.addPerson(p);
   const f1099div = new Form1099DIV({
     payer: 'Brokerage',
     payee: p,
@@ -85,6 +89,7 @@ test('dividend income', () => {
 test('capital gain/loss', () => {
   const p = Person.self('A');
   const tr = new TaxReturn();
+  tr.addPerson(p);
   tr.addForm(new Form1040({ filingStatus: FilingStatus.Single }));
   tr.addForm(new W2({
     employer: 'Money',
@@ -110,6 +115,7 @@ test('capital gain/loss', () => {
 test('require Form8959', () => {
   const p = Person.self('A');
   const tr = new TaxReturn();
+  tr.addPerson(p);
   tr.addForm(new W2({
     employer: 'Company',
     employee: p,
@@ -130,6 +136,7 @@ test('require Form8959', () => {
 test('backdoor and megabackdoor roth', () => {
   const p = Person.self('A');
   const tr = new TaxReturn();
+  tr.addPerson(p);
   tr.addForm(new Form1099R({
     payer: 'Roth',
     payee: p,

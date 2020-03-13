@@ -86,6 +86,7 @@ test('foreign tax credit', () => {
 test('no net capital losses in total income', () => {
   const p = Person.self('A');
   const tr = new TaxReturn();
+  tr.addPerson(p);
   tr.addForm(new Form1040({
     filingStatus: FilingStatus.MarriedFilingJoint
   }));

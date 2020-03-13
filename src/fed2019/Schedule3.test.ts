@@ -19,6 +19,7 @@ test('foreign tax credit, form 1116 not required', () => {
   for (const filingStatus of Object.values(FilingStatus)) {
     const p = Person.self('A');
     const tr = new TaxReturn();
+    tr.addPerson(p);
     tr.addForm(new Form1040({ filingStatus }));
     tr.addForm(new Form8949);
     tr.addForm(new ScheduleD);
@@ -47,6 +48,7 @@ test('foreign tax credit, form 1116 required', () => {
   for (const filingStatus of Object.values(FilingStatus)) {
     const p = Person.self('A');
     const tr = new TaxReturn();
+    tr.addPerson(p);
     tr.addForm(new Form1040({ filingStatus }));
     tr.addForm(new Form8949);
     tr.addForm(new ScheduleD);

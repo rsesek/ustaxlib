@@ -20,6 +20,8 @@ export default class Form8606 extends Form<Form8606['_lines'], Form8606Input> {
 
   readonly supportsMultipleCopies = true;
 
+  person() { return this.getInput('person'); }
+
   protected readonly _lines = {
     'person': new Input('person'),
 

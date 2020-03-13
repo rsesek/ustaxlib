@@ -29,6 +29,8 @@ export default class Form1099DIV extends Form<Form1099DIV['_lines'], Form1099DIV
 
   readonly supportsMultipleCopies = true;
 
+  person() { return this.getInput('payee'); }
+
   protected readonly _lines = {
     'payer': new Input('payer'),
     'recipient': new Input('payee'),

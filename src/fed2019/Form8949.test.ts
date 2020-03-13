@@ -10,6 +10,7 @@ describe('single form', () => {
     test(`box ${Form8949Box[box]}`, () => {
       const p = Person.self('A');
       const tr = new TaxReturn();
+      tr.addPerson(p);
       tr.addForm(new Form1040({ filingStatus: FilingStatus.Single }));
       tr.addForm(new Form1099B({
         payer: 'Brokerage',
@@ -49,6 +50,7 @@ describe('single form', () => {
 test('multiple forms', () => {
   const p = Person.self('A');
   const tr = new TaxReturn();
+  tr.addPerson(p);
   tr.addForm(new Form1040({ filingStatus: FilingStatus.Single }));
   tr.addForm(new Form1099B({
     payer: 'Brokerage',
@@ -106,6 +108,7 @@ test('multiple forms', () => {
 test('adjustments', () => {
   const p = Person.self('A');
   const tr = new TaxReturn();
+  tr.addPerson(p);
   tr.addForm(new Form1040({ filingStatus: FilingStatus.Single }));
   const b1 = new Form1099B({
     payer: 'Brokerage',

@@ -26,6 +26,8 @@ export default class Form1099INT extends Form<Form1099INT['_lines'], Form1099INT
 
   readonly supportsMultipleCopies = true;
 
+  person() { return this.getInput('payee'); }
+
   protected readonly _lines = {
     'payer': new Input('payer'),
     'recipient': new Input('payee'),
