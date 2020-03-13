@@ -8,6 +8,8 @@ export default class Person {
   private _name: string;
   private _relation: Relation;
 
+  static joint = Symbol('Joint') as unknown as Person;
+
   constructor(name: string, relation: Relation) {
     this._name = name;
     this._relation = relation;

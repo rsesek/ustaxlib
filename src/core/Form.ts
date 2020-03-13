@@ -1,3 +1,4 @@
+import Person from './Person';
 import TaxReturn from './TaxReturn';
 import { Line } from './Line';
 import { InconsistencyError, NotFoundError } from './Errors';
@@ -26,6 +27,10 @@ export default abstract class Form<L extends { [key: string]: Line<any> },
       l._id = id;
       l.form = this;
     }
+  }
+
+  person(): Person | undefined {
+    return undefined;
   }
 
   getLine<K extends keyof L>(id: K): L[K] {

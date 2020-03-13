@@ -101,3 +101,53 @@ test('get non-existent form', () => {
   expect(tr.findForm(TestForm)).toBeNull();
   expect(tr.findForms(TestForm)).toEqual([]);
 });
+
+class PerPersonForm extends Form<PerPersonForm['_lines']> {
+  private _person?: Person;
+
+  readonly name = 'Per Person';
+
+  readonly supportsMultipleCopies = true;
+
+  protected readonly _lines = {};
+
+  constructor(person?: Person) {
+    super(undefined);
+    this._person = person;
+  }
+
+  person() { return this._person; }
+};
+
+test('find forms for person', () => {
+  const p1 = Person.self('1');
+  const p2 = Person.spouse('2');
+
+  const addFormsToTaxReturn = (tr) => {
+    tr.addForm(new PerPersonForm(undefined));
+    tr.addForm(new PerPersonForm(undefined));
+    tr.addForm(new PerPersonForm(p1));
+    tr.addForm(new PerPersonForm(p2));
+    tr.addForm(new PerPersonForm(p2));
+    tr.addForm(new PerPersonForm(Person.joint));
+  };
+
+  const mfsp1 = new TestTaxReturn();
+  mfsp1.includeJointPersonForms = false;
+  mfsp1.addPerson(p1);
+  addFormsToTaxReturn(mfsp1);
+  expect(mfsp1.findForms(PerPersonForm).length).toBe(3);
+
+  const mfsp2 = new TestTaxReturn();
+  mfsp2.includeJointPersonForms = false;
+  mfsp2.addPerson(p2);
+  addFormsToTaxReturn(mfsp2);
+  expect(mfsp2.findForms(PerPersonForm).length).toBe(4);
+
+  const mfj = new TestTaxReturn();
+  mfj.includeJointPersonForms = true;
+  mfj.addPerson(p1);
+  mfj.addPerson(p2);
+  addFormsToTaxReturn(mfj);
+  expect(mfj.findForms(PerPersonForm).length).toBe(6);
+});

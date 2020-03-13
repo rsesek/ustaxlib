@@ -56,7 +56,18 @@ export default abstract class TaxReturn {
   }
 
   findForms<T extends Form<any>>(cls: FormClass<T>): T[] {
-    const forms: T[] = this._forms.filter((form: Form<any>): form is T => isFormT(form, cls));
+    const forms: T[] = this._forms
+        .filter((form: Form<any>): form is T => isFormT(form, cls))
+        .filter((form: T) => {
+          const person = form.person();
+          if (person === undefined)
+            return true;
+
+          if (person == Person.joint && this.includeJointPersonForms)
+            return true;
+
+          return this._people.includes(form.person());
+        });
     return forms;
   }
 
