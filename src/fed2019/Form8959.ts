@@ -17,7 +17,7 @@ export default class Form8959 extends Form<Form8959['_lines']> {
       return this.getValue(tr, '1');
     }),
     '5': new ComputedLine((tr): number => {
-      return Form8959.filingStatusLimit(tr.getForm(Form1040).getInput('filingStatus'));
+      return Form8959.filingStatusLimit(tr.getForm(Form1040).filingStatus);
     }),
     '6': new ComputedLine((tr): number => {
       return clampToZero(this.getValue(tr, '4') - this.getValue(tr, '5'));

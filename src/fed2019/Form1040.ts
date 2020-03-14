@@ -77,7 +77,7 @@ export default class Form1040 extends Form<Form1040['_lines'], Form1040Input> {
 
     '9': new ComputedLine((): number => {
       // TODO - Itemized deductions.
-      switch (this.getInput('filingStatus')) {
+      switch (this.filingStatus) {
         case FilingStatus.Single:
         case FilingStatus.MarriedFilingSeparate:
           return 12200;
@@ -89,7 +89,7 @@ export default class Form1040 extends Form<Form1040['_lines'], Form1040Input> {
     '10': new ComputedLine((tr): number => {
       const taxableIncome = this.getValue(tr, '8b');
       let use8995a = false;
-      switch (this.getInput('filingStatus')) {
+      switch (this.filingStatus) {
         case FilingStatus.Single:                use8995a = taxableIncome <= 160700; break;
         case FilingStatus.MarriedFilingSeparate: use8995a = taxableIncome <= 160725; break;
         case FilingStatus.MarriedFilingJoint:    use8995a = taxableIncome <= 321400; break;
@@ -117,7 +117,7 @@ export default class Form1040 extends Form<Form1040['_lines'], Form1040Input> {
       if (schedD)
         return schedD.getValue(tr, '47');
 
-      return computeTax(taxableIncome, this.getInput('filingStatus'));
+      return computeTax(taxableIncome, this.filingStatus);
     }, 'Tax'),
 
     '12b': new ComputedLine((tr): number => {
@@ -176,7 +176,11 @@ export default class Form1040 extends Form<Form1040['_lines'], Form1040Input> {
     '23': new ComputedLine((tr): number => {
       return clampToZero(this.getValue(tr, '16') - this.getValue(tr, '19'));
     }, 'Amount you owe'),
-  };
+  }
+
+  get filingStatus(): FilingStatus {
+    return this.getInput('filingStatus');
+  }
 };
 
 export function computeTax(income: number, filingStatus: FilingStatus): number {

@@ -71,7 +71,7 @@ export default class ScheduleD extends Form<ScheduleD['_lines']> {
     '21': new ComputedLine((tr): number | undefined => {
       if (!this.getValue(tr, '17') || !this.getValue(tr, '20'))
         return undefined;
-      const filingStatus = tr.getForm(Form1040).getInput('filingStatus');
+      const filingStatus = tr.getForm(Form1040).filingStatus;
       const limit = filingStatus == FilingStatus.MarriedFilingSeparate ? -1500 : -3000;
       return Math.min(this.getValue(tr, '16'), limit);
     }, 'Net capital loss'),
@@ -107,7 +107,7 @@ export class ScheduleDTaxWorksheet extends Form<ScheduleDTaxWorksheet['_lines']>
     '13': new ComputedLine((tr): number => this.getValue(tr, '10') - this.getValue(tr, '12')),
     '14': new ComputedLine((tr): number => clampToZero(this.getValue(tr, '1') - this.getValue(tr, '13'))),
     '15': new ComputedLine((tr): number => {
-      switch (tr.getForm(Form1040).getInput('filingStatus')) {
+      switch (tr.getForm(Form1040).filingStatus) {
         case FilingStatus.Single:
         case FilingStatus.MarriedFilingSeparate:
           return 39375;
@@ -120,7 +120,7 @@ export class ScheduleDTaxWorksheet extends Form<ScheduleDTaxWorksheet['_lines']>
     '18': new ComputedLine((tr): number => clampToZero(this.getValue(tr, '1') - this.getValue(tr, '10'))),
     '19': new ComputedLine((tr): number => {
       let threshold: number;
-      switch (tr.getForm(Form1040).getInput('filingStatus')) {
+      switch (tr.getForm(Form1040).filingStatus) {
         case FilingStatus.Single:
         case FilingStatus.MarriedFilingSeparate:
           threshold = 160725;
@@ -138,7 +138,7 @@ export class ScheduleDTaxWorksheet extends Form<ScheduleDTaxWorksheet['_lines']>
     '24': new ReferenceLine(ScheduleDTaxWorksheet as any, '22'),
     '25': new ComputedLine((tr): number => clampToZero(this.getValue(tr, '23') - this.getValue(tr, '24'))),
     '26': new ComputedLine((tr): number => {
-      switch (tr.getForm(Form1040).getInput('filingStatus')) {
+      switch (tr.getForm(Form1040).filingStatus) {
         case FilingStatus.Single:
           return 434550;
         case FilingStatus.MarriedFilingSeparate:
@@ -183,7 +183,7 @@ export class ScheduleDTaxWorksheet extends Form<ScheduleDTaxWorksheet['_lines']>
     }),
     '44': new ComputedLine((tr): number => {
       const income = this.getValue(tr, '21');
-      return computeTax(income, tr.getForm(Form1040).getInput('filingStatus'));
+      return computeTax(income, tr.getForm(Form1040).filingStatus);
     }),
     '45': new ComputedLine((tr): number => {
       return this.getValue(tr, '31') +
@@ -194,7 +194,7 @@ export class ScheduleDTaxWorksheet extends Form<ScheduleDTaxWorksheet['_lines']>
     }),
     '46': new ComputedLine((tr): number => {
       const income = this.getValue(tr, '1');
-      return computeTax(income, tr.getForm(Form1040).getInput('filingStatus'));
+      return computeTax(income, tr.getForm(Form1040).filingStatus);
     }),
     '47': new ComputedLine((tr): number => Math.min(this.getValue(tr, '45'), this.getValue(tr, '46'))),
   };

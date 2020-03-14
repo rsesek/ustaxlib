@@ -51,7 +51,7 @@ export default class Form8960 extends Form<Form8960['_lines']> {
     '12': new ComputedLine((tr): number => this.getValue(tr, '8') - this.getValue(tr, '11'), 'Net investment income'),
     '13': new ReferenceLine(Form1040, '8b', 'Modified adjusted gross income'),
     '14': new ComputedLine((tr): number => {
-      return Form8960.filingStatusLimit(tr.getForm(Form1040).getInput('filingStatus'));
+      return Form8960.filingStatusLimit(tr.getForm(Form1040).filingStatus);
     }, 'Threshold'),
     '15': new ComputedLine((tr): number => clampToZero(this.getValue(tr, '13') - this.getValue(tr, '14'))),
     '16': new ComputedLine((tr): number => Math.min(this.getValue(tr, '12'), this.getValue(tr, '15'))),

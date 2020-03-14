@@ -17,7 +17,7 @@ export default class Schedule2 extends Form<Schedule2['_lines']> {
       // income
       const f1040 = tr.getForm(Form1040);
       const taxableIncome = f1040.getValue(tr, '11b');
-      switch (f1040.getInput('filingStatus')) {
+      switch (f1040.filingStatus) {
         case FilingStatus.Single:
           if (taxableIncome < 510300)
             return 0;
@@ -43,7 +43,7 @@ export default class Schedule2 extends Form<Schedule2['_lines']> {
     '8': new ComputedLine((tr): number => {
       const f1040 = tr.getForm(Form1040);
       const wages = f1040.getLine('1').value(tr);
-      const filingStatus = f1040.getInput('filingStatus');
+      const filingStatus = f1040.filingStatus;
 
       let value = 0;
 
