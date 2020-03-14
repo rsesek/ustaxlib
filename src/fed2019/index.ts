@@ -1,3 +1,8 @@
+// Copyright 2020 Blue Static <https://www.bluestatic.org>
+// This program is free software licensed under the GNU General Public License,
+// version 3.0. The full text of the license can be found in LICENSE.txt.
+// SPDX-License-Identifier: GPL-3.0-only
+
 export { default as Form1040 } from './Form1040';
 export { default as Form1099B } from './Form1099B';
 export { default as Form1099DIV } from './Form1099DIV';
