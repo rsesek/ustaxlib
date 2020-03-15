@@ -4,6 +4,7 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
 import TaxReturn from './TaxReturn';
+import Trace from './Trace';
 import Form, { FormClass } from './Form';
 
 export abstract class Line<T> {
@@ -38,7 +39,10 @@ export class ComputedLine<T> extends Line<T> {
   }
 
   value(tr: TaxReturn): T {
-    return this._compute(tr);
+    const trace = new Trace(this);
+    const value = this._compute(tr);
+    trace.end();
+    return value;
   }
 };
 
@@ -61,10 +65,14 @@ export class ReferenceLine<F extends Form<any>,
   }
 
   value(tr: TaxReturn): T {
+    const trace = new Trace(this);
     const form: F = tr.findForm(this._form);
-    if (this._fallback !== undefined && !form)
+    if (this._fallback !== undefined && !form) {
+      trace.end();
       return this._fallback;
+    }
     const value: T = form.getValue(tr, this._line);
+    trace.end();
     return value;
   }
 };
@@ -82,9 +90,14 @@ export class InputLine<U = unknown, T extends keyof U = any> extends Line<U[T]> 
   }
 
   value(tr: TaxReturn): U[T] {
-    if (!this.form.hasInput(this._input) && this._fallback !== undefined)
+    const trace = new Trace(this);
+    if (!this.form.hasInput(this._input) && this._fallback !== undefined) {
+      trace.end();
       return this._fallback;
-    return this.form.getInput<T>(this._input);
+    }
+    const value = this.form.getInput<T>(this._input);
+    trace.end();
+    return value;
   }
 };
 
@@ -95,14 +108,17 @@ export class AccumulatorLine<F extends Form<any>,
   private _line: L;
 
   constructor(form: FormClass<F>, line: L, description?: string) {
-    super(description || `Accumulator F${form}.L${line}`);
+    super(description || `Accumulator F${form.name}.L${line}`);
     this._form = form;
     this._line = line;
   }
 
   value(tr): number {
+    const trace = new Trace(this);
     const forms: F[] = tr.findForms(this._form);
-    return sumLineOfForms(tr, forms, this._line);
+    const value = sumLineOfForms(tr, forms, this._line);
+    trace.end();
+    return value;
   }
 };
 
