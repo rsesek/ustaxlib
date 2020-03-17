@@ -3,7 +3,7 @@
 // version 3.0. The full text of the license can be found in LICENSE.txt.
 // SPDX-License-Identifier: GPL-3.0-only
 
-import Trace from '../core/Trace';
+import * as Trace from '../core/Trace';
 import { Form, Person, TaxReturn } from '../core';
 import { Line, InputLine, ComputedLine, sumLineOfForms } from '../core/Line';
 
@@ -65,7 +65,7 @@ class Form8949Line extends Line<Form8949Total> {
   }
 
   value(tr: TaxReturn): Form8949Total {
-    const trace = new Trace(this);
+    Trace.begin(this);
     const f1099bs = matching1099Bs(tr, this._box);
     const proceeds = sumLineOfForms(tr, f1099bs, '1d');
     const costBasis = sumLineOfForms(tr, f1099bs, '1e');
@@ -74,7 +74,7 @@ class Form8949Line extends Line<Form8949Total> {
         f8949.getInput('adjustments')
           .filter(a => f1099bs.includes(a.entry))
           .reduce((acc, curr) => acc + curr.amount, 0);
-    trace.end();
+    Trace.end();
     return {
       proceeds,
       costBasis,

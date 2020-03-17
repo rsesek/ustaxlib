@@ -5,66 +5,58 @@
 
 import { Line } from './Line';
 
-var current: Trace = null;
-
-var traces: Trace[] = [];
-
 export type Edge = [string, string];
 
-export default class Trace {
-  private _edges: { [key: string]: Edge } = {};
-  private _stack: string[] = [];
-  private _name: string;
+type Trace = { [key: string]: Edge };
 
-  constructor(line: Line<any>) {
-    this._name = this._formatLine(line);
+var stack: string[] = [];
 
-    if (current === null)
-      current = this;
+var current: Trace = null;
+var previous: Trace = null;
 
-    if (current._stack.length != 0) {
-      current._addEdge([ current._previousEdge(), this._name ]);
-    }
+export function begin(line: Line<any>) {
+  const name = formatLine(line);
 
-    current._stack.push(this._name);
+  if (current === null)
+    current = {} as Trace;
+
+  if (stack.length != 0)
+    addEdge([ previousEdge(), name ]);
+
+  stack.push(name);
+}
+
+export function mark(id: string) {
+  if (current === null)
+    return;
+  addEdge([ previousEdge(), id ]);
+}
+
+export function end() {
+  stack.pop();
+  if (stack.length == 0) {
+    previous = current;
+    current = null;
   }
-
-  static add(id: string) {
-    if (current === null)
-      return;
-    current._addEdge([ current._previousEdge(), id ]);
-  }
-
-  end() {
-    current._stack.pop();
-    if (current === this) {
-      current = null;
-      traces.push(this);
-    }
-  }
-
-  get traceList(): readonly Edge[] {
-    return Object.values(this._edges);
-  }
-
-  private _addEdge(e: Edge) {
-    this._edges[`${e[0]}|${e[1]}`] = e;
-  }
-
-  private _previousEdge(): string {
-    return this._stack[this._stack.length - 1];
-  }
-
-  private _formatLine(line: Line<any>): string {
-    const description = line.description ? ` (${line.description})` : '';
-    if (line.form === undefined)
-      return `${line.constructor.name}${description}`;
-    return `${line.form.name}-${line.id}${description}`;
-  }
-};
+}
 
 export function getLastTraceList(): readonly Edge[] {
-  if (traces.length == 0)
+  if (previous === null)
     return null;
-  return traces[traces.length - 1].traceList;
+  return Object.values(previous);
+}
+
+function addEdge(e: Edge) {
+  current[`${e[0]}|${e[1]}`] = e;
+}
+
+function previousEdge(): string {
+  return stack[stack.length - 1];
+}
+
+function formatLine(line: Line<any>): string {
+  const description = line.description ? ` (${line.description})` : '';
+  if (line.form === undefined)
+    return `${line.constructor.name}${description}`;
+  return `${line.form.name}-${line.id}${description}`;
 }

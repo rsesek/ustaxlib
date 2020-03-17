@@ -6,7 +6,7 @@
 import Form from './Form';
 import TaxReturn from './TaxReturn';
 import { ComputedLine, InputLine, ReferenceLine } from './Line';
-import Trace, { Edge, getLastTraceList } from './Trace';
+import { Edge, getLastTraceList } from './Trace';
 
 class TestTaxReturn extends TaxReturn {
   get year() { return 2019; }

@@ -5,7 +5,7 @@
 
 import Person from './Person';
 import TaxReturn from './TaxReturn';
-import Trace from './Trace';
+import * as Trace from './Trace';
 import { Line } from './Line';
 import { InconsistencyError, NotFoundError } from './Errors';
 
@@ -54,7 +54,7 @@ export default abstract class Form<L extends { [key: string]: Line<any> },
     if (!(name in this._input)) {
       throw new NotFoundError(`No input with key ${name} on form ${this.name}`);
     }
-    Trace.add(`${this.name} input: ${name}`);
+    Trace.mark(`${this.name} input: ${name}`);
     return this._input[name];
   }
 
