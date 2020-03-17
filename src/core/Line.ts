@@ -58,7 +58,7 @@ export class ReferenceLine<F extends Form<any>,
   // the one the Line is in, erase |form|'s type with |as any| to
   // keep TypeScript happy.
   constructor(form: FormClass<F>, line: L, description?: string, fallback?: T) {
-    super(description || `Reference F${form.name}.L${line}`);
+    super(description || `Reference ${form.name}-${line}`);
     this._form = form;
     this._line = line;
     this._fallback = fallback;
@@ -108,7 +108,7 @@ export class AccumulatorLine<F extends Form<any>,
   private _line: L;
 
   constructor(form: FormClass<F>, line: L, description?: string) {
-    super(description || `Accumulator F${form.name}.L${line}`);
+    super(description || `Accumulator ${form.name}-${line}`);
     this._form = form;
     this._line = line;
   }

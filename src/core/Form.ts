@@ -54,7 +54,7 @@ export default abstract class Form<L extends { [key: string]: Line<any> },
     if (!(name in this._input)) {
       throw new NotFoundError(`No input with key ${name} on form ${this.name}`);
     }
-    Trace.add(`${this.name}-input-${name}`);
+    Trace.add(`${this.name} input: ${name}`);
     return this._input[name];
   }
 
