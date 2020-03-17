@@ -42,6 +42,10 @@ export default class W2 extends Form<W2['_lines'], W2Input> {
 
   readonly supportsMultipleCopies = true;
 
+  person(): Person {
+    return this.getInput('employee');
+  }
+
   protected readonly _lines = {
     'c': new Input('employer', 'Employer name'),
     'e': new Input('employee', 'Emplyee name'),
