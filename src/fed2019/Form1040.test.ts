@@ -91,6 +91,28 @@ test('dividend income', () => {
   expect(f1040.getValue(tr, '3b')).toBe(200);
 });
 
+test('tax-exempt interest', () => {
+  const p = Person.self('A');
+  const tr = new TaxReturn();
+  tr.addPerson(p);
+  tr.addForm(new Form1099DIV({
+    payer: 'Brokerage',
+    payee: p,
+    exemptInterestDividends: 100,
+  }));
+  tr.addForm(new Form1099INT({
+    payer: 'Bank',
+    payee: p,
+    interest: 0,
+    taxExemptInterest: 50
+  }));
+
+  const f1040 = new Form1040();
+  tr.addForm(f1040);
+
+  expect(f1040.getValue(tr, '2a')).toBe(150);
+});
+
 test('capital gain/loss', () => {
   const p = Person.self('A');
   const tr = new TaxReturn();
