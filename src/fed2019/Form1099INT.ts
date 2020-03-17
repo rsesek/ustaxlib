@@ -38,7 +38,7 @@ export default class Form1099INT extends Form<Form1099INT['_lines'], Form1099INT
     'recipient': new Input('payee'),
     '1': new Input('interest'),
     '2': new Input('earlyWithdrawalPenalty'),
-    '3': new Input('interestOnUsSavingsBondOrTreas'),
+    '3': new Input('interestOnUsSavingsBondOrTreas', undefined, 0),
     '4': new Input('fedIncomeTax', undefined, 0),
     '5': new Input('investmentExpenses'),
     '6': new Input('foreignTaxPaid', undefined, 0),

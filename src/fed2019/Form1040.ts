@@ -39,7 +39,11 @@ export default class Form1040 extends Form<Form1040['_lines'], Form1040Input> {
                     (new AccumulatorLine(Form1099DIV, '11')).value(tr);
       return value;
     }, 'Tax-exempt interest'),
-    '2b': new AccumulatorLine(Form1099INT, '1', 'Taxable interest'),
+    '2b': new ComputedLine((tr): number => {
+      const value = (new AccumulatorLine(Form1099INT, '1')).value(tr) +
+                    (new AccumulatorLine(Form1099INT, '3')).value(tr);
+      return value;
+    }, 'Taxable interest'),
     '3a': new AccumulatorLine(Form1099DIV, '1b', 'Qualified dividends'),
     '3b': new AccumulatorLine(Form1099DIV, '1a', 'Ordinary dividends'),
     '4a': new ComputedLine((tr): number => {

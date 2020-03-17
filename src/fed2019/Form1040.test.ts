@@ -54,7 +54,8 @@ test('interest income', () => {
     payer: 'Bank',
     payee: p,
     interest: 100,
-    taxExemptInterest: 0
+    taxExemptInterest: 0,
+    interestOnUsSavingsBondOrTreas: 30
   }));
   tr.addForm(new Form1099INT({
     payer: 'Bank 2',
@@ -67,7 +68,7 @@ test('interest income', () => {
   tr.addForm(f1040);
 
   expect(f1040.getValue(tr, '2a')).toBe(95);
-  expect(f1040.getValue(tr, '2b')).toBe(103.5);
+  expect(f1040.getValue(tr, '2b')).toBe(133.5);
 });
 
 test('dividend income', () => {
