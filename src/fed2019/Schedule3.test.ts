@@ -6,7 +6,7 @@
 import { Person } from '../core';
 import { NotFoundError } from '../core/Errors';
 
-import Form1040, { FilingStatus } from './Form1040';
+import Form1040, { QDCGTaxWorksheet, FilingStatus } from './Form1040';
 import Form1099DIV from './Form1099DIV';
 import Form1116 from './Form1116';
 import Form8949 from './Form8949';
@@ -28,6 +28,7 @@ test('foreign tax credit, form 1116 not required', () => {
     tr.addForm(new Form1040({ filingStatus }));
     tr.addForm(new Form8949);
     tr.addForm(new ScheduleD);
+    tr.addForm(new QDCGTaxWorksheet);
     tr.addForm(new Form1099DIV({
       payer: 'Brokerage',
       payee: p,

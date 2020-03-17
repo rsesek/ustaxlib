@@ -59,7 +59,7 @@ export default class Form1040 extends Form<Form1040['_lines'], Form1040Input> {
         return 0;
 
       const l6 = schedD.getValue(tr, '16');
-      if (l6 > 0)
+      if (l6 >= 0)
         return l6;
       return schedD.getValue(tr, '21');
     }, 'Capital gain/loss'),
@@ -117,16 +117,24 @@ export default class Form1040 extends Form<Form1040['_lines'], Form1040Input> {
       // Not supported:
       // Form 8814 (election to report child's interest or dividends)
       // Form 4972 (relating to lump-sum distributions)
-      const taxableIncome = this.getValue(tr, '11b');
 
-      if (this.getValue(tr, '3a') > 0 && !tr.findForm(ScheduleD))
-        throw new UnsupportedFeatureError('Qualified Dividends and Captial Gains Tax Worksheet not supported, Schedule D requried');
+      const schedD = tr.findForm(ScheduleD);
+      // Line 18 and 19 are not undefined or 0.
+      if (schedD && !schedD.getValue(tr, '20')) {
+        // Use ScheD tax worksheet;
+        const schedDtw = tr.findForm(ScheduleDTaxWorksheet);
+        if (schedDtw)
+          return schedDtw.getValue(tr, '47');
+      }
 
-      const schedD = tr.findForm(ScheduleDTaxWorksheet);
-      if (schedD)
-        return schedD.getValue(tr, '47');
+      // If there are qualified dividends, use the QDCGTW.
+      if (this.getValue(tr, '3a') > 0) {
+        const qdcgtw = tr.getForm(QDCGTaxWorksheet);
+        return qdcgtw.getValue(tr, '27');
+      }
 
-      return computeTax(taxableIncome, this.filingStatus);
+      // Otherwise, compute just on taxable income.
+      return computeTax(this.getValue(tr, '11b'), this.filingStatus);
     }, 'Tax'),
 
     '12b': new ComputedLine((tr): number => {
@@ -236,4 +244,73 @@ export function computeTax(income: number, filingStatus: FilingStatus): number {
   const bracketStart = i == 0 ? 0 : taxBrackets[i - 1][0];
 
   return ((income - bracketStart) * bracket[1]) + bracket[2];
+};
+
+export class QDCGTaxWorksheet extends Form<QDCGTaxWorksheet['_lines']> {
+  readonly name = 'Qual Div Cap Gain Tax Worksheet';
+
+  protected readonly _lines = {
+    '1': new ReferenceLine(Form1040, '11b', 'Taxable income'),
+    '2': new ReferenceLine(Form1040, '3a', 'Qualified dividends'),
+    '3': new ComputedLine((tr): number => {
+      const schedD = tr.findForm(ScheduleD);
+      if (schedD)
+        return Math.min(schedD.getValue(tr, '15'), schedD.getValue(tr, '16'));
+      return tr.getForm(Form1040).getValue(tr, '6');
+    }),
+    '4': new ComputedLine((tr): number => this.getValue(tr, '2') + this.getValue(tr, '3')),
+    '5': new ComputedLine(() => 0), // Not supported - Form 4952/4g (nvestment interest expense deduction)
+    '6': new ComputedLine((tr): number => clampToZero(this.getValue(tr, '4') - this.getValue(tr, '5'))),
+    '7': new ComputedLine((tr): number => clampToZero(this.getValue(tr, '1') - this.getValue(tr, '6'))),
+    '8': new ComputedLine((tr): number => {
+      switch (tr.getForm(Form1040).filingStatus) {
+        case FilingStatus.Single:
+        case FilingStatus.MarriedFilingSeparate:
+          return 39375;
+        case FilingStatus.MarriedFilingJoint:
+          return 78750;
+      };
+    }),
+    '9': new ComputedLine((tr): number => Math.min(this.getValue(tr, '1'), this.getValue(tr, '8'))),
+    '10': new ComputedLine((tr): number => Math.min(this.getValue(tr, '7'), this.getValue(tr, '9'))),
+    '11': new ComputedLine((tr): number => {
+      return this.getValue(tr, '9') - this.getValue(tr, '10');
+    }, 'Amount taxed at 0%'),
+    '12': new ComputedLine((tr): number => Math.min(this.getValue(tr, '1'), this.getValue(tr, '6'))),
+    '13': new ReferenceLine(QDCGTaxWorksheet as any, '11'),
+    '14': new ComputedLine((tr): number => this.getValue(tr, '12') - this.getValue(tr, '13')),
+    '15': new ComputedLine((tr): number => {
+      switch (tr.getForm(Form1040).filingStatus) {
+        case FilingStatus.Single:                return 434550;
+        case FilingStatus.MarriedFilingSeparate: return 244425;
+        case FilingStatus.MarriedFilingJoint:    return 488850;
+      };
+    }),
+    '16': new ComputedLine((tr): number => Math.min(this.getValue(tr, '1'), this.getValue(tr, '15'))),
+    '17': new ComputedLine((tr): number => this.getValue(tr, '7') + this.getValue(tr, '11')),
+    '18': new ComputedLine((tr): number => clampToZero(this.getValue(tr, '16') - this.getValue(tr, '17'))),
+    '19': new ComputedLine((tr): number => Math.min(this.getValue(tr, '14'), this.getValue(tr, '18'))),
+    '20': new ComputedLine((tr): number => {
+      return this.getValue(tr, '19') * 0.15;
+    }, 'Amount taxed at 15%'),
+    '21': new ComputedLine((tr): number => this.getValue(tr, '11') + this.getValue(tr, '19')),
+    '22': new ComputedLine((tr): number => this.getValue(tr, '12') - this.getValue(tr, '21')),
+    '23': new ComputedLine((tr): number => {
+      return this.getValue(tr, '22') * 0.20;
+    }, 'Amount taxed at 20%'),
+    '24': new ComputedLine((tr): number => {
+      return computeTax(this.getValue(tr, '7'), tr.getForm(Form1040).filingStatus);
+    }, 'Tax on line 7'),
+    '25': new ComputedLine((tr): number => {
+      return this.getValue(tr, '20') +
+             this.getValue(tr, '23') +
+             this.getValue(tr, '24');
+    }),
+    '26': new ComputedLine((tr): number => {
+      return computeTax(this.getValue(tr, '1'), tr.getForm(Form1040).filingStatus);
+    }, 'Tax on line 1'),
+    '27': new ComputedLine((tr): number => {
+      return Math.min(this.getValue(tr, '25'), this.getValue(tr, '26'));
+    }, 'Tax on all taxable income')
+  };
 };

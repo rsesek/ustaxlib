@@ -6,11 +6,11 @@
 import { Form, Person, TaxReturn } from '../core';
 import { Line, AccumulatorLine, ComputedLine, ReferenceLine, sumLineOfForms } from '../core/Line';
 import { clampToZero } from '../core/Math';
-import { UnsupportedFeatureError } from '../core/Errors';
+import { NotFoundError, UnsupportedFeatureError } from '../core/Errors';
 
 import Form8949, { Form8949Box } from './Form8949';
 import Form1099DIV from './Form1099DIV';
-import Form1040, { FilingStatus, computeTax } from './Form1040';
+import Form1040, { FilingStatus, QDCGTaxWorksheet, computeTax } from './Form1040';
 
 export default class ScheduleD extends Form<ScheduleD['_lines']> {
   readonly name = 'Schedule D';
@@ -28,7 +28,7 @@ export default class ScheduleD extends Form<ScheduleD['_lines']> {
       return f8949.getValue(tr, 'boxA').gainOrLoss +
              f8949.getValue(tr, 'boxB').gainOrLoss +
              f8949.getValue(tr, 'boxC').gainOrLoss;
-    }, 'Net short-term capital gain or (loss)'),
+    }, 'Net short-term capital gain or loss'),
 
     // 8a is not supported.
 
@@ -46,40 +46,46 @@ export default class ScheduleD extends Form<ScheduleD['_lines']> {
              f8949.getValue(tr, 'boxE').gainOrLoss +
              f8949.getValue(tr, 'boxF').gainOrLoss +
              this.getValue(tr, '13');
-    }, 'Net long-term capital gain or (loss)'),
+    }, 'Net long-term capital gain or loss'),
 
     '16': new ComputedLine((tr): number => {
       return this.getValue(tr, '7') + this.getValue(tr, '15');
-    }),
+      // If value is a gain, enter on 1040/6 and goto 17.
+      // If value is a loss, goto 21 and 22.
+      // If value is zero, enter 0 on 1040/6 and goto 22.
+    }, 'Total capital gain or loss'),
 
     '17': new ComputedLine((tr): boolean => {
       return this.getValue(tr, '15') > 0 && this.getValue(tr, '16') > 0;
+      // If yes, goto 18.
+      // If no, goto 22.
     }, 'Both ST and LT are gains'),
 
     '18': new ComputedLine((tr): number | undefined => {
-      if (!this.getValue(tr, '17') || this.getValue(tr, '16') <= 0)
-        return undefined;
       // Not supported - only for gains on Qualified Small Business Stock or collectibles.
       return 0;
     }, '28% Rate Gain Worksheet Value'),
 
-    // 19 is not supported (Unrecaptured Section 1250 Gain Worksheet)
+    '19': new ComputedLine(() => undefined, 'Unrecaptured Section 1250 Gain Worksheet'), // Not supported.
 
     '20': new ComputedLine((tr): boolean | undefined => {
-      if (!this.getValue(tr, '17') || this.getValue(tr, '16') <= 0)
-        return undefined;
       const l18 = this.getValue(tr, '18');
-      const l19 = undefined; //this.getValue(tr, '19');
+      const l19 = this.getValue(tr, '19');
       return (l18 === 0 || l18 === undefined) || (l19 === 0 || l19 === undefined);
     }, 'Line 18 and 19 both 0 or blank?'),
 
     '21': new ComputedLine((tr): number | undefined => {
-      if (!this.getValue(tr, '17') || !this.getValue(tr, '20'))
-        return undefined;
+      const l16 = this.getValue(tr, '16');
+      if (l16 >= 0)
+        return 0;
       const filingStatus = tr.getForm(Form1040).filingStatus;
       const limit = filingStatus == FilingStatus.MarriedFilingSeparate ? -1500 : -3000;
-      return Math.min(this.getValue(tr, '16'), limit);
+      return Math.max(l16, limit);
     }, 'Net capital loss'),
+
+    '22': new ComputedLine((tr): boolean => {
+      return tr.getForm(Form1040).getValue(tr, '3a') > 0;
+    }, 'Need QD/CG Tax Worksheet'),
   };
 };
 
@@ -105,8 +111,7 @@ export class ScheduleDTaxWorksheet extends Form<ScheduleDTaxWorksheet['_lines']>
     '10': new ComputedLine((tr): number => this.getValue(tr, '6') + this.getValue(tr, '9')),
     '11': new ComputedLine((tr): number => {
       const schedD = tr.getForm(ScheduleD);
-      // TODO - line 19 is not supported.
-      return Math.min(schedD.getValue(tr, '18'), Infinity); //schedD.getValue(tr, '19'));
+      return schedD.getValue(tr, '18') + schedD.getValue(tr, '19');
     }),
     '12': new ComputedLine((tr): number => Math.min(this.getValue(tr, '9'), this.getValue(tr, '11'))),
     '13': new ComputedLine((tr): number => this.getValue(tr, '10') - this.getValue(tr, '12')),
