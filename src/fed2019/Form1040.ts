@@ -259,7 +259,7 @@ export class QDCGTaxWorksheet extends Form<QDCGTaxWorksheet['_lines']> {
     '3': new ComputedLine((tr): number => {
       const schedD = tr.findForm(ScheduleD);
       if (schedD)
-        return Math.min(schedD.getValue(tr, '15'), schedD.getValue(tr, '16'));
+        return clampToZero(Math.min(schedD.getValue(tr, '15'), schedD.getValue(tr, '16')));
       return tr.getForm(Form1040).getValue(tr, '6');
     }),
     '4': new ComputedLine((tr): number => this.getValue(tr, '2') + this.getValue(tr, '3')),

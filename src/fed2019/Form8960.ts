@@ -5,7 +5,7 @@
 
 import { Form, TaxReturn } from '../core';
 import { ComputedLine, ReferenceLine } from '../core/Line';
-import { clampToZero } from '../core/Math';
+import { clampToZero, undefinedToZero } from '../core/Math';
 
 import Form1040, { FilingStatus } from './Form1040';
 import Schedule1 from './Schedule1';
@@ -24,7 +24,7 @@ export default class Form8960 extends Form<Form8960['_lines']> {
     // 4c not supported - 4a+4b
     '5a': new ComputedLine((tr): number => {
       return (new ReferenceLine(Form1040, '6')).value(tr) +
-             (new ReferenceLine(Schedule1, '4', undefined, 0)).value(tr);
+             undefinedToZero(new ReferenceLine(Schedule1, '4', undefined, 0).value(tr));
     }, 'Net gain or loss'),
     // 5b not supported - Net gain or loss from disposition of property that is not subject to net investment income tax
     // 5c not supported - Adjustment from disposition of partnership interest or S corporation stock
