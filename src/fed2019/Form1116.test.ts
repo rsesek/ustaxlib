@@ -49,8 +49,9 @@ test('unsupported income categories', () => {
 });
 
 test('foreign tax credit', () => {
-  const p = Person.self('A');
   const tr = new TaxReturn();
+  const p = Person.self('A');
+  tr.addPerson(p);
   tr.addForm(new Form1040({
     filingStatus: FilingStatus.MarriedFilingJoint
   }));

@@ -26,8 +26,9 @@ describe('additional medicare tax', () => {
 
   for (const filingStatus of Object.values(FilingStatus)) {
     test(`filing status ${filingStatus}`, () => {
-      const p = Person.self('A');
       const tr = new TaxReturn();
+      const p = Person.self('A');
+      tr.addPerson(p);
       tr.addForm(new Form1040({ filingStatus }));
       tr.addForm(new W2({
         employer: 'Acme',
@@ -61,8 +62,9 @@ describe('additional medicare tax', () => {
 describe('no additional medicare tax', () => {
   for (const filingStatus of Object.values(FilingStatus)) {
     test(`filing status ${filingStatus}`, () => {
-      const p = Person.self('A');
       const tr = new TaxReturn();
+      const p = Person.self('A');
+      tr.addPerson(p);
       tr.addForm(new Form1040({ filingStatus }));
       tr.addForm(new W2({
         employer: 'Acme',
