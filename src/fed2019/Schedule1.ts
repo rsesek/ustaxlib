@@ -5,6 +5,7 @@
 
 import { Form, TaxReturn } from '../core';
 import { ComputedLine, InputLine } from '../core/Line';
+import * as Trace from '../core/Trace';
 import { NotFoundError, UnsupportedFeatureError } from '../core/Errors';
 import { undefinedToZero } from '../core/Math';
 
@@ -49,6 +50,7 @@ class Input<T extends keyof Schedule1Input> extends InputLine<Schedule1Input, T>
     try {
       value = super.value(tr);
     } catch (NotFoundError) {
+      Trace.end();
     }
     if (this._predicate)
       this._predicate(value);

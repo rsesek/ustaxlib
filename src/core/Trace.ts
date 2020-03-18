@@ -35,9 +35,14 @@ export function mark(id: string) {
 export function end() {
   stack.pop();
   if (stack.length == 0) {
-    previous = current;
-    current = null;
+    reset();
   }
+}
+
+export function reset() {
+  previous = current;
+  current = null;
+  stack = [];
 }
 
 export function getLastTraceList(): readonly Edge[] {
