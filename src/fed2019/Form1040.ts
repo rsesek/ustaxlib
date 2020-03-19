@@ -13,6 +13,7 @@ import Form8959 from './Form8959';
 import Form1099INT from './Form1099INT';
 import Form1099DIV from './Form1099DIV';
 import Form1099R, { Box7Code } from './Form1099R';
+import Form8995REIT from './Form8995';
 import W2 from './W2';
 import Schedule1 from './Schedule1';
 import Schedule2 from './Schedule2';
@@ -100,13 +101,9 @@ export default class Form1040 extends Form<Form1040['_lines'], Form1040Input> {
     }, 'Deduction'),
 
     '10': new ComputedLine((tr): number => {
-      const taxableIncome = this.getValue(tr, '8b');
-      let use8995a = false;
-      switch (this.filingStatus) {
-        case FilingStatus.Single:                use8995a = taxableIncome <= 160700; break;
-        case FilingStatus.MarriedFilingSeparate: use8995a = taxableIncome <= 160725; break;
-        case FilingStatus.MarriedFilingJoint:    use8995a = taxableIncome <= 321400; break;
-      };
+      const f8995 = tr.findForm(Form8995REIT);
+      if (f8995)
+        return f8995.getValue(tr, '39');
       return 0;
     }, 'Qualified business income deduction'),
 

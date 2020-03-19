@@ -13,6 +13,7 @@ export { default as Form8606 } from './Form8606';
 export { default as Form8949 } from './Form8949';
 export { default as Form8959 } from './Form8959';
 export { default as Form8960 } from './Form8960';
+export { default as Form8995REIT } from './Form8995';
 export { default as Schedule1 } from './Schedule1';
 export { default as Schedule2 } from './Schedule2';
 export { default as Schedule3 } from './Schedule3';
