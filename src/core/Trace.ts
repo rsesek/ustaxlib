@@ -63,5 +63,5 @@ function formatLine(line: Line<any>): string {
   const description = line.description ? ` (${line.description})` : '';
   if (line.form === undefined)
     return `${line.constructor.name}${description}`;
-  return `${line.form.name}-${line.id}${description}`;
+  return `${line.form.name}@${line.id}${description}`;
 }

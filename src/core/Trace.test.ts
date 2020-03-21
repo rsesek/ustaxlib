@@ -46,21 +46,21 @@ describe('tracing', () => {
   test('input line', () => {
     f.getValue(tr, 'i1');
     const trace = getLastTraceList();
-    expect(trace).toStrictEqual([ [ 'TF-i1 (Input from name)', 'TF input: name' ] ]);
+    expect(trace).toStrictEqual([ [ 'TF@i1 (Input from name)', 'TF input: name' ] ]);
   });
 
   test('computed line via input', () => {
     f.getValue(tr, 'c1');
     const trace = getLastTraceList();
-    expect(trace).toStrictEqual([ [ 'TF-c1', 'TF input: name' ] ]);
+    expect(trace).toStrictEqual([ [ 'TF@c1', 'TF input: name' ] ]);
   });
 
   test('computed line via input line', () => {
     f.getValue(tr, 'c2');
     const trace = getLastTraceList();
     expect(trace).toStrictEqual([
-      [ 'TF-c2', 'TF-i2 (Input from value)' ],
-      [ 'TF-i2 (Input from value)', 'TF input: value' ]
+      [ 'TF@c2', 'TF@i2 (Input from value)' ],
+      [ 'TF@i2 (Input from value)', 'TF input: value' ]
     ]);
   });
 
@@ -68,9 +68,9 @@ describe('tracing', () => {
     f.getValue(tr, 'r2');
     const trace = getLastTraceList();
     expect(trace).toStrictEqual([
-      [ 'TF-r2 (Reference TestForm-c2)', 'TF-c2' ],
-      [ 'TF-c2', 'TF-i2 (Input from value)' ],
-      [ 'TF-i2 (Input from value)', 'TF input: value' ]
+      [ 'TF@r2 (Reference TestForm@c2)', 'TF@c2' ],
+      [ 'TF@c2', 'TF@i2 (Input from value)' ],
+      [ 'TF@i2 (Input from value)', 'TF input: value' ]
     ]);
   });
 });
