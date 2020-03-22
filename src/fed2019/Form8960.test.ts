@@ -7,7 +7,7 @@ import { Person } from '../core';
 
 import W2 from './W2';
 import Form1040, { FilingStatus } from './Form1040';
-import Form1099B, { GainType } from './Form1099B';
+import Form1099B from './Form1099B';
 import Form1099DIV from './Form1099DIV';
 import Form1099INT from './Form1099INT';
 import Form8949 from './Form8949';
@@ -45,11 +45,13 @@ describe('net investment income tax', () => {
       tr.addForm(new Form1099B({
         payer: 'Brokerage',
         payee: p,
-        description: '100 VTI',
-        proceeds: 4000,
-        costBasis: 3500,
-        gainType: GainType.LongTerm,
-        basisReportedToIRS: true
+        longTermBasisReported: [
+          {
+            description: '100 VTI',
+            proceeds: 4000,
+            costBasis: 3500,
+          }
+        ]
       }));
       tr.addForm(new Form8949);
       tr.addForm(new ScheduleD);
@@ -106,11 +108,13 @@ describe('no net investment income tax', () => {
       tr.addForm(new Form1099B({
         payer: 'Brokerage',
         payee: p,
-        description: '100 VTI',
-        proceeds: 4000,
-        costBasis: 3500,
-        gainType: GainType.LongTerm,
-        basisReportedToIRS: true
+        longTermBasisReported: [
+          {
+            description: '100 VTI',
+            proceeds: 4000,
+            costBasis: 3500,
+          }
+        ]
       }));
       tr.addForm(new Form8949);
       tr.addForm(new ScheduleD);

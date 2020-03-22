@@ -6,25 +6,7 @@
 import { Form, Person, TaxReturn } from '../core';
 import { InputLine } from '../core/Line';
 
-export enum GainType {
-  ShortTerm = 'ST',
-  LongTerm  = 'LT',
-  Ordinary  = 'O',
-};
-
-export interface SpecialProceeds {
-  collectibles?: boolean;
-  qof?: boolean;
-};
-
-export interface IRSReporting {
-  grossProceeds?: boolean;
-  netProceeds?: boolean;
-};
-
-export interface Form1099BInput {
-  payer: string;
-  payee: Person;
+export interface Form1099BRow {
   description: string;
   dateAcquired?: string;
   dateSold?: string;
@@ -32,18 +14,24 @@ export interface Form1099BInput {
   costBasis: number;
   accruedMarketDiscount?: number;
   washSaleLossDisallowed?: number;
-  gainType: GainType;
-  specialProceeds?: SpecialProceeds;
   fedIncomeTax?: number;
-  nonCoveredSecurity?: boolean;
-  irsReporting?: IRSReporting;
-  disallowedLoss?: boolean;
-  profitOnClosedContracts?: number;
-  unrealizedProfitOnOpenContractsCurrentTY?: number;
-  unrealizedProfitOnOpenContractsNextTY?: number;
-  aggregateProfitOnContracts?: number;
-  basisReportedToIRS?: boolean;
-  bartering?: number;
+
+  adjustments?: number;  // Not reported on 1099-B, but entered as part of Form8994.
+};
+
+export interface Form1099BInput {
+  payer: string;
+  payee: Person;
+
+  shortTermBasisReported?: Form1099BRow[];  // Box A checked.
+  shortTermBasisUnreported?: Form1099BRow[];  // Box B checked.
+
+  longTermBasisReported?: Form1099BRow[];  // Box D checked.
+  longTermBasisUnreported?: Form1099BRow[];  // Box E checked.
+
+  // For unreported securities, create your own 1099-B.
+  shortTermUnreported?: Form1099BRow[];  // Box C checked.
+  longTermUnreported?: Form1099BRow[];  // Box F checked.
 };
 
 class Input<T extends keyof Form1099BInput> extends InputLine<Form1099BInput, T> {};
@@ -58,24 +46,11 @@ export default class Form1099B extends Form<Form1099B['_lines'], Form1099BInput>
   protected readonly _lines = {
     'payer': new Input('payer'),
     'recipient': new Input('payee'),
-    '1a': new Input('description'),
-    '1b': new Input('dateAcquired'),
-    '1c': new Input('dateSold'),
-    '1d': new Input('proceeds'),
-    '1e': new Input('costBasis'),
-    '1f': new Input('accruedMarketDiscount'),
-    '1g': new Input('washSaleLossDisallowed'),
-    '2': new Input('gainType'),
-    '3': new Input('specialProceeds'),
-    '4': new Input('fedIncomeTax'),
-    '5': new Input('nonCoveredSecurity'),
-    '6': new Input('irsReporting'),
-    '7': new Input('disallowedLoss'),
-    '8': new Input('profitOnClosedContracts'),
-    '9': new Input('unrealizedProfitOnOpenContractsCurrentTY'),
-    '10': new Input('unrealizedProfitOnOpenContractsNextTY'),
-    '11': new Input('aggregateProfitOnContracts'),
-    '12': new Input('basisReportedToIRS'),
-    '13': new Input('bartering')
+    'shortTermBasisReported': new Input('shortTermBasisReported'),
+    'shortTermBasisUnreported': new Input('shortTermBasisUnreported'),
+    'longTermBasisReported': new Input('longTermBasisReported'),
+    'longTermBasisUnreported': new Input('longTermBasisUnreported'),
+    'shortTermUnreported': new Input('shortTermUnreported'),
+    'longTermUnreported': new Input('longTermUnreported'),
   };
 };

@@ -8,7 +8,7 @@ import { UnsupportedFeatureError } from '../core/Errors';
 
 import Form1040, { FilingStatus } from './Form1040';
 import Form1116, { ForeignIncomeCategory } from './Form1116';
-import Form1099B, { GainType } from './Form1099B';
+import Form1099B from './Form1099B';
 import Form1099DIV from './Form1099DIV';
 import Form8949 from './Form8949';
 import W2 from './W2';
@@ -104,20 +104,20 @@ test('no net capital losses in total income', () => {
   tr.addForm(new Form1099B({
     payer: 'Brokerage',
     payee: p,
-    description: 'SCHF',
-    proceeds: 100,
-    costBasis: 50,
-    gainType: GainType.LongTerm,
-    basisReportedToIRS: true
-  }));
-  tr.addForm(new Form1099B({
-    payer: 'Brokerage',
-    payee: p,
-    description: 'SCHE',
-    proceeds: 60,
-    costBasis: 100,
-    gainType: GainType.ShortTerm,
-    basisReportedToIRS: true
+    longTermBasisReported: [
+      {
+        description: 'SCHF',
+        proceeds: 100,
+        costBasis: 50,
+      }
+    ],
+    shortTermBasisReported: [
+      {
+        description: 'SCHE',
+        proceeds: 60,
+        costBasis: 100,
+      }
+    ]
   }));
   tr.addForm(new Form8949);
   tr.addForm(new ScheduleD);

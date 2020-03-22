@@ -6,7 +6,7 @@
 import { Person } from '../core';
 
 import Form1040, { FilingStatus } from './Form1040';
-import Form1099B, { GainType } from './Form1099B';
+import Form1099B, { Form1099BInput } from './Form1099B';
 import Form8949, { Form8949Box, Form8949Total } from './Form8949';
 import TaxReturn from './TaxReturn';
 
@@ -17,14 +17,27 @@ describe('single form', () => {
       const tr = new TaxReturn();
       tr.addPerson(p);
       tr.addForm(new Form1040({ filingStatus: FilingStatus.Single }));
+
+      const fieldMap: { [key: string]: keyof Form1099BInput } = {
+        [Form8949Box.A]: 'shortTermBasisReported',
+        [Form8949Box.B]: 'shortTermBasisUnreported',
+        [Form8949Box.C]: 'shortTermUnreported',
+        [Form8949Box.D]: 'longTermBasisReported',
+        [Form8949Box.E]: 'longTermBasisUnreported',
+        [Form8949Box.F]: 'longTermUnreported',
+      };
+      const field = fieldMap[box];
+
       tr.addForm(new Form1099B({
         payer: 'Brokerage',
         payee: p,
-        description: '10 shares',
-        proceeds: 100,
-        costBasis: 110,
-        gainType: (box == Form8949Box.A || box == Form8949Box.B) ? GainType.ShortTerm : GainType.LongTerm,
-        basisReportedToIRS: (box == Form8949Box.A || box == Form8949Box.D),
+        [field]: [
+          {
+            description: '10 shares',
+            proceeds: 100,
+            costBasis: 110,
+          }
+        ],
       }));
 
       const form = new Form8949();
@@ -60,29 +73,25 @@ test('multiple forms', () => {
   tr.addForm(new Form1099B({
     payer: 'Brokerage',
     payee: p,
-    description: '10 SCHB',
-    proceeds: 55,
-    costBasis: 50,
-    gainType: GainType.ShortTerm,
-    basisReportedToIRS: true,
-  }));
-  tr.addForm(new Form1099B({
-    payer: 'Brokerage',
-    payee: p,
-    description: '10 SCHB',
-    proceeds: 55,
-    costBasis: 50,
-    gainType: GainType.LongTerm,
-    basisReportedToIRS: false,
-  }));
-  tr.addForm(new Form1099B({
-    payer: 'Brokerage',
-    payee: p,
-    description: '10 SCHF',
-    proceeds: 22.40,
-    costBasis: 10.10,
-    gainType: GainType.LongTerm,
-    basisReportedToIRS: false,
+    shortTermBasisReported: [
+      {
+        description: '10 SCHB',
+        proceeds: 55,
+        costBasis: 50,
+      }
+    ],
+    longTermBasisUnreported: [
+      {
+        description: '10 SCHB',
+        proceeds: 55,
+        costBasis: 50,
+      },
+      {
+        description: '10 SCHF',
+        proceeds: 22.40,
+        costBasis: 10.10,
+      }
+    ],
   }));
 
   const form = new Form8949();
@@ -118,39 +127,33 @@ test('adjustments', () => {
   const b1 = new Form1099B({
     payer: 'Brokerage',
     payee: p,
-    description: '10 SCHB',
-    proceeds: 55,
-    costBasis: 50,
-    gainType: GainType.ShortTerm,
-    basisReportedToIRS: false,
-  });
-  tr.addForm(b1);
-  const b2 = new Form1099B({
-    payer: 'Brokerage',
-    payee: p,
-    description: '10 SCHB',
-    proceeds: 18,
-    costBasis: 25,
-    gainType: GainType.LongTerm,
-    basisReportedToIRS: false,
-  });
-  tr.addForm(b2);
-  tr.addForm(new Form1099B({
-    payer: 'Brokerage',
-    payee: p,
-    description: '10 SCHF',
-    proceeds: 22.40,
-    costBasis: 10.10,
-    gainType: GainType.LongTerm,
-    basisReportedToIRS: true,
-  }));
-
-  const form = new Form8949({
-    adjustments: [
-      { entry: b1, code: 'W', amount: -10 },
-      { entry: b2, code: 'W', amount: 90 },
+    shortTermBasisUnreported: [
+      {
+        description: '10 SCHB',
+        proceeds: 55,
+        costBasis: 50,
+        adjustments: -10,
+      }
+    ],
+    longTermBasisUnreported: [
+      {
+        description: '10 SCHB',
+        proceeds: 18,
+        costBasis: 25,
+        adjustments: 90,
+      }
+    ],
+    longTermBasisReported: [
+      {
+        description: '10 SCHF',
+        proceeds: 22.40,
+        costBasis: 10.10,
+      }
     ]
   });
+  tr.addForm(b1);
+
+  const form = new Form8949();
   tr.addForm(form);
 
   const boxB = form.getValue(tr, 'boxB');
