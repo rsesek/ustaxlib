@@ -7,22 +7,57 @@ import { Person } from '../core';
 import { UnsupportedFeatureError } from '../core/Errors';
 
 import Form1040, { FilingStatus } from './Form1040';
-import Schedule1, { Schedule1Input } from './Schedule1';
+import Schedule1, { Schedule1Input, SALTWorksheet } from './Schedule1';
 import TaxReturn from './TaxReturn';
 
-test('state tax refund', () => {
+test('non-taxable state tax refund', () => {
   const p = Person.self('A');
   const tr = new TaxReturn();
   tr.addForm(new Form1040({
     filingStatus: FilingStatus.Single
   }));
+  const w = new SALTWorksheet({
+    prevYearSalt: 90000,
+    limitedPrevYearSalt: 10000,
+    prevYearItemizedDeductions: 25000,
+    prevYearFilingStatus: FilingStatus.Single
+  });
+  tr.addForm(w);
   const f = new Schedule1({
-    stateAndLocalTaxableRefunds: 500
+    stateAndLocalTaxableRefunds: 17000
   });
   tr.addForm(f);
 
-  expect(f.getValue(tr, '9')).toBe(500);
-  expect(tr.getForm(Form1040).getValue(tr, '7a')).toBe(500);
+  expect(w.getValue(tr, '1')).toBe(17000);
+  expect(w.getValue(tr, '2')).toStrictEqual([80000, true]);
+  expect(w.getValue(tr, '3')).toBe(0);
+  expect(w.getValue(tr, '9')).toBe(0);
+  expect(tr.getForm(Form1040).getValue(tr, '7a')).toBe(0);
+});
+
+test('taxable state tax refund', () => {
+  const p = Person.self('A');
+  const tr = new TaxReturn();
+  tr.addForm(new Form1040({
+    filingStatus: FilingStatus.Single
+  }));
+  const w = new SALTWorksheet({
+    prevYearSalt: 7500,
+    limitedPrevYearSalt: 7500,
+    prevYearItemizedDeductions: 14000,
+    prevYearFilingStatus: FilingStatus.Single
+  });
+  tr.addForm(w);
+  const f = new Schedule1({
+    stateAndLocalTaxableRefunds: 2000
+  });
+  tr.addForm(f);
+
+  expect(w.getValue(tr, '1')).toBe(2000);
+  expect(w.getValue(tr, '2')).toStrictEqual([2000, false]);
+  expect(w.getValue(tr, '3')).toBe(2000);
+  expect(w.getValue(tr, '9')).toBe(2000);
+  expect(tr.getForm(Form1040).getValue(tr, '7a')).toBe(2000);
 });
 
 test('unsupported inputs', () => {

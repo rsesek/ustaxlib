@@ -26,5 +26,6 @@ export * from './Form1099B';
 export * from './Form1099R';
 export * from './Form1116';
 export * from './Form8949';
+export * from './Schedule1';
 export * from './ScheduleD';
 export * from './W2';

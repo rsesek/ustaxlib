@@ -9,7 +9,7 @@ import * as Trace from '../core/Trace';
 import { NotFoundError, UnsupportedFeatureError } from '../core/Errors';
 import { undefinedToZero } from '../core/Math';
 
-import Form1040 from './Form1040';
+import Form1040, { FilingStatus } from './Form1040';
 
 export interface Schedule1Input {
   // Additional Income
@@ -63,7 +63,11 @@ export default class Schedule1 extends Form<Schedule1['_lines'], Schedule1Input>
 
   readonly _lines = {
     // Part 1
-    '1': new Input('stateAndLocalTaxableRefunds'),
+    '1': new ComputedLine((tr): number => {
+      if (this.hasInput('stateAndLocalTaxableRefunds'))
+        return tr.getForm(SALTWorksheet).getValue(tr, '9');
+      return 0;
+    }, 'Taxable refunds, credits, or offsets of state and local income taxes'),
     '2': new Input('alimonyReceived'),
     '3': new Input('businessIncome', (value: number) => {
       if (value !== undefined)
@@ -136,5 +140,63 @@ export default class Schedule1 extends Form<Schedule1['_lines'], Schedule1Input>
              undefinedToZero(this.getValue(tr, '20')) +
              undefinedToZero(this.getValue(tr, '21'));
     }),
+  };
+};
+
+export interface SALTWorksheetInput {
+  prevYearSalt: number;  // ScheduleA@5d.
+  limitedPrevYearSalt: number;  // ScheduleA@5e.
+  prevYearItemizedDeductions?: number;  // ScheduleA@17.
+  prevYearFilingStatus?: FilingStatus;
+};
+
+export class SALTWorksheet extends Form<SALTWorksheet['_lines'], SALTWorksheetInput> {
+  readonly name = 'State and Local Income Tax Refund Worksheet';
+
+  protected readonly _lines = {
+    '1': new ComputedLine((tr): number => {
+      const refunds = tr.findForm(Schedule1).getInput('stateAndLocalTaxableRefunds');
+      const prevYear = this.getInput('prevYearSalt');
+      return refunds > prevYear ? prevYear : refunds;
+    }, 'Tax refunds'),
+    '2': new ComputedLine((tr): [number, boolean] => {
+      const prevYearSalt = this.getInput('prevYearSalt');
+      const limitedPrevYearSalt = this.getInput('limitedPrevYearSalt');
+      if (prevYearSalt > limitedPrevYearSalt) {
+        return [prevYearSalt - limitedPrevYearSalt, true];
+      }
+      return [this.getValue(tr, '1'), false];
+    }, 'Remainder of SALT limitation'),
+    '3': new ComputedLine((tr): number => {
+      const l1 = this.getValue(tr, '1');
+      const l2 = this.getValue(tr, '2');
+      if (!l2[1])
+        return l1;
+      if (l1 > l2[0])
+        return l2[0] - l1;
+      // Else: none of refund is taxable.
+      return 0;
+    }),
+    '4': new InputLine<SALTWorksheetInput>('prevYearItemizedDeductions'),
+    '5': new ComputedLine((tr): number => {
+      switch (this.getInput('prevYearFilingStatus')) {
+        case FilingStatus.Single:
+        case FilingStatus.MarriedFilingSeparate:
+          return 12000;
+        case FilingStatus.MarriedFilingJoint:
+          return 24000;
+      }
+    }, 'Previous year standard deduction'),
+    '6': new ComputedLine((tr): number => 0, 'Special situations'),  // Not supported
+    '7': new ComputedLine((tr): number => this.getValue(tr, '5') + this.getValue(tr, '6')),
+    '8': new ComputedLine((tr): number => {
+      const l4 = this.getValue(tr, '4');
+      const l7 = this.getValue(tr, '7');
+      if (l7 < l4)
+        return l4 - l7;
+      // Else: none of refund is taxable.
+      return 0;
+    }),
+    '9': new ComputedLine((tr): number => Math.min(this.getValue(tr, '3'), this.getValue(tr, '8')), 'Taxable refund')
   };
 };
