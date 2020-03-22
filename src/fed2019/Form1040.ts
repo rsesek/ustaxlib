@@ -248,7 +248,7 @@ export function computeTax(income: number, filingStatus: FilingStatus): number {
 };
 
 export class QDCGTaxWorksheet extends Form<QDCGTaxWorksheet['_lines']> {
-  readonly name = 'Qual Div Cap Gain Tax Worksheet';
+  readonly name = 'QDCG Tax Worksheet';
 
   protected readonly _lines = {
     '1': new ReferenceLine(Form1040, '11b', 'Taxable income'),

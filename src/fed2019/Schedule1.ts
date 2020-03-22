@@ -151,7 +151,7 @@ export interface SALTWorksheetInput {
 };
 
 export class SALTWorksheet extends Form<SALTWorksheet['_lines'], SALTWorksheetInput> {
-  readonly name = 'State and Local Income Tax Refund Worksheet';
+  readonly name = 'SALT Refund Worksheet';
 
   protected readonly _lines = {
     '1': new ComputedLine((tr): number => {
