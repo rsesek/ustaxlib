@@ -42,11 +42,11 @@ To start using the software, create a new, private NPM project, and install the 
 dependencies. This will also install the HTML viewer. Then copy an example file and run the viewer
 with it.
 
-    npm init
-    # answer questions
+    mkdir taxes && cd taxes
+    echo '{"private":true}' > package.json
     npm i ts-node typescript ustaxlib ustaxviewer
     cp node_modules/ustaxlib/examples/fed2019.ts .
-    npx ustaxviewer-ts fed2019.ts
+    npx ustaxviewer fed2019.ts
 
 ## Contributing
 
@@ -66,7 +66,9 @@ liability throughout the year, or to learn about the US tax system.
 ### Should I use this to file my own tax returns?
 
 Please, heck no. There are guaranteed to be bugs in this software. The models do not support every
-and situation. This software is provided with no warranty.
+situation, and many more complex parts of forms are not implemented. This software is provided with
+no warranty. There is no wizard/interview system; it is expected that you use the instructions on
+[the IRS website](https://www.irs.gov) to set up and input data into the forms.
 
 ### How well does it work?
 
