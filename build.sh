@@ -24,4 +24,3 @@ cp LICENSE.txt $OUTDIR
 # "Preprocess" the dist package.json.
 cp ./package.json $OUTDIR
 sed -i '' -e s@\"dist/@\"@ $OUTDIR/package.json
-sed -i '' -e 's@"prepare": ".*",@@' $OUTDIR/package.json
