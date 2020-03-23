@@ -10,10 +10,10 @@ import { clampToZero } from '../core/Math';
 import Form1040, { FilingStatus } from './Form1040';
 import W2 from './W2';
 
-export default class Form8959 extends Form<Form8959['_lines']> {
+export default class Form8959 extends Form<Form8959['lines']> {
   readonly name = '8959';
 
-  protected readonly _lines = {
+  readonly lines = {
     '1': new AccumulatorLine(W2, '5', 'Medicare wages'),
     // 2 is not supported (Unreported tips from Form 4137)
     // 3 is not supported (Wages from Form 8919)

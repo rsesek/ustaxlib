@@ -16,10 +16,10 @@ class TestTaxReturn extends TaxReturn {
 test('add and get line', () => {
   const l = new ComputedLine<number>(() => 42);
 
-  class TestForm extends Form<TestForm['_lines']> {
+  class TestForm extends Form<TestForm['lines']> {
     readonly name = 'Test Form';
 
-    protected readonly _lines = { '1': l };
+    readonly lines = { '1': l };
   };
 
   const f = new TestForm();
@@ -27,9 +27,9 @@ test('add and get line', () => {
 });
 
 test('get non-existent line', () => {
-  class TestForm extends Form<TestForm['_lines']> {
+  class TestForm extends Form<TestForm['lines']> {
     readonly name = 'Test';
-    protected readonly _lines = {};
+    readonly lines = {};
   };
 
   const f = new TestForm();
@@ -48,7 +48,7 @@ test('input', () => {
   class TestForm extends Form<any, TestInput> {
     readonly name = '1040';
 
-    protected readonly _lines = null;
+    readonly lines = null;
   };
 
   const f = new TestForm({ filingStatus: 'S', money: 100.0 });
@@ -56,10 +56,10 @@ test('input', () => {
 });
 
 test('get value', () => {
-  class TestForm extends Form<TestForm['_lines']> {
+  class TestForm extends Form<TestForm['lines']> {
     readonly name = 'Form';
 
-    protected readonly _lines = {
+    readonly lines = {
       line: new ComputedLine<number>(() => 42),
     };
   };
@@ -80,11 +80,11 @@ test('get value', () => {
 test('form types', () => {
   class FormA extends Form<any> {
     readonly name = 'A';
-    protected readonly _lines = {};
+    readonly lines = {};
   };
   class FormB extends Form<any> {
     readonly name = 'B';
-    protected readonly _lines = {};
+    readonly lines = {};
   };
 
   expect(isFormT(new FormA(), FormA)).toBe(true);

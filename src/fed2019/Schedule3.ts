@@ -17,10 +17,10 @@ export interface Schedule3Input {
   estimatedTaxPayments?: number;
 };
 
-export default class Schedule3 extends Form<Schedule3['_lines'], Schedule3Input> {
+export default class Schedule3 extends Form<Schedule3['lines'], Schedule3Input> {
   readonly name = 'Schedule 3';
 
-  readonly _lines = {
+  readonly lines = {
     // Part 1
     '1': new ComputedLine((tr): number => {
       const f1040 = tr.getForm(Form1040);

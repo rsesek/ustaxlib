@@ -12,10 +12,10 @@ import Form8949, { Form8949Box } from './Form8949';
 import Form1099DIV from './Form1099DIV';
 import Form1040, { FilingStatus, QDCGTaxWorksheet, computeTax } from './Form1040';
 
-export default class ScheduleD extends Form<ScheduleD['_lines']> {
+export default class ScheduleD extends Form<ScheduleD['lines']> {
   readonly name = 'Schedule D';
 
-  protected readonly _lines = {
+  readonly lines = {
     // 1a not supported (Totals for all short-term transactions reported on Form 1099-B for which basis was reported to the IRS and for which you have no adjustments)
     // 4 is not supported (Short-term gain from Form 6252 and short-term gain or (loss) from Forms 4684, 6781, and 8824)
     // 5 is not supported (Net short-term gain or (loss) from partnerships, S corporations, estates, and trusts from Schedule(s) K-1)
@@ -89,10 +89,10 @@ export default class ScheduleD extends Form<ScheduleD['_lines']> {
   };
 };
 
-export class ScheduleDTaxWorksheet extends Form<ScheduleDTaxWorksheet['_lines']> {
+export class ScheduleDTaxWorksheet extends Form<ScheduleDTaxWorksheet['lines']> {
   readonly name = 'Schedule D Tax Worksheet';
 
-  protected readonly _lines = {
+  readonly lines = {
     '1': new ReferenceLine(Form1040, '11b'),
     '2': new ReferenceLine(Form1040, '3a'),
     // TODO 3 - form 4952

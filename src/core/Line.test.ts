@@ -39,9 +39,9 @@ test('computed line', () => {
 });
 
 test('reference line', () => {
-  class TestForm extends Form<TestForm['_lines']> {
+  class TestForm extends Form<TestForm['lines']> {
     readonly name = 'Form 1';
-    protected readonly _lines = {
+    readonly lines = {
       '6b': new ConstantLine(12.34),
       's': new ConstantLine('abc'),
     };
@@ -65,15 +65,15 @@ test('reference line', () => {
 });
 
 test('self reference line', () => {
-  class OtherForm extends Form<OtherForm['_lines']> {
+  class OtherForm extends Form<OtherForm['lines']> {
     readonly name = 'Form A';
-    protected readonly _lines = {
+    readonly lines = {
       '6c': new ConstantLine(55)
     };
   };
-  class TestForm extends Form<TestForm['_lines']> {
+  class TestForm extends Form<TestForm['lines']> {
     readonly name = 'Form 1';
-    protected readonly _lines = {
+    readonly lines = {
       'a': new ConstantLine(100.2),
       'b': new ReferenceLine(OtherForm, '6c'),
       'c': new ReferenceLine((TestForm as unknown) as FormClass<Form<any>>, 'b'),
@@ -97,9 +97,9 @@ test('input line', () => {
     key: string;
     key2?: string;
   }
-  class TestForm extends Form<TestForm['_lines'], Input> {
+  class TestForm extends Form<TestForm['lines'], Input> {
     readonly name = 'F1';
-    protected readonly _lines = {
+    readonly lines = {
       '1': new InputLine<Input>('key'),
       '2': new InputLine<Input>('key2'),
       '3': new InputLine<Input>('key2', undefined, 'FALLBACK')
@@ -119,16 +119,16 @@ test('input line', () => {
 });
 
 test('line stack', () => {
-  class FormZ extends Form<FormZ['_lines'], {'input': number}> {
+  class FormZ extends Form<FormZ['lines'], {'input': number}> {
     readonly name = 'Z';
-    protected readonly _lines = {
+    readonly lines = {
       '3': new InputLine<any, any>('input')
     }
   };
 
-  class FormZ2 extends Form<FormZ2['_lines']> {
+  class FormZ2 extends Form<FormZ2['lines']> {
     readonly name = 'Z-2';
-    protected readonly _lines = {
+    readonly lines = {
       '2c': new ComputedLine<number>((tr: TaxReturn): any => {
           return tr.getForm(FormZ).getLine('3').value(tr) * 0.2;
         })
@@ -144,10 +144,10 @@ test('line stack', () => {
 });
 
 test('accumulator line', () => {
-  class TestForm extends Form<TestForm['_lines']> {
+  class TestForm extends Form<TestForm['lines']> {
     readonly name = 'Form B';
     readonly supportsMultipleCopies = true;
-    protected readonly _lines = {
+    readonly lines = {
       g: new ConstantLine<number>(100.25)
     };
   };

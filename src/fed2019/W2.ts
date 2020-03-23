@@ -37,7 +37,7 @@ export interface W2Input {
 
 class Input<T extends keyof W2Input> extends InputLine<W2Input, T> {};
 
-export default class W2 extends Form<W2['_lines'], W2Input> {
+export default class W2 extends Form<W2['lines'], W2Input> {
   readonly name = 'W-2';
 
   readonly supportsMultipleCopies = true;
@@ -46,7 +46,7 @@ export default class W2 extends Form<W2['_lines'], W2Input> {
     return this.getInput('employee');
   }
 
-  protected readonly _lines = {
+  readonly lines = {
     'c': new Input('employer', 'Employer name'),
     'e': new Input('employee', 'Emplyee name'),
     '1': new Input('wages', 'Wages, tips, other compensation'),

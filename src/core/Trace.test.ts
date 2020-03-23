@@ -19,10 +19,10 @@ interface Input {
   value: number;
 };
 
-class TestForm extends Form<TestForm['_lines'], Input> {
+class TestForm extends Form<TestForm['lines'], Input> {
   readonly name = 'TF';
 
-  readonly _lines = {
+  readonly lines = {
     'i1': new InputLine<Input>('name'),
     'i2': new InputLine<Input>('value'),
     'c1': new ComputedLine((tr): string => {

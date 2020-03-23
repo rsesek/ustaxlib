@@ -10,10 +10,10 @@ import { clampToZero, undefinedToZero } from '../core/Math';
 import Form1040, { FilingStatus } from './Form1040';
 import Schedule1 from './Schedule1';
 
-export default class Form8960 extends Form<Form8960['_lines']> {
+export default class Form8960 extends Form<Form8960['lines']> {
   readonly name = '8960';
 
-  protected readonly _lines = {
+  readonly lines = {
     // Part 1
     // Section 6013 elections not supported.
     '1': new ReferenceLine(Form1040, '2b', 'Taxable interest'),

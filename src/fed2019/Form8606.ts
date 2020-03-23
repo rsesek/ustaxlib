@@ -20,14 +20,14 @@ export interface Form8606Input {
 
 class Input<T extends keyof Form8606Input> extends InputLine<Form8606Input, T> {};
 
-export default class Form8606 extends Form<Form8606['_lines'], Form8606Input> {
+export default class Form8606 extends Form<Form8606['lines'], Form8606Input> {
   readonly name = '8606';
 
   readonly supportsMultipleCopies = true;
 
   person() { return this.getInput('person'); }
 
-  protected readonly _lines = {
+  readonly lines = {
     'person': new Input('person'),
 
     // Part 1

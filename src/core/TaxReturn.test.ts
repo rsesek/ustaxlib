@@ -61,7 +61,7 @@ test('get non-existent person', () => {
 test('single-copy forms', () => {
   class TestForm extends Form<null> {
     readonly name = 'Test Form';
-    protected readonly _lines = null;
+    readonly lines = null;
   };
 
   const tr = new TestTaxReturn();
@@ -76,7 +76,7 @@ test('multiple-copy forms', () => {
   class TestForm extends Form<null> {
     readonly name = 'Test Form';
     readonly supportsMultipleCopies = true;
-    protected readonly _lines = null;
+    readonly lines = null;
   };
 
   const tr = new TestTaxReturn();
@@ -99,7 +99,7 @@ test('multiple-copy forms', () => {
 test('get non-existent form', () => {
   class TestForm extends Form<null> {
     readonly name = 'Test Form';
-    protected readonly _lines = null;
+    readonly lines = null;
   }
   const tr = new TestTaxReturn();
   expect(() => tr.getForm(TestForm)).toThrow(NotFoundError);
@@ -107,14 +107,14 @@ test('get non-existent form', () => {
   expect(tr.findForms(TestForm)).toEqual([]);
 });
 
-class PerPersonForm extends Form<PerPersonForm['_lines']> {
+class PerPersonForm extends Form<PerPersonForm['lines']> {
   private _person?: Person;
 
   readonly name = 'Per Person';
 
   readonly supportsMultipleCopies = true;
 
-  protected readonly _lines = {};
+  readonly lines = {};
 
   constructor(person?: Person) {
     super(undefined);

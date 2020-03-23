@@ -13,23 +13,19 @@ export default abstract class Form<L extends { [key: string]: Line<any> },
                                    I = unknown> {
   abstract readonly name: string;
 
-  protected abstract readonly _lines: L;
+  abstract readonly lines: L;
 
   readonly supportsMultipleCopies: boolean = false;
 
   private readonly _input?: I;
-
-  // Avoid using this; prefer the getLine() helpers declared below. This
-  // is only exposed for propagating line type information.
-  get lines(): L { return this._lines; }
 
   constructor(input?: I) {
     this._input = input;
   }
 
   init() {
-    for (const id in this._lines) {
-      let l = this._lines[id];
+    for (const id in this.lines) {
+      let l = this.lines[id];
       l._id = id;
       l.form = this;
     }
@@ -40,9 +36,9 @@ export default abstract class Form<L extends { [key: string]: Line<any> },
   }
 
   getLine<K extends keyof L>(id: K): L[K] {
-    if (!(id in this._lines))
+    if (!(id in this.lines))
       throw new NotFoundError(`Form ${this.name} does not have line ${id}`);
-    return this._lines[id];
+    return this.lines[id];
   }
 
   getValue<K extends keyof L>(tr: TaxReturn, id: K): ReturnType<L[K]['value']> {

@@ -18,11 +18,11 @@ export interface Form8995REITInput {
 // Dividends from REITs get preferential tax treatment, but the form used to
 // calculate that differs based off taxable income amounts. But the QBI
 // computation for RETIs is the same. This just models the REIT portion.
-export default class Form8995REIT extends Form<Form8995REIT['_lines']> {
+export default class Form8995REIT extends Form<Form8995REIT['lines']> {
   readonly name = '8995 REIT';
 
   // This uses line numbers from 8995-A.
-  protected readonly _lines = {
+  readonly lines = {
     // 1-26 not supported
     '27': new ComputedLine(() => 0, 'Total qualified business income component'), // Not supported.
     '28': new AccumulatorLine(Form1099DIV, '5', 'Qualified REIT dividends'),

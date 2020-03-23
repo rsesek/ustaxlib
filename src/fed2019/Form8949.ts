@@ -76,12 +76,12 @@ class Form8949Line extends Line<Form8949Total> {
   }
 };
 
-export default class Form8949 extends Form<Form8949['_lines']> {
+export default class Form8949 extends Form<Form8949['lines']> {
   readonly name = '8949';
 
   readonly supportsMultipleCopies = true;
 
-  protected readonly _lines = {
+  readonly lines = {
     'boxA': new Form8949Line(Form8949Box.A),
     'boxB': new Form8949Line(Form8949Box.B),
     'boxC': new Form8949Line(Form8949Box.C),

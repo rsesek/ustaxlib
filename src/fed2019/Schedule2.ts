@@ -13,10 +13,10 @@ import Form1099INT from './Form1099INT';
 import Form8959 from './Form8959';
 import Form8960 from './Form8960';
 
-export default class Schedule2 extends Form<Schedule2['_lines']> {
+export default class Schedule2 extends Form<Schedule2['lines']> {
   readonly name = 'Schedule 2';
 
-  protected readonly _lines = {
+  readonly lines = {
     '1': new ComputedLine((tr): number => {
       // TODO - this is just using Taxable Income, rather than AMT-limited
       // income

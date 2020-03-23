@@ -26,14 +26,14 @@ export interface Form1099INTInput {
 
 class Input<T extends keyof Form1099INTInput> extends InputLine<Form1099INTInput, T> {};
 
-export default class Form1099INT extends Form<Form1099INT['_lines'], Form1099INTInput> {
+export default class Form1099INT extends Form<Form1099INT['lines'], Form1099INTInput> {
   readonly name = '1099-INT';
 
   readonly supportsMultipleCopies = true;
 
   person() { return this.getInput('payee'); }
 
-  protected readonly _lines = {
+  readonly lines = {
     'payer': new Input('payer'),
     'recipient': new Input('payee'),
     '1': new Input('interest'),

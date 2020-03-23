@@ -58,10 +58,10 @@ class Input<T extends keyof Schedule1Input> extends InputLine<Schedule1Input, T>
   }
 };
 
-export default class Schedule1 extends Form<Schedule1['_lines'], Schedule1Input> {
+export default class Schedule1 extends Form<Schedule1['lines'], Schedule1Input> {
   readonly name = 'Schedule 1';
 
-  readonly _lines = {
+  readonly lines = {
     // Part 1
     '1': new ComputedLine((tr): number => {
       if (this.hasInput('stateAndLocalTaxableRefunds'))
@@ -150,10 +150,10 @@ export interface SALTWorksheetInput {
   prevYearFilingStatus?: FilingStatus;
 };
 
-export class SALTWorksheet extends Form<SALTWorksheet['_lines'], SALTWorksheetInput> {
+export class SALTWorksheet extends Form<SALTWorksheet['lines'], SALTWorksheetInput> {
   readonly name = 'SALT Refund Worksheet';
 
-  protected readonly _lines = {
+  readonly lines = {
     '1': new ComputedLine((tr): number => {
       const refunds = tr.findForm(Schedule1).getInput('stateAndLocalTaxableRefunds');
       const prevYear = this.getInput('prevYearSalt');

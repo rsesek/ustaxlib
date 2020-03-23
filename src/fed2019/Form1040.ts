@@ -30,10 +30,10 @@ export interface Form1040Input {
   filingStatus: FilingStatus;
 };
 
-export default class Form1040 extends Form<Form1040['_lines'], Form1040Input> {
+export default class Form1040 extends Form<Form1040['lines'], Form1040Input> {
   readonly name = '1040';
 
-  protected readonly _lines = {
+  readonly lines = {
     '1': new AccumulatorLine(W2, '1', 'Wages, salaries, tips, etc.'),
     '2a': new ComputedLine((tr): number => {
       const value = (new AccumulatorLine(Form1099INT, '8')).value(tr) +
@@ -247,10 +247,10 @@ export function computeTax(income: number, filingStatus: FilingStatus): number {
   return ((income - bracketStart) * bracket[1]) + bracket[2];
 };
 
-export class QDCGTaxWorksheet extends Form<QDCGTaxWorksheet['_lines']> {
+export class QDCGTaxWorksheet extends Form<QDCGTaxWorksheet['lines']> {
   readonly name = 'QDCG Tax Worksheet';
 
-  protected readonly _lines = {
+  readonly lines = {
     '1': new ReferenceLine(Form1040, '11b', 'Taxable income'),
     '2': new ReferenceLine(Form1040, '3a', 'Qualified dividends'),
     '3': new ComputedLine((tr): number => {
