@@ -9,7 +9,8 @@ module.exports = {
   collectCoverage: true,
   collectCoverageFrom: [
     '**/*.ts',
-    '!dist/**/*'
+    '!dist/**/*',
+    '!examples/*',
   ],
   testPathIgnorePatterns: [
     '/node_modules/',

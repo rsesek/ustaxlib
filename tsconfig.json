@@ -8,5 +8,9 @@
     "esModuleInterop": true,
     "declaration": true,
     "outDir": "dist/"
-  }
+  },
+  "exclude": [
+    "dist/*",
+    "examples/*"
+  ]
 }
