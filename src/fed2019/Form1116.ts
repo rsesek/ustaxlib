@@ -4,7 +4,7 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
 import { Form, Person, TaxReturn } from '../core';
-import { ComputedLine, InputLine, ReferenceLine } from '../core/Line';
+import { ComputedLine, InputLine, ReferenceLine, UnsupportedLine, sumFormLines } from '../core/Line';
 import { UnsupportedFeatureError } from '../core/Errors';
 import { reduceBySum } from '../core/Math';
 
@@ -47,9 +47,9 @@ export default class Form1116 extends Form<Form1116['lines'], Form1116Input> {
     'i': new Input('posessionName'),
     '1a': new Input('grossForeignIncome'),
     // 1b not supported - services as an employee.
-    // 2 not supported - Expenses definitely related to the income
+    '2': new UnsupportedLine('Expenses definitely related to the income'),
     '3a': new ReferenceLine(Form1040, '9', 'Deductions'),
-    '3b': new ComputedLine(() => 0, 'Other deductions'),  // Not supported
+    '3b': new UnsupportedLine('Other deductions'),
     '3c': new ComputedLine((tr): number => {
       return this.getValue(tr, '3a') + this.getValue(tr, '3b');
     }),
@@ -75,28 +75,28 @@ export default class Form1116 extends Form<Form1116['lines'], Form1116Input> {
     '3g': new ComputedLine((tr): number => {
       return this.getValue(tr, '3c') * this.getValue(tr, '3f');
     }),
-    // 4 not supported - Pro rata share of interest expense
+    '4a': new UnsupportedLine('Home mortgage interest'),
+    '4b': new UnsupportedLine('Other interest expense'),
     '5': new Input('lossesFromForeignSources', undefined, 0),
     '6': new ComputedLine((tr): number => {
-      // Should include 2, 4a, 4b.
-      return this.getValue(tr, '3g') + this.getValue(tr, '5');
+      return sumFormLines(tr, this, ['2', '3g', '4a', '4b', '5']);
     }),
     '7': new ComputedLine((tr): number => this.getValue(tr, '1a') - this.getValue(tr, '6')),
     // Skip the complicated Part II matrix and just use the input value.
     '8': new Input('totalForeignTaxesPaidOrAccrued'),
     '9': new ReferenceLine(Form1116 as any, '8'),
-    // 10 not supported - Carryback or carryover
-    '11': new ComputedLine((tr): number => this.getValue(tr, '9') /* + this.getValue(tr, '10') */),
-    // 12 not supported - Reduction in foreign taxes
-    // 13 not supported - Taxes reclassified under high tax kickout
+    '10': new UnsupportedLine('Carryback or carryover'),
+    '11': new ComputedLine((tr): number => this.getValue(tr, '9') + this.getValue(tr, '10')),
+    '12': new UnsupportedLine('Reduction in foreign taxes'),
+    '13': new UnsupportedLine('Taxes reclassified under high tax kickout'),
     '14': new ComputedLine((tr): number => {
-      return this.getValue(tr, '11') /*+
+      return this.getValue(tr, '11') +
              this.getValue(tr, '12') +
-             this.getValue(tr, '13')*/;
+             this.getValue(tr, '13');
     }),
     '15': new ReferenceLine(Form1116 as any, '7'),
-    // 16 not supported - Adjustments to line 15
-    '17': new ComputedLine((tr): number => this.getValue(tr, '15') /* + this.getValue(tr, '16') */),
+    '16': new UnsupportedLine('Adjustments to line 15'),
+    '17': new ComputedLine((tr): number => this.getValue(tr, '15') + this.getValue(tr, '16')),
     // TODO - This does not handle necessary adjustments.
     '18': new ReferenceLine(Form1040, '11b'),
     '19': new ComputedLine((tr): number => this.getValue(tr, '17') / this.getValue(tr, '18')),
@@ -111,7 +111,7 @@ export default class Form1116 extends Form<Form1116['lines'], Form1116Input> {
     '22': new ComputedLine((tr): number => Math.min(this.getValue(tr, '14'), this.getValue(tr, '21'))),
     // 23-30 not supported (other category F1116)
     '31': new ReferenceLine(Form1116 as any, '22'),
-    // 32 not supported - Reduction of credit for international boycott operations
-    '33': new ComputedLine((tr): number => this.getValue(tr, '31') /* - this.getValue(tr, '32')*/),
+    '32': new UnsupportedLine('Reduction of credit for international boycott operations'),
+    '33': new ComputedLine((tr): number => this.getValue(tr, '31') - this.getValue(tr, '32')),
   };
 };

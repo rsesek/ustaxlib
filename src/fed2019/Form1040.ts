@@ -4,9 +4,9 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
 import { Form, TaxReturn } from '../core';
-import { Line, AccumulatorLine, ComputedLine, ReferenceLine, sumLineOfForms } from '../core/Line';
+import { Line, AccumulatorLine, ComputedLine, ReferenceLine, UnsupportedLine, sumFormLines, sumLineOfForms } from '../core/Line';
 import { UnsupportedFeatureError } from '../core/Errors';
-import { clampToZero, reduceBySum } from '../core/Math';
+import { clampToZero, reduceBySum, undefinedToZero } from '../core/Math';
 
 import Form8606 from './Form8606';
 import Form8959 from './Form8959';
@@ -54,10 +54,11 @@ export default class Form1040 extends Form<Form1040['lines'], Form1040Input> {
     '4b': new ComputedLine((tr): number => {
       const f8606s = tr.findForms(Form8606);
       return sumLineOfForms(tr, f8606s, '15c') + sumLineOfForms(tr, f8606s, '18');
-    }, 'IRA distributions, taxadble amount'),
-    '4d': new ComputedLine(() => 0),
-    // 4c and 4d are not supported
-    // 5a and 5b are not supported
+    }, 'IRA distributions, taxable amount'),
+    '4c': new UnsupportedLine('Pensions and annuities'),
+    '4d': new UnsupportedLine('Pensions and annuities, taxable amount'),
+    '5a': new UnsupportedLine('Social security benefits'),
+    '5b': new UnsupportedLine('Social security benefits, taxable amount'),
     '6': new ComputedLine((tr): number => {
       const schedD = tr.findForm(ScheduleD);
       if (!schedD)
@@ -71,16 +72,7 @@ export default class Form1040 extends Form<Form1040['lines'], Form1040Input> {
     '7a': new ReferenceLine(Schedule1, '9', 'Other income from Schedule 1', 0),
 
     '7b': new ComputedLine((tr): number => {
-      let income = 0;
-      income += this.getValue(tr, '1');
-      income += this.getValue(tr, '2b');
-      income += this.getValue(tr, '3b');
-      income += this.getValue(tr, '4b');
-      income += this.getValue(tr, '4d');
-      //income += this.getValue(tr, '5b');
-      income += this.getValue(tr, '6');
-      income += this.getValue(tr, '7a');
-      return income;
+      return sumFormLines(tr, this, ['1', '2b', '3b', '4b', '4d', '5b', '6', '7a']);
     }, 'Total income'),
 
     '8a': new ReferenceLine(Schedule1, '22', 'Adjustments to income', 0),
@@ -142,9 +134,15 @@ export default class Form1040 extends Form<Form1040['lines'], Form1040Input> {
       return this.getValue(tr, '12a') + tr.getForm(Schedule2).getValue(tr, '3');
     }, 'Additional tax'),
 
-    // Not supported: 13a - child tax credit
+    '13a': new UnsupportedLine('Child tax credit'),
 
-    '13b': new ReferenceLine(Schedule3, '7', 'Additional credits', 0),
+    '13b': new ComputedLine((tr): number => {
+      let value  = this.getValue(tr, '13a');
+      const sched3 = tr.findForm(Schedule3);
+      if (sched3)
+        value += undefinedToZero(sched3.getValue(tr, '7'));
+      return value;
+    }, 'Additional credits'),
 
     '14': new ComputedLine((tr): number => {
       return clampToZero(this.getValue(tr, '12b') - this.getValue(tr, '13b'));
@@ -174,13 +172,12 @@ export default class Form1040 extends Form<Form1040['lines'], Form1040Input> {
       return reduceBySum(withholding) + additionalMedicare;
     }, 'Federal income tax withheld'),
 
-    // 18a not supported - Earned income credit (EIC)
-    // 18b not supported - Additional child tax credit. Attach Schedule 8812
-    // 18c not supported - American opportunity credit from Form 8863, line 8
+    '18a': new UnsupportedLine('Earned income credit (EIC)'),
+    '18b': new UnsupportedLine('Additional child tax credit. Attach Schedule 8812'),
+    '18c': new UnsupportedLine('American opportunity credit from Form 8863, line 8'),
     '18d': new ReferenceLine(Schedule3, '14', undefined, 0),
     '18e': new ComputedLine((tr): number => {
-      // Should include 18a-18c.
-      return this.getValue(tr, '18d');
+      return sumFormLines(tr, this, ['18a', '18b', '18c', '18d']);
     }),
 
     '19': new ComputedLine((tr): number => {
@@ -260,7 +257,7 @@ export class QDCGTaxWorksheet extends Form<QDCGTaxWorksheet['lines']> {
       return tr.getForm(Form1040).getValue(tr, '6');
     }),
     '4': new ComputedLine((tr): number => this.getValue(tr, '2') + this.getValue(tr, '3')),
-    '5': new ComputedLine(() => 0), // Not supported - Form 4952/4g (nvestment interest expense deduction)
+    '5': new UnsupportedLine('Form 4952@4g (Investment interest expense deduction)'),
     '6': new ComputedLine((tr): number => clampToZero(this.getValue(tr, '4') - this.getValue(tr, '5'))),
     '7': new ComputedLine((tr): number => clampToZero(this.getValue(tr, '1') - this.getValue(tr, '6'))),
     '8': new ComputedLine((tr): number => {

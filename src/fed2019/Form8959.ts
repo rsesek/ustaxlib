@@ -4,7 +4,7 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
 import { Form, TaxReturn } from '../core';
-import { Line, AccumulatorLine, ComputedLine, ReferenceLine } from '../core/Line';
+import { Line, AccumulatorLine, ComputedLine, ReferenceLine, UnsupportedLine, sumFormLines } from '../core/Line';
 import { clampToZero } from '../core/Math';
 
 import Form1040, { FilingStatus } from './Form1040';
@@ -15,11 +15,10 @@ export default class Form8959 extends Form<Form8959['lines']> {
 
   readonly lines = {
     '1': new AccumulatorLine(W2, '5', 'Medicare wages'),
-    // 2 is not supported (Unreported tips from Form 4137)
-    // 3 is not supported (Wages from Form 8919)
+    '2': new UnsupportedLine('Unreported tips from Form 4137'),
+    '3': new UnsupportedLine('Wages from Form 8919'),
     '4': new ComputedLine((tr): number => {
-      // Should include 2-3.
-      return this.getValue(tr, '1');
+      return sumFormLines(tr, this, ['1', '2', '3']);
     }),
     '5': new ComputedLine((tr): number => {
       return Form8959.filingStatusLimit(tr.getForm(Form1040).filingStatus);
@@ -46,10 +45,9 @@ export default class Form8959 extends Form<Form8959['lines']> {
     '22': new ComputedLine((tr): number => {
       return clampToZero(this.getValue(tr, '19') - this.getValue(tr, '21'));
     }, 'Additional Medicare withholding on Medicare wages'),
-    // 23 is not supported (Additional Medicare Tax withholding on railroad retirement (RRTA) compensation)
+    '23': new UnsupportedLine('Additional Medicare Tax withholding on railroad retirement (RRTA) compensation'),
     '24': new ComputedLine((tr): number => {
-      // Should include 23.
-      return this.getValue(tr, '22');
+      return this.getValue(tr, '22') + this.getValue(tr, '23');
     }),
   };
 

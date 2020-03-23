@@ -4,7 +4,7 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
 import { Form, TaxReturn } from '../core';
-import { ComputedLine, ReferenceLine } from '../core/Line';
+import { ComputedLine, ReferenceLine, UnsupportedLine, sumFormLines } from '../core/Line';
 import { clampToZero, undefinedToZero } from '../core/Math';
 
 import Form1040, { FilingStatus } from './Form1040';
@@ -18,30 +18,23 @@ export default class Form8960 extends Form<Form8960['lines']> {
     // Section 6013 elections not supported.
     '1': new ReferenceLine(Form1040, '2b', 'Taxable interest'),
     '2': new ReferenceLine(Form1040, '3b', 'Ordinary dividends'),
-    // 3 not supported - Annuities
-    // 4a not supported - Rental real estate, royalties, partnerships, S corporations, trusts, etc
-    // 4b not supported - Adjustment for net income or loss derived in the ordinary course of a nonsection 1411 trade or business
-    // 4c not supported - 4a+4b
+    '3': new UnsupportedLine('Annuities'),
+    '4a': new UnsupportedLine('Rental real estate, royalties, partnerships, S corporations, trusts, etc'),
+    '4b': new UnsupportedLine('Adjustment for net income or loss derived in the ordinary course of a nonsection 1411 trade or business'),
+    '4c': new ComputedLine((tr): number => this.getValue(tr, '4a') + this.getValue(tr, '4b')),
     '5a': new ComputedLine((tr): number => {
       return (new ReferenceLine(Form1040, '6')).value(tr) +
              undefinedToZero(new ReferenceLine(Schedule1, '4', undefined, 0).value(tr));
     }, 'Net gain or loss'),
-    // 5b not supported - Net gain or loss from disposition of property that is not subject to net investment income tax
-    // 5c not supported - Adjustment from disposition of partnership interest or S corporation stock
+    '5b': new UnsupportedLine('Net gain or loss from disposition of property that is not subject to net investment income tax'),
+    '5c': new UnsupportedLine('Adjustment from disposition of partnership interest or S corporation stock'),
     '5d': new ComputedLine((tr): number => {
-      // Should include 5b-5c.
-      return this.getValue(tr, '5a');
+      return sumFormLines(tr, this, ['5a', '5b', '5c']);
     }),
-    // 6 not supported - Adjustments to investment income for certain CFCs and PFICs
-    // 7 not supported - Other modifications to investment income
+    '6': new UnsupportedLine('Adjustments to investment income for certain CFCs and PFICs'),
+    '7': new UnsupportedLine('Other modifications to investment income'),
     '8': new ComputedLine((tr): number => {
-      return this.getValue(tr, '1') +
-             this.getValue(tr, '2') +
-             /*this.getValue(tr, '3') +
-             this.getValue(tr, '4c') +*/
-             this.getValue(tr, '5d') /*+
-             this.getValue(tr, '6') +
-             this.getValue(tr, '7')*/;
+      return sumFormLines(tr, this, ['1', '2', '3', '4c', '5d', '6', '7']);
     }),
 
     // Part 2

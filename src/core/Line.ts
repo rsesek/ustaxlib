@@ -122,8 +122,27 @@ export class AccumulatorLine<F extends Form<any>,
   }
 };
 
+export class UnsupportedLine extends Line<number> {
+  constructor(description?: string) {
+    super(description || 'Unsupported');
+  }
+
+  value(tr): number {
+    // Unsupported lines are deliberately omitted from Trace.
+    return 0;
+  }
+};
+
 export function sumLineOfForms<F extends Form<any>, L extends keyof F['lines']>(
     tr: TaxReturn, forms: F[], line: L): number {
   const reducer = (acc: number, curr: F) => acc + curr.getValue(tr, line);
   return forms.reduce(reducer, 0);
+}
+
+export function sumFormLines<F extends Form<any>, L extends keyof F['lines']>(
+    tr: TaxReturn, form: F, lines: L[]): number {
+  let value = 0;
+  for (const line of lines)
+    value += form.getValue(tr, line);
+  return value;
 }

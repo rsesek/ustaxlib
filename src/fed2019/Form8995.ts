@@ -4,7 +4,7 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
 import { Form, Person, TaxReturn } from '../core';
-import { AccumulatorLine, ComputedLine, InputLine } from '../core/Line';
+import { AccumulatorLine, ComputedLine, InputLine, UnsupportedLine } from '../core/Line';
 import { clampToZero } from '../core/Math';
 
 import Form1040 from './Form1040';
@@ -24,7 +24,7 @@ export default class Form8995REIT extends Form<Form8995REIT['lines']> {
   // This uses line numbers from 8995-A.
   readonly lines = {
     // 1-26 not supported
-    '27': new ComputedLine(() => 0, 'Total qualified business income component'), // Not supported.
+    '27': new UnsupportedLine('Total qualified business income component'),
     '28': new AccumulatorLine(Form1099DIV, '5', 'Qualified REIT dividends'),
     '29': new InputLine<Form8995REITInput>('qualifiedReitDividendCarryforward', undefined, 0),
     '30': new ComputedLine((tr): number => clampToZero(this.getValue(tr, '28') + this.getValue(tr, '29'))),
@@ -53,7 +53,7 @@ export default class Form8995REIT extends Form<Form8995REIT['lines']> {
     '35': new ComputedLine((tr): number => clampToZero(this.getValue(tr, '33') - this.getValue(tr, '34'))),
     '36': new ComputedLine((tr): number => this.getValue(tr, '35') * 0.20, 'Income limitation'),
     '37': new ComputedLine((tr): number => Math.min(this.getValue(tr, '32'), this.getValue(tr, '36'))),
-    '38': new ComputedLine(() => 0, 'DPAD under section 199A(g) allocated from an agricultural or horticultural cooperative'),  // Not supported,
+    '38': new UnsupportedLine('DPAD under section 199A(g) allocated from an agricultural or horticultural cooperative'),
     '39': new ComputedLine((tr): number => this.getValue(tr, '37') + this.getValue(tr, '38')),
     '40': new ComputedLine((tr): number => Math.min(0, this.getValue(tr, '28') + this.getValue(tr, '29')), 'Total qualified REIT dividends and PTP loss carryforward.'),
   };

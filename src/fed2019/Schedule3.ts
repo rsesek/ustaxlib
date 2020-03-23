@@ -4,7 +4,7 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
 import { Form, TaxReturn } from '../core';
-import { AccumulatorLine, ComputedLine, InputLine, ReferenceLine } from '../core/Line';
+import { AccumulatorLine, ComputedLine, InputLine, ReferenceLine, UnsupportedLine, sumFormLines } from '../core/Line';
 import { NotFoundError, UnsupportedFeatureError } from '../core/Errors';
 
 import Form1040, { FilingStatus } from './Form1040';
@@ -35,31 +35,29 @@ export default class Schedule3 extends Form<Schedule3['lines'], Schedule3Input> 
       }
       return tr.getForm(Form1116).getValue(tr, '33');
     }, 'Foreign tax credit'),
-    // 2 not supported - Credit for child and dependent care expenses. Attach Form 2441
-    // 3 not supported - Education credits from Form 8863, line 19
-    // 4 not supported - Retirement savings contributions credit. Attach Form 8880
-    // 5 not supported - Residential energy credits. Attach Form 5695
-    // 6a not supported - Form 3800
-    // 6b not supported - Form 8801
-    // 6c not supported - Other nonrefundable credits
+    '2': new UnsupportedLine('Credit for child and dependent care expenses. Attach Form 2441'),
+    '3': new UnsupportedLine('Education credits from Form 8863, line 19'),
+    '4': new UnsupportedLine('Retirement savings contributions credit. Attach Form 8880'),
+    '5': new UnsupportedLine('Residential energy credits. Attach Form 5695'),
+    '6a': new UnsupportedLine('Form 3800'),
+    '6b': new UnsupportedLine('Form 8801'),
+    '6c': new UnsupportedLine('Other nonrefundable credits'),
     '7': new ComputedLine((tr): number => {
-      // Should include 2-6.
-      return this.getValue(tr, '1');
+      return sumFormLines(tr, this, ['1', '2', '3', '4', '5', '6a', '6b', '6c']);
     }),
 
     // Part 2
     '8': new InputLine<Schedule3Input>('estimatedTaxPayments'),
-    // 9 not supported - Net premium tax credit. Attach Form 8962
-    // 10 not supported - Amount paid with request for extension to file (see instructions)
-    // 11 not supported - Excess social security and tier 1 RRTA tax withheld
-    // 12 not supported - Credit for federal tax on fuels. Attach Form 4136
-    // 13a not supported - Form 2439
+    '9': new UnsupportedLine('Net premium tax credit. Attach Form 8962'),
+    '10': new UnsupportedLine('Amount paid with request for extension to file (see instructions)'),
+    '11': new UnsupportedLine('Excess social security and tier 1 RRTA tax withheld'),
+    '12': new UnsupportedLine('Credit for federal tax on fuels. Attach Form 4136'),
+    '13a': new UnsupportedLine('Form 2439'),
     // 13b is reserved
-    // 13c not supported - Form 8885
-    // 13d not supported - Other refundable credits
+    '13c': new UnsupportedLine('Form 8885'),
+    '13d': new UnsupportedLine('Other refundable credits'),
     '14': new ComputedLine((tr): number => {
-      // Should include 9-13.
-      return this.getValue(tr, '8');
+      return sumFormLines(tr, this, ['8', '9', '10', '11', '12', '13a', '13c', '13d']);
     }),
   };
 };

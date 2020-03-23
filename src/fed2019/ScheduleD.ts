@@ -4,7 +4,7 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
 import { Form, Person, TaxReturn } from '../core';
-import { Line, AccumulatorLine, ComputedLine, ReferenceLine, sumLineOfForms } from '../core/Line';
+import { Line, AccumulatorLine, ComputedLine, ReferenceLine, UnsupportedLine, sumFormLines, sumLineOfForms } from '../core/Line';
 import { clampToZero } from '../core/Math';
 import { NotFoundError, UnsupportedFeatureError } from '../core/Errors';
 
@@ -17,35 +17,34 @@ export default class ScheduleD extends Form<ScheduleD['lines']> {
 
   readonly lines = {
     // 1a not supported (Totals for all short-term transactions reported on Form 1099-B for which basis was reported to the IRS and for which you have no adjustments)
-    // 4 is not supported (Short-term gain from Form 6252 and short-term gain or (loss) from Forms 4684, 6781, and 8824)
-    // 5 is not supported (Net short-term gain or (loss) from partnerships, S corporations, estates, and trusts from Schedule(s) K-1)
-    // 6 is not supported (Short-term capital loss carryover. Enter the amount, if any, from line 8 of your Capital Loss Carryover Worksheet in the instructions)
+    '4': new UnsupportedLine(),  // Short-term gain from Form 6252 and short-term gain or (loss) from Forms 4684, 6781, and 8824
+    '5': new UnsupportedLine(),  // Net short-term gain or (loss) from partnerships, S corporations, estates, and trusts from Schedule(s) K-1
+    '6': new UnsupportedLine(),  // Short-term capital loss carryover. Enter the amount, if any, from line 8 of your Capital Loss Carryover Worksheet in the instructions
 
     '7': new ComputedLine((tr): number => {
       // 1-3 are computed by Form8949.
-      // 4-6 should be included.
+      let value = sumFormLines(tr, this, ['4', '5', '6']);
       const f8949 = tr.getForm(Form8949);
-      return f8949.getValue(tr, 'boxA').gainOrLoss +
-             f8949.getValue(tr, 'boxB').gainOrLoss +
-             f8949.getValue(tr, 'boxC').gainOrLoss;
+      value += f8949.getValue(tr, 'boxA').gainOrLoss;
+      value += f8949.getValue(tr, 'boxB').gainOrLoss;
+      value += f8949.getValue(tr, 'boxC').gainOrLoss;
+      return value;
     }, 'Net short-term capital gain or loss'),
 
     // 8a is not supported.
 
-    // 11 is not supported (Gain from Form 4797, Part I; long-term gain from Forms 2439 and 6252; and long-term gain or (loss) from Forms 4684, 6781, and 8824)
-    // 12 is not supported (Net long-term gain or (loss) from partnerships, S corporations, estates, and trusts from Schedule(s) K-1)
-
+    '11': new UnsupportedLine(),  // Gain from Form 4797, Part I; long-term gain from Forms 2439 and 6252; and long-term gain or (loss) from Forms 4684, 6781, and 8824
+    '12': new UnsupportedLine(),  // Net long-term gain or (loss) from partnerships, S corporations, estates, and trusts from Schedule(s) K-1
     '13': new AccumulatorLine(Form1099DIV, '2a', 'Capital gain distributions'),
-
-    // 14 is not supported (Long-term capital loss carryover. Enter the amount, if any, from line 13 of your Capital Loss Carryover Worksheet in the instructions)
+    '14': new UnsupportedLine('Long-term capital loss carryover'),
 
     '15': new ComputedLine((tr): number => {
-      // 11-14 should be included.
+      let value = sumFormLines(tr, this, ['11', '12', '13', '14']);
       const f8949 = tr.getForm(Form8949);
-      return f8949.getValue(tr, 'boxD').gainOrLoss +
-             f8949.getValue(tr, 'boxE').gainOrLoss +
-             f8949.getValue(tr, 'boxF').gainOrLoss +
-             this.getValue(tr, '13');
+      value += f8949.getValue(tr, 'boxD').gainOrLoss;
+      value += f8949.getValue(tr, 'boxE').gainOrLoss;
+      value += f8949.getValue(tr, 'boxF').gainOrLoss;
+      return value;
     }, 'Net long-term capital gain or loss'),
 
     '16': new ComputedLine((tr): number => {
@@ -61,12 +60,9 @@ export default class ScheduleD extends Form<ScheduleD['lines']> {
       // If no, goto 22.
     }, 'Both ST and LT are gains'),
 
-    '18': new ComputedLine((tr): number | undefined => {
-      // Not supported - only for gains on Qualified Small Business Stock or collectibles.
-      return 0;
-    }, '28% Rate Gain Worksheet Value'),
+    '18': new UnsupportedLine('28% Rate Gain Worksheet Value (Qualified Small Business Stock or collectibles.)'),
 
-    '19': new ComputedLine(() => undefined, 'Unrecaptured Section 1250 Gain Worksheet'), // Not supported.
+    '19': new UnsupportedLine('Unrecaptured Section 1250 Gain Worksheet'),
 
     '20': new ComputedLine((tr): boolean | undefined => {
       const l18 = this.getValue(tr, '18');
@@ -95,8 +91,8 @@ export class ScheduleDTaxWorksheet extends Form<ScheduleDTaxWorksheet['lines']> 
   readonly lines = {
     '1': new ReferenceLine(Form1040, '11b'),
     '2': new ReferenceLine(Form1040, '3a'),
-    // TODO 3 - form 4952
-    // TODO 4 - 4952
+    '3': new UnsupportedLine('Form 4952@4g'),
+    '4': new UnsupportedLine('Form 4952@4e'),
     '5': new ComputedLine((tr): number => 0),
     '6': new ComputedLine((tr): number => clampToZero(this.getValue(tr, '2') - this.getValue(tr, '5'))),
     '7': new ComputedLine((tr): number => {
@@ -104,8 +100,7 @@ export class ScheduleDTaxWorksheet extends Form<ScheduleDTaxWorksheet['lines']> 
       return Math.min(schedD.getValue(tr, '15'), schedD.getValue(tr, '16'));
     }),
     '8': new ComputedLine((tr): number => {
-      return 0;
-      // return Math.min(this.getValue(tr, '3'), this.getValue(tr, '4'));
+      return Math.min(this.getValue(tr, '3'), this.getValue(tr, '4'));
     }),
     '9': new ComputedLine((tr): number => clampToZero(this.getValue(tr, '7') - this.getValue(tr, '8'))),
     '10': new ComputedLine((tr): number => this.getValue(tr, '6') + this.getValue(tr, '9')),
@@ -167,8 +162,7 @@ export class ScheduleDTaxWorksheet extends Form<ScheduleDTaxWorksheet['lines']> 
     '34': new ComputedLine((tr): number => this.getValue(tr, '33') * 0.20),
     '35': new ComputedLine((tr): number => {
       const schedD = tr.getForm(ScheduleD);
-      // TODO - line 19 is not supported.
-      return Math.min(this.getValue(tr, '9'), Infinity); //schedD.getValue(tr, '19'));
+      return Math.min(this.getValue(tr, '9'), schedD.getValue(tr, '19'));
     }),
     '36': new ComputedLine((tr): number => this.getValue(tr, '10') + this.getValue(tr, '21')),
     '37': new ReferenceLine(ScheduleDTaxWorksheet as any, '1'),
@@ -196,11 +190,7 @@ export class ScheduleDTaxWorksheet extends Form<ScheduleDTaxWorksheet['lines']> 
       return computeTax(income, tr.getForm(Form1040).filingStatus);
     }),
     '45': new ComputedLine((tr): number => {
-      return this.getValue(tr, '31') +
-             this.getValue(tr, '34') +
-             this.getValue(tr, '40') +
-             this.getValue(tr, '43') +
-             this.getValue(tr, '44');
+      return sumFormLines(tr, this, ['31', '34', '40', '43', '44']);
     }),
     '46': new ComputedLine((tr): number => {
       const income = this.getValue(tr, '1');

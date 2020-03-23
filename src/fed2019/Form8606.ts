@@ -4,7 +4,7 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
 import { Form, Person, TaxReturn } from '../core';
-import { Line, AccumulatorLine, ComputedLine, InputLine, ReferenceLine } from '../core/Line';
+import { Line, AccumulatorLine, ComputedLine, InputLine, ReferenceLine, UnsupportedLine } from '../core/Line';
 import { clampToZero, undefinedToZero } from '../core/Math';
 
 export interface Form8606Input {
@@ -55,8 +55,7 @@ export default class Form8606 extends Form<Form8606['lines'], Form8606Input> {
       return l3 - this.getValue(tr, '13');
     }, 'Total basis in Traditional IRAs'),
     '15a': new ComputedLine((tr): number => this.getValue(tr, '7') - this.getValue(tr, '12')),
-    '15b': new ComputedLine((): number => 0, 'Amount attributable to qualified disaster distributions'),
-    // 15b not supported - amount on line 15a attributable
+    '15b': new UnsupportedLine('Amount attributable to qualified disaster distributions'),
     '15c': new ComputedLine((tr): number => this.getValue(tr, '15a') - this.getValue(tr, '15b'), 'Taxable amount'),
 
     // Part 2
