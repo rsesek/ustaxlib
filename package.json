@@ -2,6 +2,7 @@
   "name": "ustaxlib",
   "version": "1.0.0",
   "description": "A library for modeling individual US tax returns.",
+  "repository": "https://github.com/rsesek/ustaxlib",
   "scripts": {
     "dev": "jest --watch",
     "test": "jest",
@@ -16,7 +17,8 @@
   },
   "files": [
     "dist/**/*",
-    "src/**/*"
+    "src/**/*",
+    "examples/**/*"
   ],
   "devDependencies": {
     "@types/jest": "^25.1.2",
