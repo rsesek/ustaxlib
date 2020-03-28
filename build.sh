@@ -23,4 +23,5 @@ cp LICENSE.txt $OUTDIR
 
 # "Preprocess" the dist package.json.
 cp ./package.json $OUTDIR
-sed -i='' -e s@\"dist/@\"@ $OUTDIR/package.json
+sed -i.bak -e s@\"dist/@\"@ $OUTDIR/package.json
+rm $OUTDIR/package.json.bak
