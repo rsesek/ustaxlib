@@ -1,5 +1,8 @@
 # ustaxlib
 
+![CI](https://github.com/rsesek/ustaxlib/workflows/CI/badge.svg?branch=master)
+[![npm version](https://badge.fury.io/js/ustaxlib.svg)](https://badge.fury.io/js/ustaxlib)
+
 This project provides modules for modeling the US tax system for individuals. The `ustaxlib/core`
 module provides a generic framework for defining tax return forms. And peer modules like
 `ustaxlib/fed2019` provide forms for specific revisions/years of tax returns.
