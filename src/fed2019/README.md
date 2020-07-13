@@ -26,6 +26,7 @@ The following forms are at least partially supported:
 - **Form 1099-INT:** Interest income
 - **Form 1099-R:** Retirement account distributions
 - **Form 1116:** Foreign tax credit
+- **Form 6251:** Alternative Minimum Tax _without Form 1116 and Schedule D recalculation_
 - **Form 8606:** Nondeductible IRAs
 - **Form 8949:** Sales and dispositions of capital assets
 - **Form 8959:** Additional medicare tax

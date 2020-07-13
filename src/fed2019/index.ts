@@ -9,6 +9,7 @@ export { default as Form1099DIV } from './Form1099DIV';
 export { default as Form1099INT } from './Form1099INT';
 export { default as Form1099R } from './Form1099R';
 export { default as Form1116 } from './Form1116';
+export { default as Form6251 } from './Form6251';
 export { default as Form8606 } from './Form8606';
 export { default as Form8949 } from './Form8949';
 export { default as Form8959 } from './Form8959';

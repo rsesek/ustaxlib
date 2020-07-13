@@ -10,6 +10,7 @@ import { UnsupportedFeatureError } from '../core/Errors';
 import Form1040, { FilingStatus } from './Form1040';
 import Form1099DIV from './Form1099DIV';
 import Form1099INT from './Form1099INT';
+import Form6251 from './Form6251';
 import Form8959 from './Form8959';
 import Form8960 from './Form8960';
 
@@ -18,22 +19,10 @@ export default class Schedule2 extends Form<Schedule2['lines']> {
 
   readonly lines = {
     '1': new ComputedLine((tr): number => {
-      // TODO - this is just using Taxable Income, rather than AMT-limited
-      // income
-      const f1040 = tr.getForm(Form1040);
-      const taxableIncome = f1040.getValue(tr, '11b');
-      switch (f1040.filingStatus) {
-        case FilingStatus.Single:
-          if (taxableIncome < 510300)
-            return 0;
-        case FilingStatus.MarriedFilingJoint:
-          if (taxableIncome < 1020600)
-            return 0;
-        case FilingStatus.MarriedFilingSeparate:
-          if (taxableIncome < 510300)
-            return 0;
-      }
-      throw new UnsupportedFeatureError('The AMT is not supported');
+      const f6251 = tr.findForm(Form6251);
+      if (f6251)
+        return f6251.getValue(tr, '11');
+      return 0;
     }, 'AMT'),
     '2': new UnsupportedLine('Excess advance premium tax credit repayment'),
     '3': new ComputedLine((tr): number => {

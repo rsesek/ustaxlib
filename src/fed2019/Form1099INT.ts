@@ -44,7 +44,7 @@ export default class Form1099INT extends Form<Form1099INT['lines'], Form1099INTI
     '6': new Input('foreignTaxPaid', undefined, 0),
     '7': new Input('foreignCountryOrPosession'),
     '8': new Input('taxExemptInterest', undefined, 0),
-    '9': new Input('privateActivityBondInterest'),
+    '9': new Input('privateActivityBondInterest', undefined, 0),
     '10': new Input('marketDiscount'),
     '11': new Input('bondPremium'),
     '12': new Input('bondPremiumOnTreas'),
