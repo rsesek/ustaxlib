@@ -12,6 +12,7 @@ import Form1099INT from './Form1099INT';
 import Form1099B from './Form1099B';
 import Form1099R, { Box7Code } from './Form1099R';
 import Schedule2 from './Schedule2';
+import ScheduleA from './ScheduleA';
 import ScheduleD, { ScheduleDTaxWorksheet } from './ScheduleD';
 import Form8606 from './Form8606';
 import Form8959 from './Form8959';
@@ -205,4 +206,31 @@ test('backdoor and megabackdoor roth', () => {
 
   expect(f.getValue(tr, '4a')).toBe(6000);
   expect(f.getValue(tr, '4b')).toBe(0);
+});
+
+test('itemized deductions', () => {
+  const tr = new TaxReturn();
+  const f = new Form1040({
+    filingStatus: FilingStatus.MarriedFilingJoint
+  });
+  tr.addForm(f);
+  tr.addForm(new ScheduleA({
+    charitableGiftsCashOrCheck: 26000
+  }));
+
+  expect(f.getValue(tr, '9')).toBe(26000);
+});
+
+test('itemized deductions, forced', () => {
+  const tr = new TaxReturn();
+  const f = new Form1040({
+    filingStatus: FilingStatus.MarriedFilingJoint
+  });
+  tr.addForm(f);
+  tr.addForm(new ScheduleA({
+    stateAndLocalIncomeAndSalesTaxes: 10000,
+    forceItemize: true
+  }));
+
+  expect(f.getValue(tr, '9')).toBe(10000);
 });

@@ -18,6 +18,7 @@ import W2 from './W2';
 import Schedule1 from './Schedule1';
 import Schedule2 from './Schedule2';
 import Schedule3 from './Schedule3';
+import ScheduleA from './ScheduleA';
 import ScheduleD, { ScheduleDTaxWorksheet } from './ScheduleD';
 
 export enum FilingStatus {
@@ -81,14 +82,22 @@ export default class Form1040 extends Form<Form1040['lines'], Form1040Input> {
       return this.getValue(tr, '7b') - this.getValue(tr, '8a');
     }, 'Adjusted gross income'),
 
-    '9': new ComputedLine((): number => {
-      // TODO - Itemized deductions.
+    '9': new ComputedLine((tr): number => {
+      let deduction = 0;
+      const schedA = tr.findForm(ScheduleA);
+      if (schedA) {
+        deduction = schedA.getValue(tr, '17');
+        if (schedA.getValue(tr, '18')) {
+          return deduction;
+        }
+      }
+
       switch (this.filingStatus) {
         case FilingStatus.Single:
         case FilingStatus.MarriedFilingSeparate:
-          return 12200;
+          return Math.max(deduction, 12200);
         case FilingStatus.MarriedFilingJoint:
-          return 24400;
+          return Math.max(deduction, 24400);
       }
     }, 'Deduction'),
 

@@ -20,6 +20,7 @@ The following forms are at least partially supported:
 - **Schedule 3:** Additional credits and payments
 - **Schedule B:** _This form is not directly modeled, and instead the computations are done on
     1040._
+- **Schedule A:** Itemized deductions
 - **Schedule D:** Capital gains and losses
 - **Form 1099-B:** Proceeds from broker transactions
 - **Form 1099-DIV:** Dividend income

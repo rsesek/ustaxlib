@@ -18,6 +18,7 @@ export { default as Form8995REIT } from './Form8995';
 export { default as Schedule1 } from './Schedule1';
 export { default as Schedule2 } from './Schedule2';
 export { default as Schedule3 } from './Schedule3';
+export { default as ScheduleA } from './ScheduleA';
 export { default as ScheduleD } from './ScheduleD';
 export { default as TaxReturn } from './TaxReturn';
 export { default as W2 } from './W2';
