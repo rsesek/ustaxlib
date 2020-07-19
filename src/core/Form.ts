@@ -66,5 +66,9 @@ export type FormClass<T extends Form> = new (...args: any[]) => T;
 export function isFormT<T extends Form>(form: Form,
                                         formClass: FormClass<T>):
                                             form is T {
-  return form.constructor === formClass;
+  for (let proto = form; proto !== null; proto = Object.getPrototypeOf(proto)) {
+    if (proto.constructor === formClass)
+      return true;
+  }
+  return false;
 }

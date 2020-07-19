@@ -92,3 +92,22 @@ test('form types', () => {
   expect(isFormT(new FormA(), FormB)).toBe(false);
   expect(isFormT(new FormB(), FormB)).toBe(true);
 });
+
+test('derived form types', () => {
+  class Base extends Form<any> {
+    readonly name = 'Base';
+    readonly lines = {};
+  };
+  class Derived extends Base {};
+  class SecondDerived extends Derived {};
+
+  expect(isFormT(new Base(), Base)).toBe(true);
+  expect(isFormT(new Derived(), Derived)).toBe(true);
+
+  expect(isFormT(new Derived(), Base)).toBe(true);
+  expect(isFormT(new Base(), Derived)).toBe(false);
+
+  expect(isFormT(new SecondDerived(), SecondDerived)).toBe(true);
+  expect(isFormT(new SecondDerived(), Derived)).toBe(true);
+  expect(isFormT(new SecondDerived(), Base)).toBe(true);
+});
