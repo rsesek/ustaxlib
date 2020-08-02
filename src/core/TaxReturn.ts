@@ -11,6 +11,8 @@ export default abstract class TaxReturn {
   private _people: Person[] = [];
   private _forms: Form[] = [];
 
+  abstract readonly constants;
+
   abstract get year(): number;
 
   abstract get includeJointPersonForms(): boolean;

@@ -5,7 +5,7 @@
 
 import { Form, Person, TaxReturn } from '../core';
 import { Line, AccumulatorLine, ComputedLine, ReferenceLine, UnsupportedLine, sumFormLines, sumLineOfForms } from '../core/Line';
-import { clampToZero } from '../core/Math';
+import { Literal, clampToZero } from '../core/Math';
 import { NotFoundError, UnsupportedFeatureError } from '../core/Errors';
 
 import Form8949, { Form8949Box } from './Form8949';
@@ -89,8 +89,8 @@ export class ScheduleDTaxWorksheet extends Form {
   readonly name = 'Schedule D Tax Worksheet';
 
   readonly lines = {
-    '1': new ReferenceLine(Form1040, '11b'),
-    '2': new ReferenceLine(Form1040, '3a'),
+    '1': new ReferenceLine(Form1040, '11b', 'Taxable income'),
+    '2': new ReferenceLine(Form1040, '3a', 'Qualified dividends'),
     '3': new UnsupportedLine('Form 4952@4g'),
     '4': new UnsupportedLine('Form 4952@4e'),
     '5': new ComputedLine((tr): number => 0),
@@ -98,7 +98,7 @@ export class ScheduleDTaxWorksheet extends Form {
     '7': new ComputedLine((tr): number => {
       const schedD = tr.getForm(ScheduleD);
       return Math.min(schedD.getValue(tr, '15'), schedD.getValue(tr, '16'));
-    }),
+    }, 'Capital loss'),
     '8': new ComputedLine((tr): number => {
       return Math.min(this.getValue(tr, '3'), this.getValue(tr, '4'));
     }),
@@ -107,59 +107,40 @@ export class ScheduleDTaxWorksheet extends Form {
     '11': new ComputedLine((tr): number => {
       const schedD = tr.getForm(ScheduleD);
       return schedD.getValue(tr, '18') + schedD.getValue(tr, '19');
-    }),
+    }, '28% gains and unrecaptured gains'),
     '12': new ComputedLine((tr): number => Math.min(this.getValue(tr, '9'), this.getValue(tr, '11'))),
     '13': new ComputedLine((tr): number => this.getValue(tr, '10') - this.getValue(tr, '12')),
     '14': new ComputedLine((tr): number => clampToZero(this.getValue(tr, '1') - this.getValue(tr, '13'))),
     '15': new ComputedLine((tr): number => {
-      switch (tr.getForm(Form1040).filingStatus) {
-        case FilingStatus.Single:
-        case FilingStatus.MarriedFilingSeparate:
-          return 39375;
-        case FilingStatus.MarriedFilingJoint:
-          return 78750;
-      }
+      const fs = tr.getForm(Form1040).filingStatus;
+      return tr.constants.capitalGains.rate0MaxIncome[fs];
     }),
     '16': new ComputedLine((tr): number => Math.min(this.getValue(tr, '1'), this.getValue(tr, '15'))),
     '17': new ComputedLine((tr): number => Math.min(this.getValue(tr, '14'), this.getValue(tr, '16'))),
     '18': new ComputedLine((tr): number => clampToZero(this.getValue(tr, '1') - this.getValue(tr, '10'))),
     '19': new ComputedLine((tr): number => {
-      let threshold: number;
-      switch (tr.getForm(Form1040).filingStatus) {
-        case FilingStatus.Single:
-        case FilingStatus.MarriedFilingSeparate:
-          threshold = 160725;
-          break;
-        case FilingStatus.MarriedFilingJoint:
-          threshold = 321450;
-          break;
-      }
+      const fs = tr.getForm(Form1040).filingStatus;
+      const threshold = tr.constants.qualifiedBusinessIncomeDeductionThreshold[fs];
       return Math.min(this.getValue(tr, '1'), threshold);
     }),
     '20': new ComputedLine((tr): number => Math.min(this.getValue(tr, '14'), this.getValue(tr, '19'))),
     '21': new ComputedLine((tr): number => Math.max(this.getValue(tr, '18'), this.getValue(tr, '20'))),
-    '22': new ComputedLine((tr): number => this.getValue(tr, '16') - this.getValue(tr, '17')),
+    '22': new ComputedLine((tr): number => this.getValue(tr, '16') - this.getValue(tr, '17'), 'Amount taxed at 0%'),
     '23': new ComputedLine((tr): number => Math.min(this.getValue(tr, '1'), this.getValue(tr, '13'))),
     '24': new ReferenceLine(ScheduleDTaxWorksheet as any, '22'),
     '25': new ComputedLine((tr): number => clampToZero(this.getValue(tr, '23') - this.getValue(tr, '24'))),
     '26': new ComputedLine((tr): number => {
-      switch (tr.getForm(Form1040).filingStatus) {
-        case FilingStatus.Single:
-          return 434550;
-        case FilingStatus.MarriedFilingSeparate:
-          return 244425;
-        case FilingStatus.MarriedFilingJoint:
-          return 488850;
-      }
+      const fs = tr.getForm(Form1040).filingStatus;
+      return tr.constants.capitalGains.rate15MaxIncome[fs];
     }),
     '27': new ComputedLine((tr): number => Math.min(this.getValue(tr, '1'), this.getValue(tr, '26'))),
     '28': new ComputedLine((tr): number => this.getValue(tr, '21') + this.getValue(tr, '22')),
     '29': new ComputedLine((tr): number => clampToZero(this.getValue(tr, '27') - this.getValue(tr, '28'))),
-    '30': new ComputedLine((tr): number => Math.min(this.getValue(tr, '25'), this.getValue(tr, '29'))),
-    '31': new ComputedLine((tr): number => this.getValue(tr, '30') * 0.15),
+    '30': new ComputedLine((tr): number => Math.min(this.getValue(tr, '25'), this.getValue(tr, '29')), 'Amount taxed at 15%'),
+    '31': new ComputedLine((tr): number => this.getValue(tr, '30') * Literal(0.15), '15% Tax'),
     '32': new ComputedLine((tr): number => this.getValue(tr, '24') + this.getValue(tr, '30')),
-    '33': new ComputedLine((tr): number => this.getValue(tr, '23') - this.getValue(tr, '32')),
-    '34': new ComputedLine((tr): number => this.getValue(tr, '33') * 0.20),
+    '33': new ComputedLine((tr): number => this.getValue(tr, '23') - this.getValue(tr, '32'), 'Amount taxed at 20%'),
+    '34': new ComputedLine((tr): number => this.getValue(tr, '33') * Literal(0.20), '20% Tax'),
     '35': new ComputedLine((tr): number => {
       const schedD = tr.getForm(ScheduleD);
       return Math.min(this.getValue(tr, '9'), schedD.getValue(tr, '19'));
@@ -168,7 +149,7 @@ export class ScheduleDTaxWorksheet extends Form {
     '37': new ReferenceLine(ScheduleDTaxWorksheet as any, '1'),
     '38': new ComputedLine((tr): number => clampToZero(this.getValue(tr, '36') - this.getValue(tr, '37'))),
     '39': new ComputedLine((tr): number => clampToZero(this.getValue(tr, '35') - this.getValue(tr, '38'))),
-    '40': new ComputedLine((tr): number => this.getValue(tr, '39') * 0.25),
+    '40': new ComputedLine((tr): number => this.getValue(tr, '39') * Literal(0.25), 'Tax on unrecaptured gains'),
     '41': new ComputedLine((tr): number => {
       const schedD = tr.getForm(ScheduleD);
       if (schedD.getValue(tr, '18'))
@@ -183,19 +164,19 @@ export class ScheduleDTaxWorksheet extends Form {
     '43': new ComputedLine((tr): number => {
       if (!tr.getForm(ScheduleD).getValue(tr, '18'))
         return 0;
-      return this.getValue(tr, '42') * 0.28;
-    }),
+      return this.getValue(tr, '42') * Literal(0.28);
+    }, '28% gain tax'),
     '44': new ComputedLine((tr): number => {
       const income = this.getValue(tr, '21');
-      return computeTax(income, tr.getForm(Form1040).filingStatus);
-    }),
+      return computeTax(income, tr);
+    }, 'Nominal rate tax'),
     '45': new ComputedLine((tr): number => {
       return sumFormLines(tr, this, ['31', '34', '40', '43', '44']);
-    }),
+    }, 'Schedule D tax'),
     '46': new ComputedLine((tr): number => {
       const income = this.getValue(tr, '1');
-      return computeTax(income, tr.getForm(Form1040).filingStatus);
-    }),
-    '47': new ComputedLine((tr): number => Math.min(this.getValue(tr, '45'), this.getValue(tr, '46'))),
+      return computeTax(income, tr);
+    }, 'Income tax'),
+    '47': new ComputedLine((tr): number => Math.min(this.getValue(tr, '45'), this.getValue(tr, '46')), 'Tax on all taxable income'),
   };
 };

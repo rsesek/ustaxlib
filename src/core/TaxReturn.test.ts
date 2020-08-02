@@ -11,6 +11,8 @@ import { NotFoundError, InconsistencyError } from './Errors';
 class TestTaxReturn extends TaxReturn {
   get year() { return 2019; }
 
+  readonly constants = {};
+
   includeJointPersonForms = false;
 };
 

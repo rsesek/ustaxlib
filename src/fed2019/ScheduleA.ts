@@ -41,7 +41,7 @@ export default class ScheduleA extends Form<ScheduleAInput> {
     // Medical and dental expenses
     '1': new Input('medicalAndDentalExpenses', 'Medical and dental expenses', 0),
     '2': new ReferenceLine(Form1040, '8b'),
-    '3': new ComputedLine((tr): number => this.getValue(tr, '2') * 0.075),
+    '3': new ComputedLine((tr): number => this.getValue(tr, '2') * tr.constants.medicalDeductionLimitationPercent),
     '4': new ComputedLine((tr): number => clampToZero(this.getValue(tr, '1') - this.getValue(tr, '3'))),
 
     // Taxes you paid
@@ -51,7 +51,7 @@ export default class ScheduleA extends Form<ScheduleAInput> {
     '5d': new ComputedLine((tr): number => sumFormLines(tr, this, ['5a', '5b', '5c'])),
     '5e': new ComputedLine((tr): number => {
       const fs = tr.getForm(Form1040).filingStatus;
-      const limit = fs == FilingStatus.MarriedFilingSeparate ? 5000 : 10000;
+      const limit = tr.constants.saltLimit[fs];
       return Math.min(this.getValue(tr, '5d'), limit);
     }),
     '6': new Input('otherTaxes', 'Other taxes', 0),

@@ -27,7 +27,7 @@ export default class Schedule3 extends Form<Schedule3Input> {
 
       const totalForeignTax = (new AccumulatorLine(Form1099DIV, '7')).value(tr) +
                               (new AccumulatorLine(Form1099INT, '6')).value(tr);
-      const limit = f1040.filingStatus == FilingStatus.MarriedFilingJoint ? 600 : 300;
+      const limit = tr.constants.foreignTaxCreditWithoutForm1116Limit[f1040.filingStatus];
 
       if (totalForeignTax < limit) {
         const sched2l2 = new ReferenceLine(Schedule2, '2', undefined, 0);

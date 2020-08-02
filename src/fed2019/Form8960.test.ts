@@ -76,7 +76,7 @@ describe('net investment income tax', () => {
       expect(f.getValue(tr, '11')).toBe(0);
       expect(f.getValue(tr, '12')).toBe(5555);
       expect(f.getValue(tr, '13')).toBe(305555);
-      expect(f.getValue(tr, '14')).toBe(Form8960.filingStatusLimit(filingStatus));
+      expect(f.getValue(tr, '14')).toBe(Form8960.filingStatusLimit(tr));
       expect(f.getValue(tr, '15')).toBe(filingStatusToResult[filingStatus]);
       expect(f.getValue(tr, '16')).toBe(5555);
       expect(f.getValue(tr, '17')).toBe(5555 * 0.038);

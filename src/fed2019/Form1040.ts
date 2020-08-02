@@ -92,13 +92,7 @@ export default class Form1040 extends Form<Form1040Input> {
         }
       }
 
-      switch (this.filingStatus) {
-        case FilingStatus.Single:
-        case FilingStatus.MarriedFilingSeparate:
-          return Math.max(deduction, 12200);
-        case FilingStatus.MarriedFilingJoint:
-          return Math.max(deduction, 24400);
-      }
+      return Math.max(deduction, tr.constants.standardDeduction[this.filingStatus]);
     }, 'Deduction'),
 
     '10': new ComputedLine((tr): number => {
@@ -136,7 +130,7 @@ export default class Form1040 extends Form<Form1040Input> {
       }
 
       // Otherwise, compute just on taxable income.
-      return computeTax(this.getValue(tr, '11b'), this.filingStatus);
+      return computeTax(this.getValue(tr, '11b'), tr);
     }, 'Tax'),
 
     '12b': new ComputedLine((tr): number => {
@@ -207,41 +201,9 @@ export default class Form1040 extends Form<Form1040Input> {
   }
 };
 
-export function computeTax(income: number, filingStatus: FilingStatus): number {
-  // From https://www.irs.gov/pub/irs-drop/rp-18-57.pdf, Section 3.01 and
-  // https://www.irs.gov/pub/irs-pdf/p17.pdf, 2019 Tax Rate Schedules (p254).
-  const taxBrackets = {
-    // Format is:
-    // [ limit-of-taxable-income, marginal-rate, base-tax ]
-    // If Income is over Row[0], pay Row[2] + (Row[1] * (Income - PreviousRow[0]))
-    [FilingStatus.MarriedFilingJoint]: [
-      [ 19400, 0.10, 0 ],
-      [ 78950, 0.12, 1940 ],
-      [ 168400, 0.22, 9086 ],
-      [ 321450, 0.24, 28765 ],
-      [ 408200, 0.32, 65497 ],
-      [ 612350, 0.35, 93257 ],
-      [ Infinity, 0.37, 164709.50 ]
-    ],
-    [FilingStatus.Single]: [
-      [ 9700, 0.10, 0 ],
-      [ 39475, 0.12, 970 ],
-      [ 84200, 0.22, 4543 ],
-      [ 160725, 0.24, 14382.50 ],
-      [ 204100, 0.32, 32748.50 ],
-      [ 510300, 0.35, 46628.50 ],
-      [ Infinity, 0.37, 153798.50 ]
-    ],
-    [FilingStatus.MarriedFilingSeparate]: [
-      [ 9700, 0.10, 0 ],
-      [ 39475, 0.12, 970 ],
-      [ 84200, 0.22, 4543 ],
-      [ 160725, 0.24, 14382.50 ],
-      [ 204100, 0.32, 32748.50 ],
-      [ 306175, 0.35, 46628.50 ],
-      [ Infinity, 0.37, 82354.75 ]
-    ]
-  }[filingStatus];
+export function computeTax(income: number, tr: TaxReturn): number {
+  const f1040 = tr.getForm(Form1040);
+  const taxBrackets = tr.constants.taxBrackets[f1040.filingStatus];
 
   let i = 0;
   while (taxBrackets[i][0] < income)
@@ -270,13 +232,8 @@ export class QDCGTaxWorksheet extends Form {
     '6': new ComputedLine((tr): number => clampToZero(this.getValue(tr, '4') - this.getValue(tr, '5'))),
     '7': new ComputedLine((tr): number => clampToZero(this.getValue(tr, '1') - this.getValue(tr, '6'))),
     '8': new ComputedLine((tr): number => {
-      switch (tr.getForm(Form1040).filingStatus) {
-        case FilingStatus.Single:
-        case FilingStatus.MarriedFilingSeparate:
-          return 39375;
-        case FilingStatus.MarriedFilingJoint:
-          return 78750;
-      };
+      const fs = tr.getForm(Form1040).filingStatus;
+      return tr.constants.capitalGains.rate0MaxIncome[fs];
     }),
     '9': new ComputedLine((tr): number => Math.min(this.getValue(tr, '1'), this.getValue(tr, '8'))),
     '10': new ComputedLine((tr): number => Math.min(this.getValue(tr, '7'), this.getValue(tr, '9'))),
@@ -287,11 +244,8 @@ export class QDCGTaxWorksheet extends Form {
     '13': new ReferenceLine(QDCGTaxWorksheet as any, '11'),
     '14': new ComputedLine((tr): number => this.getValue(tr, '12') - this.getValue(tr, '13')),
     '15': new ComputedLine((tr): number => {
-      switch (tr.getForm(Form1040).filingStatus) {
-        case FilingStatus.Single:                return 434550;
-        case FilingStatus.MarriedFilingSeparate: return 244425;
-        case FilingStatus.MarriedFilingJoint:    return 488850;
-      };
+      const fs = tr.getForm(Form1040).filingStatus;
+      return tr.constants.capitalGains.rate15MaxIncome[fs];
     }),
     '16': new ComputedLine((tr): number => Math.min(this.getValue(tr, '1'), this.getValue(tr, '15'))),
     '17': new ComputedLine((tr): number => this.getValue(tr, '7') + this.getValue(tr, '11')),
@@ -306,7 +260,7 @@ export class QDCGTaxWorksheet extends Form {
       return this.getValue(tr, '22') * 0.20;
     }, 'Amount taxed at 20%'),
     '24': new ComputedLine((tr): number => {
-      return computeTax(this.getValue(tr, '7'), tr.getForm(Form1040).filingStatus);
+      return computeTax(this.getValue(tr, '7'), tr);
     }, 'Tax on line 7'),
     '25': new ComputedLine((tr): number => {
       return this.getValue(tr, '20') +
@@ -314,7 +268,7 @@ export class QDCGTaxWorksheet extends Form {
              this.getValue(tr, '24');
     }),
     '26': new ComputedLine((tr): number => {
-      return computeTax(this.getValue(tr, '1'), tr.getForm(Form1040).filingStatus);
+      return computeTax(this.getValue(tr, '1'), tr);
     }, 'Tax on line 1'),
     '27': new ComputedLine((tr): number => {
       return Math.min(this.getValue(tr, '25'), this.getValue(tr, '26'));

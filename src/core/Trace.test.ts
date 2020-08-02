@@ -9,6 +9,8 @@ import { ComputedLine, InputLine, ReferenceLine } from './Line';
 import { Edge, getLastTraceList } from './Trace';
 
 class TestTaxReturn extends TaxReturn {
+  readonly constants = undefined;
+
   get year() { return 2019; }
 
   get includeJointPersonForms() { return false; }

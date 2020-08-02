@@ -41,12 +41,12 @@ export default class Schedule2 extends Form {
       let value = 0;
 
       // Additional medicare tax.
-      if (wages > Form8959.filingStatusLimit(filingStatus)) {
+      if (wages > Form8959.filingStatusLimit(tr)) {
         value += tr.getForm(Form8959).getValue(tr, '18');
       }
 
       // Net investment income tax.
-      if (wages > Form8960.filingStatusLimit(filingStatus) &&
+      if (wages > Form8960.filingStatusLimit(tr) &&
           (tr.findForms(Form1099DIV).length || tr.findForms(Form1099INT).length)) {
         value += tr.getForm(Form8960).getValue(tr, '17');
       }

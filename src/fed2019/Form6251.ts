@@ -5,7 +5,7 @@
 
 import { Form, TaxReturn } from '../core';
 import { AccumulatorLine, ComputedLine, ReferenceLine, UnsupportedLine, sumFormLines } from '../core/Line';
-import { clampToZero } from '../core/Math';
+import { Literal, clampToZero } from '../core/Math';
 
 import Form1040, { QDCGTaxWorksheet, FilingStatus } from './Form1040';
 import Form1099INT from './Form1099INT';
@@ -56,24 +56,20 @@ export default class Form6251 extends Form {
 
     // Part II
     '5': new ComputedLine((tr): number => {
-      // [ threshold, exemption ]
-      const exemptions = {
-        [FilingStatus.Single]: [ 510300, 71700 ],
-        [FilingStatus.MarriedFilingJoint]: [ 1020600, 111700 ],
-        [FilingStatus.MarriedFilingSeparate]: [ 510300, 55850 ],
-      };
-      const exemption = exemptions[tr.getForm(Form1040).filingStatus];
+      const fs = tr.getForm(Form1040).filingStatus;
+      const exemption = tr.constants.amt.exemption[fs];
+      const phaseout = tr.constants.amt.phaseout[fs];
 
       const l4 = this.getValue(tr, '4');
-      if (l4 < exemption[0])
-        return exemption[1];
+      if (l4 < phaseout)
+        return exemption;
 
       // Exemption worksheet:
-      const wl1 = exemption[1];
+      const wl1 = exemption;
       const wl2 = l4;
-      const wl3 = exemption[0];
+      const wl3 = phaseout;
       const wl4 = clampToZero(wl2 - wl3);
-      const wl5 = wl4 * 0.25;
+      const wl5 = wl4 * Literal(0.25);
       const wl6 = clampToZero(wl1 - wl5);
       return wl6;
     }),
@@ -97,7 +93,7 @@ export default class Form6251 extends Form {
       if (part3)
         return this.getValue(tr, '40');
 
-      return computeAmtTax(f1040.filingStatus, this.getValue(tr, '6'));
+      return computeAmtTax(tr, this.getValue(tr, '6'));
     }),
     '8': new ReferenceLine(Schedule3, '1', 'Alternative minimum tax foreign tax credit'),  // Not supported - AMT FTC recalculation
     '9': new ComputedLine((tr): number => {
@@ -137,18 +133,10 @@ export default class Form6251 extends Form {
     }),
     '16': new ComputedLine((tr): number => Math.min(this.getValue(tr, '12'), this.getValue(tr, '15'))),
     '17': new ComputedLine((tr): number => this.getValue(tr, '12') - this.getValue(tr, '16')),
-    '18': new ComputedLine((tr): number => {
-      const fs = tr.getForm(Form1040).filingStatus;
-      return computeAmtTax(fs, this.getValue(tr, '17'));
-    }),
+    '18': new ComputedLine((tr): number => computeAmtTax(tr, this.getValue(tr, '17'))),
     '19': new ComputedLine((tr): number => {
-      switch (tr.getForm(Form1040).filingStatus) {
-        case FilingStatus.Single:
-        case FilingStatus.MarriedFilingSeparate:
-          return 39375;
-        case FilingStatus.MarriedFilingJoint:
-          return 78750;
-      }
+      const fs = tr.getForm(Form1040).filingStatus;
+      return tr.constants.capitalGains.rate0MaxIncome[fs];
     }),
     '20': new ComputedLine((tr): number => {
       const schedDTW = tr.findForm(ScheduleDTaxWorksheet);
@@ -163,11 +151,8 @@ export default class Form6251 extends Form {
     '23': new ComputedLine((tr): number => Math.min(this.getValue(tr, '21'), this.getValue(tr, '22'))),
     '24': new ComputedLine((tr): number => this.getValue(tr, '22') - this.getValue(tr, '23')),
     '25': new ComputedLine((tr): number => {
-      switch (tr.getForm(Form1040).filingStatus) {
-        case FilingStatus.Single: return 434550;
-        case FilingStatus.MarriedFilingSeparate: return 244425;
-        case FilingStatus.MarriedFilingJoint: return 488850;
-      }
+      const fs = tr.getForm(Form1040).filingStatus;
+      return tr.constants.capitalGains.rate15MaxIncome[fs];
     }),
     '26': new ReferenceLine(Form6251 as any, '21'),
     '27': new ComputedLine((tr): number => {
@@ -189,20 +174,17 @@ export default class Form6251 extends Form {
     '36': new ComputedLine((tr): number => clampToZero(this.getValue(tr, '12') - this.getValue(tr, '35'))),
     '37': new ComputedLine((tr): number => this.getValue(tr, '36') * 0.25),
     '38': new ComputedLine((tr): number => sumFormLines(tr, this, ['18', '31', '34', '37'])),
-    '39': new ComputedLine((tr): number => {
-      const fs = tr.getForm(Form1040).filingStatus;
-      return computeAmtTax(fs, this.getValue(tr, '12'));
-    }),
+    '39': new ComputedLine((tr): number => computeAmtTax(tr, this.getValue(tr, '12'))),
     '40': new ComputedLine((tr): number => Math.min(this.getValue(tr, '38'), this.getValue(tr, '39'))),
   };
 };
 
-function computeAmtTax(filingStatus, amount) {
-  const mfs = filingStatus = FilingStatus.MarriedFilingSeparate;
-  const limit = mfs ? 97400 : 194800;
-  const sub = mfs ? 1948 : 3896;
+function computeAmtTax(tr: TaxReturn, amount) {
+  const fs = tr.getForm(Form1040).filingStatus;
+  const limit = tr.constants.amt.limitForRate28Percent[fs];
+  const sub = limit * 0.02;  // Difference between the two rates.
 
   if (amount < limit)
-    return amount * 0.26;
-  return (amount * 0.28) - sub;
+    return amount * Literal(0.26);
+  return (amount * Literal(0.28)) - sub;
 }

@@ -44,7 +44,7 @@ describe('additional medicare tax', () => {
       tr.addForm(new Schedule2());
 
       expect(form.getValue(tr, '4')).toBe(300000);
-      expect(form.getValue(tr, '5')).toBe(Form8959.filingStatusLimit(filingStatus));
+      expect(form.getValue(tr, '5')).toBe(Form8959.filingStatusLimit(tr));
       expect(form.getValue(tr, '6')).toBe(filingStatusToResults[filingStatus]['6']);
       expect(form.getValue(tr, '18')).toBeCloseTo(form.getValue(tr, '6') * 0.009);
 
@@ -80,7 +80,7 @@ describe('no additional medicare tax', () => {
       tr.addForm(new Schedule2());
 
       expect(form.getValue(tr, '4')).toBe(110000);
-      expect(form.getValue(tr, '5')).toBe(Form8959.filingStatusLimit(filingStatus));
+      expect(form.getValue(tr, '5')).toBe(Form8959.filingStatusLimit(tr));
       expect(form.getValue(tr, '6')).toBe(0);
       expect(form.getValue(tr, '18')).toBe(0);
 

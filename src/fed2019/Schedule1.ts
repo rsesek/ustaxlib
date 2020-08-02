@@ -179,13 +179,8 @@ export class SALTWorksheet extends Form<SALTWorksheetInput> {
     }),
     '4': new InputLine<SALTWorksheetInput>('prevYearItemizedDeductions'),
     '5': new ComputedLine((tr): number => {
-      switch (this.getInput('prevYearFilingStatus')) {
-        case FilingStatus.Single:
-        case FilingStatus.MarriedFilingSeparate:
-          return 12000;
-        case FilingStatus.MarriedFilingJoint:
-          return 24000;
-      }
+      const fs = this.getInput('prevYearFilingStatus');
+      return tr.constants.prevYearStandardDeduction[fs];
     }, 'Previous year standard deduction'),
     '6': new ComputedLine((tr): number => 0, 'Special situations'),  // Not supported
     '7': new ComputedLine((tr): number => this.getValue(tr, '5') + this.getValue(tr, '6')),

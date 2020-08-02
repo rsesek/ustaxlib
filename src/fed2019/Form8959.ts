@@ -21,13 +21,13 @@ export default class Form8959 extends Form {
       return sumFormLines(tr, this, ['1', '2', '3']);
     }),
     '5': new ComputedLine((tr): number => {
-      return Form8959.filingStatusLimit(tr.getForm(Form1040).filingStatus);
+      return tr.constants.medicare.additionalWithholdingLimit[tr.getForm(Form1040).filingStatus];
     }),
     '6': new ComputedLine((tr): number => {
       return clampToZero(this.getValue(tr, '4') - this.getValue(tr, '5'));
     }),
     '7': new ComputedLine((tr): number => {
-      return this.getValue(tr, '6') * 0.009;
+      return this.getValue(tr, '6') * tr.constants.medicare.additionalWithholdingRate;
     }, 'Additional Medicare tax on Medicare wages'),
 
     // All of Section 2 and 3 skipped.
@@ -40,7 +40,7 @@ export default class Form8959 extends Form {
     '19': new AccumulatorLine(W2, '6', 'Medicare tax withheld'),
     '20': new ReferenceLine(Form8959 as any, '1'),
     '21': new ComputedLine((tr): number => {
-      return this.getValue(tr, '20') * 0.0145;
+      return this.getValue(tr, '20') * tr.constants.medicare.withholdingRate;
     }, 'Regular Medicare withholding on Medicare wages'),
     '22': new ComputedLine((tr): number => {
       return clampToZero(this.getValue(tr, '19') - this.getValue(tr, '21'));
@@ -51,11 +51,8 @@ export default class Form8959 extends Form {
     }),
   };
 
-  static filingStatusLimit(filingStatus: FilingStatus): number {
-    switch (filingStatus) {
-      case FilingStatus.Single:                return 200000;
-      case FilingStatus.MarriedFilingJoint:    return 250000;
-      case FilingStatus.MarriedFilingSeparate: return 125000;
-    }
+  static filingStatusLimit(tr: TaxReturn): number {
+    const filingStatus = tr.getForm(Form1040).filingStatus;
+    return tr.constants.medicare.additionalWithholdingLimit[filingStatus];
   }
 };

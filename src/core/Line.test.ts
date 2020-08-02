@@ -9,6 +9,7 @@ import TaxReturn from './TaxReturn';
 import { NotFoundError } from './Errors';
 
 class TestTaxReturn extends TaxReturn {
+  readonly constants = undefined;
   get year() { return 2019; }
   get includeJointPersonForms() { return false; }
 };

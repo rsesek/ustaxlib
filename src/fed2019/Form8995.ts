@@ -5,7 +5,7 @@
 
 import { Form, Person, TaxReturn } from '../core';
 import { AccumulatorLine, ComputedLine, InputLine, UnsupportedLine } from '../core/Line';
-import { clampToZero } from '../core/Math';
+import { Literal, clampToZero } from '../core/Math';
 
 import Form1040 from './Form1040';
 import Form1099DIV from './Form1099DIV';
@@ -28,7 +28,7 @@ export default class Form8995REIT extends Form {
     '28': new AccumulatorLine(Form1099DIV, '5', 'Qualified REIT dividends'),
     '29': new InputLine<Form8995REITInput>('qualifiedReitDividendCarryforward', undefined, 0),
     '30': new ComputedLine((tr): number => clampToZero(this.getValue(tr, '28') + this.getValue(tr, '29'))),
-    '31': new ComputedLine((tr): number => this.getValue(tr, '30') * 0.20, 'REIT and PTP component'),
+    '31': new ComputedLine((tr): number => this.getValue(tr, '30') * Literal(0.20), 'REIT and PTP component'),
     '32': new ComputedLine((tr): number => this.getValue(tr, '27') + this.getValue(tr, '31'), 'QBI deduction before limitation'),
     '33': new ComputedLine((tr): number => {
       const f1040 = tr.getForm(Form1040);
@@ -51,7 +51,7 @@ export default class Form8995REIT extends Form {
       return value;
     }, 'Net capital gain'),
     '35': new ComputedLine((tr): number => clampToZero(this.getValue(tr, '33') - this.getValue(tr, '34'))),
-    '36': new ComputedLine((tr): number => this.getValue(tr, '35') * 0.20, 'Income limitation'),
+    '36': new ComputedLine((tr): number => this.getValue(tr, '35') * Literal(0.20), 'Income limitation'),
     '37': new ComputedLine((tr): number => Math.min(this.getValue(tr, '32'), this.getValue(tr, '36'))),
     '38': new UnsupportedLine('DPAD under section 199A(g) allocated from an agricultural or horticultural cooperative'),
     '39': new ComputedLine((tr): number => this.getValue(tr, '37') + this.getValue(tr, '38')),
