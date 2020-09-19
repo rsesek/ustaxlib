@@ -12,6 +12,7 @@ set -ex
 rm -rf $OUTDIR
 
 # Compile.
+tsc --version
 tsc
 
 # Drop tests from the compiled output.
