@@ -12,8 +12,8 @@ set -ex
 rm -rf $OUTDIR
 
 # Compile.
-tsc --version
-tsc
+npx tsc --version
+npx tsc
 
 # Drop tests from the compiled output.
 find $OUTDIR -type f -name '*.test.*' -exec rm {} +
