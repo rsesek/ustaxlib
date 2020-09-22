@@ -1,5 +1,9 @@
 # ustaxlib Change Log
 
+## 1.1.0
+- Add support for itemized deductions/Schedule A.
+- Add limited support for the AMT/Form 6251.
+
 ## 1.0.2
 - Only publish the dist/ folder.
 
