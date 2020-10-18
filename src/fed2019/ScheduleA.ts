@@ -34,7 +34,7 @@ export interface ScheduleAInput {
 
 class Input extends InputLine<ScheduleAInput> {};
 
-export default class ScheduleA extends Form<ScheduleA['lines'], ScheduleAInput> {
+export default class ScheduleA extends Form<ScheduleAInput> {
   readonly name = 'Schedule A';
 
   readonly lines = {

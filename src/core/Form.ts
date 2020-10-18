@@ -9,11 +9,10 @@ import * as Trace from './Trace';
 import { Line } from './Line';
 import { InconsistencyError, NotFoundError } from './Errors';
 
-export default abstract class Form<L extends { [key: string]: Line<any> },
-                                   I = unknown> {
+export default abstract class Form<I = unknown> {
   abstract readonly name: string;
 
-  abstract readonly lines: L;
+  abstract readonly lines: { [key: string]: Line<any> };
 
   readonly supportsMultipleCopies: boolean = false;
 
@@ -35,14 +34,17 @@ export default abstract class Form<L extends { [key: string]: Line<any> },
     return undefined;
   }
 
-  getLine<K extends keyof L>(id: K): L[K] {
+  getLine<K extends keyof this['lines']>(id: K): this['lines'][K] {
     if (!(id in this.lines))
       throw new NotFoundError(`Form ${this.name} does not have line ${id}`);
-    return this.lines[id];
+    // This coercion is safe: the method's generic constraint for K ensures
+    // a valid key in |lines|, and the abstract declaration of |lines| ensures
+    // the correct index type.
+    return this.lines[id as any] as this['lines'][K];
   }
 
-  getValue<K extends keyof L>(tr: TaxReturn, id: K): ReturnType<L[K]['value']> {
-    const line: L[K] = this.getLine(id);
+  getValue<K extends keyof this['lines']>(tr: TaxReturn, id: K): ReturnType<this['lines'][K]['value']> {
+    const line = this.getLine(id);
     return line.value(tr);
   }
 
@@ -59,10 +61,10 @@ export default abstract class Form<L extends { [key: string]: Line<any> },
   }
 };
 
-export type FormClass<T extends Form<any>> = new (...args: any[]) => T;
+export type FormClass<T extends Form> = new (...args: any[]) => T;
 
-export function isFormT<T extends Form<any>>(form: Form<any>,
-                                             formClass: FormClass<T>):
-                                                form is T {
+export function isFormT<T extends Form>(form: Form,
+                                        formClass: FormClass<T>):
+                                            form is T {
   return form.constructor === formClass;
 }

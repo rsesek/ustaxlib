@@ -76,7 +76,7 @@ class Form8949Line extends Line<Form8949Total> {
   }
 };
 
-export default class Form8949 extends Form<Form8949['lines']> {
+export default class Form8949 extends Form {
   readonly name = '8949';
 
   readonly supportsMultipleCopies = true;

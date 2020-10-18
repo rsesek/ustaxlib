@@ -17,7 +17,7 @@ export interface Schedule3Input {
   estimatedTaxPayments?: number;
 };
 
-export default class Schedule3 extends Form<Schedule3['lines'], Schedule3Input> {
+export default class Schedule3 extends Form<Schedule3Input> {
   readonly name = 'Schedule 3';
 
   readonly lines = {

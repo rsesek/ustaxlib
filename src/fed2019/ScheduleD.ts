@@ -12,7 +12,7 @@ import Form8949, { Form8949Box } from './Form8949';
 import Form1099DIV from './Form1099DIV';
 import Form1040, { FilingStatus, QDCGTaxWorksheet, computeTax } from './Form1040';
 
-export default class ScheduleD extends Form<ScheduleD['lines']> {
+export default class ScheduleD extends Form {
   readonly name = 'Schedule D';
 
   readonly lines = {
@@ -85,7 +85,7 @@ export default class ScheduleD extends Form<ScheduleD['lines']> {
   };
 };
 
-export class ScheduleDTaxWorksheet extends Form<ScheduleDTaxWorksheet['lines']> {
+export class ScheduleDTaxWorksheet extends Form {
   readonly name = 'Schedule D Tax Worksheet';
 
   readonly lines = {

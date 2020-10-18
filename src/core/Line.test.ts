@@ -39,7 +39,7 @@ test('computed line', () => {
 });
 
 test('reference line', () => {
-  class TestForm extends Form<TestForm['lines']> {
+  class TestForm extends Form {
     readonly name = 'Form 1';
     readonly lines = {
       '6b': new ConstantLine(12.34),
@@ -65,18 +65,18 @@ test('reference line', () => {
 });
 
 test('self reference line', () => {
-  class OtherForm extends Form<OtherForm['lines']> {
+  class OtherForm extends Form {
     readonly name = 'Form A';
     readonly lines = {
       '6c': new ConstantLine(55)
     };
   };
-  class TestForm extends Form<TestForm['lines']> {
+  class TestForm extends Form {
     readonly name = 'Form 1';
     readonly lines = {
       'a': new ConstantLine(100.2),
       'b': new ReferenceLine(OtherForm, '6c'),
-      'c': new ReferenceLine((TestForm as unknown) as FormClass<Form<any>>, 'b'),
+      'c': new ReferenceLine((TestForm as unknown) as FormClass<Form>, 'b'),
       'd': new ReferenceLine(TestForm as any, 'b'),
     };
   };
@@ -97,7 +97,7 @@ test('input line', () => {
     key: string;
     key2?: string;
   }
-  class TestForm extends Form<TestForm['lines'], Input> {
+  class TestForm extends Form<Input> {
     readonly name = 'F1';
     readonly lines = {
       '1': new InputLine<Input>('key'),
@@ -119,14 +119,14 @@ test('input line', () => {
 });
 
 test('line stack', () => {
-  class FormZ extends Form<FormZ['lines'], {'input': number}> {
+  class FormZ extends Form<{'input': number}> {
     readonly name = 'Z';
     readonly lines = {
       '3': new InputLine<any, any>('input')
     }
   };
 
-  class FormZ2 extends Form<FormZ2['lines']> {
+  class FormZ2 extends Form {
     readonly name = 'Z-2';
     readonly lines = {
       '2c': new ComputedLine<number>((tr: TaxReturn): any => {
@@ -144,7 +144,7 @@ test('line stack', () => {
 });
 
 test('accumulator line', () => {
-  class TestForm extends Form<TestForm['lines']> {
+  class TestForm extends Form {
     readonly name = 'Form B';
     readonly supportsMultipleCopies = true;
     readonly lines = {

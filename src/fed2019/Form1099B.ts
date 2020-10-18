@@ -36,7 +36,7 @@ export interface Form1099BInput {
 
 class Input<T extends keyof Form1099BInput> extends InputLine<Form1099BInput, T> {};
 
-export default class Form1099B extends Form<Form1099B['lines'], Form1099BInput> {
+export default class Form1099B extends Form<Form1099BInput> {
   readonly name = '1099-B';
 
   readonly supportsMultipleCopies = true;

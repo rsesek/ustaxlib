@@ -10,7 +10,7 @@ import { clampToZero, undefinedToZero } from '../core/Math';
 import Form1040, { FilingStatus } from './Form1040';
 import Schedule1 from './Schedule1';
 
-export default class Form8960 extends Form<Form8960['lines']> {
+export default class Form8960 extends Form {
   readonly name = '8960';
 
   readonly lines = {

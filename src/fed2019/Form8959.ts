@@ -10,7 +10,7 @@ import { clampToZero } from '../core/Math';
 import Form1040, { FilingStatus } from './Form1040';
 import W2 from './W2';
 
-export default class Form8959 extends Form<Form8959['lines']> {
+export default class Form8959 extends Form {
   readonly name = '8959';
 
   readonly lines = {

@@ -29,7 +29,7 @@ export interface Form1099DIVInput {
 
 class Input<T extends keyof Form1099DIVInput> extends InputLine<Form1099DIVInput, T> {};
 
-export default class Form1099DIV extends Form<Form1099DIV['lines'], Form1099DIVInput> {
+export default class Form1099DIV extends Form<Form1099DIVInput> {
   readonly name = '1099-DIV';
 
   readonly supportsMultipleCopies = true;

@@ -59,7 +59,7 @@ test('get non-existent person', () => {
 });
 
 test('single-copy forms', () => {
-  class TestForm extends Form<null> {
+  class TestForm extends Form {
     readonly name = 'Test Form';
     readonly lines = null;
   };
@@ -73,7 +73,7 @@ test('single-copy forms', () => {
 });
 
 test('multiple-copy forms', () => {
-  class TestForm extends Form<null> {
+  class TestForm extends Form {
     readonly name = 'Test Form';
     readonly supportsMultipleCopies = true;
     readonly lines = null;
@@ -97,7 +97,7 @@ test('multiple-copy forms', () => {
 });
 
 test('get non-existent form', () => {
-  class TestForm extends Form<null> {
+  class TestForm extends Form {
     readonly name = 'Test Form';
     readonly lines = null;
   }
@@ -107,7 +107,7 @@ test('get non-existent form', () => {
   expect(tr.findForms(TestForm)).toEqual([]);
 });
 
-class PerPersonForm extends Form<PerPersonForm['lines']> {
+class PerPersonForm extends Form {
   private _person?: Person;
 
   readonly name = 'Per Person';

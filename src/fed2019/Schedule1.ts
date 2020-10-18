@@ -58,7 +58,7 @@ class Input<T extends keyof Schedule1Input> extends InputLine<Schedule1Input, T>
   }
 };
 
-export default class Schedule1 extends Form<Schedule1['lines'], Schedule1Input> {
+export default class Schedule1 extends Form<Schedule1Input> {
   readonly name = 'Schedule 1';
 
   readonly lines = {
@@ -150,7 +150,7 @@ export interface SALTWorksheetInput {
   prevYearFilingStatus?: FilingStatus;
 };
 
-export class SALTWorksheet extends Form<SALTWorksheet['lines'], SALTWorksheetInput> {
+export class SALTWorksheet extends Form<SALTWorksheetInput> {
   readonly name = 'SALT Refund Worksheet';
 
   readonly lines = {

@@ -9,13 +9,13 @@ import { NotFoundError, InconsistencyError, UnsupportedFeatureError } from './Er
 
 export default abstract class TaxReturn {
   private _people: Person[] = [];
-  private _forms: Form<any, unknown>[] = [];
+  private _forms: Form[] = [];
 
   abstract get year(): number;
 
   abstract get includeJointPersonForms(): boolean;
 
-  get forms(): Form<any, unknown>[] {
+  get forms(): Form[] {
     return [...this._forms];
   }
 
@@ -40,9 +40,9 @@ export default abstract class TaxReturn {
     return people[0];
   }
 
-  addForm(form: Form<any>) {
+  addForm(form: Form) {
     if (!form.supportsMultipleCopies) {
-      const other = this.findForms(form.constructor as FormClass<Form<any>>);
+      const other = this.findForms(form.constructor as FormClass<Form>);
       if (other.length > 0) {
         throw new InconsistencyError(`Cannot have more than one type of form ${form.name}`);
       }
@@ -51,7 +51,7 @@ export default abstract class TaxReturn {
     this._forms.push(form);
   }
 
-  findForm<T extends Form<any>>(cls: FormClass<T>): T | null {
+  findForm<T extends Form>(cls: FormClass<T>): T | null {
     const forms = this.findForms(cls);
     if (forms.length == 0)
       return null;
@@ -60,9 +60,9 @@ export default abstract class TaxReturn {
     return forms[0];
   }
 
-  findForms<T extends Form<any>>(cls: FormClass<T>): T[] {
+  findForms<T extends Form>(cls: FormClass<T>): T[] {
     const forms: T[] = this._forms
-        .filter((form: Form<any>): form is T => isFormT(form, cls))
+        .filter((form: Form): form is T => isFormT(form, cls))
         .filter((form: T) => {
           const person = form.person();
           if (person === undefined)
@@ -76,7 +76,7 @@ export default abstract class TaxReturn {
     return forms;
   }
 
-  getForm<T extends Form<any>>(cls: FormClass<T>): T {
+  getForm<T extends Form>(cls: FormClass<T>): T {
     const form = this.findForm(cls);
     if (!form)
       throw new NotFoundError(`No form ${cls.name}`);

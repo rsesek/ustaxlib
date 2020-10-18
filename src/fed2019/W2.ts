@@ -37,7 +37,7 @@ export interface W2Input {
 
 class Input<T extends keyof W2Input> extends InputLine<W2Input, T> {};
 
-export default class W2 extends Form<W2['lines'], W2Input> {
+export default class W2 extends Form<W2Input> {
   readonly name = 'W-2';
 
   readonly supportsMultipleCopies = true;

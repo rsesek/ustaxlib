@@ -31,7 +31,7 @@ export interface Form1040Input {
   filingStatus: FilingStatus;
 };
 
-export default class Form1040 extends Form<Form1040['lines'], Form1040Input> {
+export default class Form1040 extends Form<Form1040Input> {
   readonly name = '1040';
 
   readonly lines = {
@@ -146,7 +146,7 @@ export default class Form1040 extends Form<Form1040['lines'], Form1040Input> {
     '13a': new UnsupportedLine('Child tax credit'),
 
     '13b': new ComputedLine((tr): number => {
-      let value  = this.getValue(tr, '13a');
+      let value: number = this.getValue(tr, '13a');
       const sched3 = tr.findForm(Schedule3);
       if (sched3)
         value += undefinedToZero(sched3.getValue(tr, '7'));
@@ -253,7 +253,7 @@ export function computeTax(income: number, filingStatus: FilingStatus): number {
   return ((income - bracketStart) * bracket[1]) + bracket[2];
 };
 
-export class QDCGTaxWorksheet extends Form<QDCGTaxWorksheet['lines']> {
+export class QDCGTaxWorksheet extends Form {
   readonly name = 'QDCG Tax Worksheet';
 
   readonly lines = {

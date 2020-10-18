@@ -19,7 +19,7 @@ interface Input {
   value: number;
 };
 
-class TestForm extends Form<TestForm['lines'], Input> {
+class TestForm extends Form<Input> {
   readonly name = 'TF';
 
   readonly lines = {

@@ -11,7 +11,7 @@ export abstract class Line<T> {
   private _description?: string;
 
   _id: string;  // _id is set by Form.init().
-  form: Form<any, any>;  // Set by Form.init();
+  form: Form;  // Set by Form.init();
 
   constructor(description?: string) {
     this._description = description;
@@ -46,7 +46,7 @@ export class ComputedLine<T> extends Line<T> {
   }
 };
 
-export class ReferenceLine<F extends Form<any>,
+export class ReferenceLine<F extends Form,
                            L extends keyof F['lines'],
                            T extends ReturnType<F['lines'][L]['value']>>
                                extends Line<T> {
@@ -81,7 +81,7 @@ export class InputLine<U = unknown, T extends keyof U = any> extends Line<U[T]> 
   private _input: T;
   private _fallback: U[T];
 
-  form: Form<any, U>;
+  form: Form<U>;
 
   constructor(input: T, description?: string, fallback?: U[T]) {
     super(description || `Input from ${input}`);
@@ -101,7 +101,7 @@ export class InputLine<U = unknown, T extends keyof U = any> extends Line<U[T]> 
   }
 };
 
-export class AccumulatorLine<F extends Form<any>,
+export class AccumulatorLine<F extends Form,
                              L extends keyof F['lines']>
                                  extends Line<number> {
   private _form: FormClass<F>;
@@ -133,13 +133,13 @@ export class UnsupportedLine extends Line<number> {
   }
 };
 
-export function sumLineOfForms<F extends Form<any>, L extends keyof F['lines']>(
+export function sumLineOfForms<F extends Form, L extends keyof F['lines']>(
     tr: TaxReturn, forms: F[], line: L): number {
   const reducer = (acc: number, curr: F) => acc + curr.getValue(tr, line);
   return forms.reduce(reducer, 0);
 }
 
-export function sumFormLines<F extends Form<any>, L extends keyof F['lines']>(
+export function sumFormLines<F extends Form, L extends keyof F['lines']>(
     tr: TaxReturn, form: F, lines: L[]): number {
   let value = 0;
   for (const line of lines)

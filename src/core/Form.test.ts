@@ -16,7 +16,7 @@ class TestTaxReturn extends TaxReturn {
 test('add and get line', () => {
   const l = new ComputedLine<number>(() => 42);
 
-  class TestForm extends Form<TestForm['lines']> {
+  class TestForm extends Form {
     readonly name = 'Test Form';
 
     readonly lines = { '1': l };
@@ -27,13 +27,13 @@ test('add and get line', () => {
 });
 
 test('get non-existent line', () => {
-  class TestForm extends Form<TestForm['lines']> {
+  class TestForm extends Form {
     readonly name = 'Test';
     readonly lines = {};
   };
 
   const f = new TestForm();
-  const fAsAny: Form<any> = f;
+  const fAsAny: Form = f;
   expect(() => fAsAny.getLine('line')).toThrow(NotFoundError);
 
   //TYPEERROR:
@@ -45,7 +45,7 @@ test('input', () => {
     filingStatus: string;
     money: number;
   };
-  class TestForm extends Form<any, TestInput> {
+  class TestForm extends Form<TestInput> {
     readonly name = '1040';
 
     readonly lines = null;
@@ -56,7 +56,7 @@ test('input', () => {
 });
 
 test('get value', () => {
-  class TestForm extends Form<TestForm['lines']> {
+  class TestForm extends Form {
     readonly name = 'Form';
 
     readonly lines = {
@@ -71,18 +71,18 @@ test('get value', () => {
   //TYPEERROR:
   //let s: string = f.getValue(tr, 'line');
 
-  const fAsAny: Form<any> = f;
+  const fAsAny: Form = f;
   expect(() => fAsAny.getValue(tr, 'other')).toThrow(NotFoundError);
   //TYPEERROR:
   //expect(() => f.getValue(tr, 'other')).toThrow(NotFoundError);
 });
 
 test('form types', () => {
-  class FormA extends Form<any> {
+  class FormA extends Form {
     readonly name = 'A';
     readonly lines = {};
   };
-  class FormB extends Form<any> {
+  class FormB extends Form {
     readonly name = 'B';
     readonly lines = {};
   };

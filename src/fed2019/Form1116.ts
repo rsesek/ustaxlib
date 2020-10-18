@@ -34,7 +34,7 @@ export interface Form1116Input {
 
 class Input<T extends keyof Form1116Input> extends InputLine<Form1116Input, T> {};
 
-export default class Form1116 extends Form<Form1116['lines'], Form1116Input> {
+export default class Form1116 extends Form<Form1116Input> {
   readonly name = '1116';
 
   readonly lines = {

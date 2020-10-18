@@ -14,7 +14,7 @@ import Schedule2 from './Schedule2';
 import Schedule3 from './Schedule3';
 import ScheduleD, { ScheduleDTaxWorksheet } from './ScheduleD';
 
-export default class Form6251 extends Form<Form6251['lines']> {
+export default class Form6251 extends Form {
   readonly name = '6251';
 
   readonly lines = {
