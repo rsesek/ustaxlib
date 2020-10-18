@@ -12,7 +12,7 @@
   "author": "Robert Sesek",
   "license": "GPL-3.0-only",
   "dependencies": {
-    "typescript": "^3.9.7"
+    "typescript": "^4.0.3"
   },
   "files": [
     "dist/**/*",
@@ -21,7 +21,7 @@
   ],
   "devDependencies": {
     "@types/jest": "^25.2.3",
-    "jest": "^25.5.4",
-    "ts-jest": "^25.5.1"
+    "jest": "^26.5.3",
+    "ts-jest": "^26.4.1"
   }
 }
