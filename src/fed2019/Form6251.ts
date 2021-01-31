@@ -21,14 +21,14 @@ export default class Form6251 extends Form {
     // Part I
     '1': new ComputedLine((tr): number => {
       const f1040 = tr.getForm(Form1040);
-      const l11b = f1040.getValue(tr, '11b');
-      if (l11b > 0)
-        return l11b;
-      return f1040.getValue(tr, '8b') - f1040.getValue(tr, '9') - f1040.getValue(tr, '10');
+      const income = f1040.taxableIncome(tr);
+      if (income > 0)
+        return income;
+      return f1040.adjustedGrossIncome(tr) - f1040.deduction(tr) - f1040.qualifiedBusinessIncomeDeduction(tr);
     }),
     '2a': new ComputedLine((tr): number => {
       // Not supported: Schedule A, line 7.
-      return tr.getForm(Form1040).getValue(tr, '9');
+      return tr.getForm(Form1040).deduction(tr);
     }),
     '2b': new ReferenceLine(Schedule1, '1', 'Tax refund', 0),  // Not supported - line 8 SALT.
     '2c': new UnsupportedLine('Investment interest expense'),
@@ -82,7 +82,7 @@ export default class Form6251 extends Form {
 
       const f1040 = tr.getForm(Form1040);
 
-      let part3 = f1040.getValue(tr, '3a') > 0;
+      let part3 = f1040.qualifiedDividends(tr) > 0;
 
       const schedD = tr.findForm(ScheduleD);
       if (schedD) {
@@ -100,7 +100,7 @@ export default class Form6251 extends Form {
       return this.getValue(tr, '7') - this.getValue(tr, '8');
     }, 'Tentative minimum tax'),
     '10': new ComputedLine((tr): number => {
-      let value = tr.getForm(Form1040).getValue(tr, '12a');
+      let value = tr.getForm(Form1040).tax(tr);
       const sched2 = tr.findForm(Schedule2);
       if (sched2) {
         value += sched2.getValue(tr, '2');

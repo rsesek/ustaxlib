@@ -77,6 +77,29 @@ export class ReferenceLine<F extends Form,
   }
 };
 
+// SymbolicLine cannot be used for lines defined on F itself. For those cases, use:
+//    new ComputedLine((tr) => this.K(tr));
+export class SymbolicLine<F extends Form & { [key in K]: ComputeFunc<ReturnType<F[K]>> },
+                          K extends keyof F>
+                              extends Line<ReturnType<F[K]>> {
+  private _form: FormClass<F>;
+  private _key: K;
+
+  constructor(form: FormClass<F>, key: K, description?: string) {
+    super(description || `Reference ${form.name}/${key}`);
+    this._form = form;
+    this._key = key;
+  }
+
+  value(tr: TaxReturn): ReturnType<F[K]> {
+    Trace.begin(this);
+    const form: F = tr.findForm(this._form);
+    const value = form[this._key](tr);
+    Trace.end();
+    return value;
+  }
+}
+
 export class InputLine<U = unknown, T extends keyof U = any> extends Line<U[T]> {
   private _input: T;
   private _fallback: U[T];

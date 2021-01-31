@@ -4,7 +4,7 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
 import { Form } from '../core';
-import { ComputedLine, InputLine, ReferenceLine, UnsupportedLine, sumFormLines } from '../core/Line';
+import { Line, ComputedLine, InputLine, ReferenceLine, SymbolicLine, UnsupportedLine, sumFormLines } from '../core/Line';
 import { clampToZero } from '../core/Math';
 
 import Form1040, { FilingStatus } from './Form1040';
@@ -40,7 +40,7 @@ export default class ScheduleA extends Form<ScheduleAInput> {
   readonly lines = {
     // Medical and dental expenses
     '1': new Input('medicalAndDentalExpenses', 'Medical and dental expenses', 0),
-    '2': new ReferenceLine(Form1040, '8b'),
+    '2': new SymbolicLine(Form1040, 'adjustedGrossIncome'),
     '3': new ComputedLine((tr): number => this.getValue(tr, '2') * tr.constants.medicalDeductionLimitationPercent),
     '4': new ComputedLine((tr): number => clampToZero(this.getValue(tr, '1') - this.getValue(tr, '3'))),
 

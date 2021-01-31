@@ -4,7 +4,7 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
 import { Form, TaxReturn } from '../core';
-import { Line, AccumulatorLine, ComputedLine, ReferenceLine, UnsupportedLine, sumFormLines, sumLineOfForms } from '../core/Line';
+import { Line, AccumulatorLine, ComputedLine, ReferenceLine, SymbolicLine, UnsupportedLine, sumFormLines, sumLineOfForms } from '../core/Line';
 import { UnsupportedFeatureError } from '../core/Errors';
 import { clampToZero, reduceBySum, undefinedToZero } from '../core/Math';
 
@@ -34,6 +34,83 @@ export interface Form1040Input {
 export default class Form1040 extends Form<Form1040Input> {
   readonly name = '1040';
 
+  taxableInterest(tr: TaxReturn): number {
+    const value = (new AccumulatorLine(Form1099INT, '1')).value(tr) +
+                  (new AccumulatorLine(Form1099INT, '3')).value(tr);
+    return value;
+  }
+
+  qualifiedDividends(tr: TaxReturn): number {
+    return this.getValue(tr, '3a');
+  }
+
+  adjustedGrossIncome(tr: TaxReturn): number {
+    return this.getValue(tr, '7b') - this.getValue(tr, '8a');
+  }
+
+  deduction(tr: TaxReturn): number {
+    let deduction = 0;
+    const schedA = tr.findForm(ScheduleA);
+    if (schedA) {
+      deduction = schedA.getValue(tr, '17');
+      if (schedA.getValue(tr, '18')) {
+        return deduction;
+      }
+    }
+
+    return Math.max(deduction, tr.constants.standardDeduction[this.filingStatus]);
+  }
+
+  qualifiedBusinessIncomeDeduction(tr: TaxReturn): number {
+    const f8995 = tr.findForm(Form8995REIT);
+    if (f8995)
+      return f8995.getValue(tr, '39');
+    return 0;
+  }
+
+  capitalGainOrLoss(tr: TaxReturn): number {
+    const schedD = tr.findForm(ScheduleD);
+    if (!schedD)
+      return 0;
+
+    const l6 = schedD.getValue(tr, '16');
+    if (l6 >= 0)
+      return l6;
+    return schedD.getValue(tr, '21');
+  }
+
+  totalIncome(tr: TaxReturn): number {
+    return sumFormLines(tr, this, ['1', '2b', '3b', '4b', '4d', '5b', '6', '7a']);
+  }
+
+  taxableIncome(tr: TaxReturn): number {
+    return clampToZero(this.getValue(tr, '8b') - this.getValue(tr, '11a'));
+  }
+
+  tax(tr: TaxReturn): number {
+    // Not supported:
+    // Form 8814 (election to report child's interest or dividends)
+    // Form 4972 (relating to lump-sum distributions)
+
+    const schedD = tr.findForm(ScheduleD);
+    // Line 18 and 19 are not undefined or 0.
+    if (schedD && !schedD.getValue(tr, '20')) {
+      // Use ScheD tax worksheet;
+      const schedDtw = tr.findForm(ScheduleDTaxWorksheet);
+      if (schedDtw)
+        return schedDtw.getValue(tr, '47');
+    }
+
+    // If there are qualified dividends, use the QDCGTW.
+    if (this.qualifiedDividends(tr) > 0) {
+      const qdcgtw = tr.getForm(QDCGTaxWorksheet);
+      return qdcgtw.getValue(tr, '27');
+    }
+
+    // Otherwise, compute just on taxable income.
+    return computeTax(this.taxableIncome(tr), tr);
+  }
+
   readonly lines = {
     '1': new AccumulatorLine(W2, '1', 'Wages, salaries, tips, etc.'),
     '2a': new ComputedLine((tr): number => {
@@ -41,11 +118,7 @@ export default class Form1040 extends Form<Form1040Input> {
                     (new AccumulatorLine(Form1099DIV, '11')).value(tr);
       return value;
     }, 'Tax-exempt interest'),
-    '2b': new ComputedLine((tr): number => {
-      const value = (new AccumulatorLine(Form1099INT, '1')).value(tr) +
-                    (new AccumulatorLine(Form1099INT, '3')).value(tr);
-      return value;
-    }, 'Taxable interest'),
+    '2b': new ComputedLine((tr) => this.taxableInterest(tr), 'Taxable interest'),
     '3a': new AccumulatorLine(Form1099DIV, '1b', 'Qualified dividends'),
     '3b': new AccumulatorLine(Form1099DIV, '1a', 'Ordinary dividends'),
     '4a': new ComputedLine((tr): number => {
@@ -60,78 +133,25 @@ export default class Form1040 extends Form<Form1040Input> {
     '4d': new UnsupportedLine('Pensions and annuities, taxable amount'),
     '5a': new UnsupportedLine('Social security benefits'),
     '5b': new UnsupportedLine('Social security benefits, taxable amount'),
-    '6': new ComputedLine((tr): number => {
-      const schedD = tr.findForm(ScheduleD);
-      if (!schedD)
-        return 0;
-
-      const l6 = schedD.getValue(tr, '16');
-      if (l6 >= 0)
-        return l6;
-      return schedD.getValue(tr, '21');
-    }, 'Capital gain/loss'),
+    '6': new ComputedLine((tr) => this.capitalGainOrLoss(tr), 'Capital gain/loss'),
     '7a': new ReferenceLine(Schedule1, '9', 'Other income from Schedule 1', 0),
 
-    '7b': new ComputedLine((tr): number => {
-      return sumFormLines(tr, this, ['1', '2b', '3b', '4b', '4d', '5b', '6', '7a']);
-    }, 'Total income'),
+    '7b': new ComputedLine((tr) => this.totalIncome(tr), 'Total income'),
 
     '8a': new ReferenceLine(Schedule1, '22', 'Adjustments to income', 0),
 
-    '8b': new ComputedLine((tr): number => {
-      return this.getValue(tr, '7b') - this.getValue(tr, '8a');
-    }, 'Adjusted gross income'),
+    '8b': new ComputedLine((tr) => this.adjustedGrossIncome(tr), 'Adjusted gross income'),
 
-    '9': new ComputedLine((tr): number => {
-      let deduction = 0;
-      const schedA = tr.findForm(ScheduleA);
-      if (schedA) {
-        deduction = schedA.getValue(tr, '17');
-        if (schedA.getValue(tr, '18')) {
-          return deduction;
-        }
-      }
+    '9': new ComputedLine((tr) => this.deduction(tr), 'Deduction'),
 
-      return Math.max(deduction, tr.constants.standardDeduction[this.filingStatus]);
-    }, 'Deduction'),
-
-    '10': new ComputedLine((tr): number => {
-      const f8995 = tr.findForm(Form8995REIT);
-      if (f8995)
-        return f8995.getValue(tr, '39');
-      return 0;
-    }, 'Qualified business income deduction'),
+    '10': new ComputedLine((tr) => this.qualifiedBusinessIncomeDeduction(tr), 'Qualified business income deduction'),
 
     '11a': new ComputedLine((tr): number => {
       return this.getValue(tr, '9') + this.getValue(tr, '10');
     }),
-    '11b': new ComputedLine((tr): number => {
-      return clampToZero(this.getValue(tr, '8b') - this.getValue(tr, '11a'));
-    }, 'Taxable income'),
+    '11b': new ComputedLine((tr) => this.taxableIncome(tr), 'Taxable income'),
 
-    '12a': new ComputedLine((tr): number => {
-      // Not supported:
-      // Form 8814 (election to report child's interest or dividends)
-      // Form 4972 (relating to lump-sum distributions)
-
-      const schedD = tr.findForm(ScheduleD);
-      // Line 18 and 19 are not undefined or 0.
-      if (schedD && !schedD.getValue(tr, '20')) {
-        // Use ScheD tax worksheet;
-        const schedDtw = tr.findForm(ScheduleDTaxWorksheet);
-        if (schedDtw)
-          return schedDtw.getValue(tr, '47');
-      }
-
-      // If there are qualified dividends, use the QDCGTW.
-      if (this.getValue(tr, '3a') > 0) {
-        const qdcgtw = tr.getForm(QDCGTaxWorksheet);
-        return qdcgtw.getValue(tr, '27');
-      }
-
-      // Otherwise, compute just on taxable income.
-      return computeTax(this.getValue(tr, '11b'), tr);
-    }, 'Tax'),
+    '12a': new ComputedLine((tr) => this.tax(tr), 'Tax'),
 
     '12b': new ComputedLine((tr): number => {
       return this.getValue(tr, '12a') + tr.getForm(Schedule2).getValue(tr, '3');
@@ -219,13 +239,13 @@ export class QDCGTaxWorksheet extends Form {
   readonly name = 'QDCG Tax Worksheet';
 
   readonly lines = {
-    '1': new ReferenceLine(Form1040, '11b', 'Taxable income'),
+    '1': new SymbolicLine(Form1040, 'taxableIncome', 'Taxable income'),
     '2': new ReferenceLine(Form1040, '3a', 'Qualified dividends'),
     '3': new ComputedLine((tr): number => {
       const schedD = tr.findForm(ScheduleD);
       if (schedD)
         return clampToZero(Math.min(schedD.getValue(tr, '15'), schedD.getValue(tr, '16')));
-      return tr.getForm(Form1040).getValue(tr, '6');
+      return tr.getForm(Form1040).capitalGainOrLoss(tr);
     }),
     '4': new ComputedLine((tr): number => this.getValue(tr, '2') + this.getValue(tr, '3')),
     '5': new UnsupportedLine('Form 4952@4g (Investment interest expense deduction)'),

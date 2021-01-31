@@ -9,7 +9,7 @@ import * as Trace from '../core/Trace';
 import { NotFoundError, UnsupportedFeatureError } from '../core/Errors';
 import { undefinedToZero } from '../core/Math';
 
-import Form1040, { FilingStatus } from './Form1040';
+import { FilingStatus } from './Form1040';
 
 export interface Schedule1Input {
   // Additional Income

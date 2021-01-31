@@ -32,12 +32,12 @@ export default class Form8995REIT extends Form {
     '32': new ComputedLine((tr): number => this.getValue(tr, '27') + this.getValue(tr, '31'), 'QBI deduction before limitation'),
     '33': new ComputedLine((tr): number => {
       const f1040 = tr.getForm(Form1040);
-      return f1040.getValue(tr, '8b') - f1040.getValue(tr, '9');
+      return f1040.adjustedGrossIncome(tr) - f1040.deduction(tr);
     }, 'Taxable income before deduction'),
     '34': new ComputedLine((tr): number => {
       const f1040 = tr.getForm(Form1040);
 
-      let value = f1040.getValue(tr, '3a');
+      let value = f1040.qualifiedDividends(tr);
 
       const schedD = tr.findForm(ScheduleD);
       if (schedD) {
@@ -45,7 +45,7 @@ export default class Form8995REIT extends Form {
           clampToZero(schedD.getValue(tr, '15')),
           clampToZero(schedD.getValue(tr, '16')));
       } else {
-        value += f1040.getValue(tr, '6');
+        value += f1040.capitalGainOrLoss(tr);
       }
 
       return value;

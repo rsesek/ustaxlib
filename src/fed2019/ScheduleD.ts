@@ -4,7 +4,7 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
 import { Form, Person, TaxReturn } from '../core';
-import { Line, AccumulatorLine, ComputedLine, ReferenceLine, UnsupportedLine, sumFormLines, sumLineOfForms } from '../core/Line';
+import { Line, AccumulatorLine, ComputedLine, ReferenceLine, SymbolicLine, UnsupportedLine, sumFormLines, sumLineOfForms } from '../core/Line';
 import { Literal, clampToZero } from '../core/Math';
 import { NotFoundError, UnsupportedFeatureError } from '../core/Errors';
 
@@ -80,7 +80,7 @@ export default class ScheduleD extends Form {
     }, 'Net capital loss'),
 
     '22': new ComputedLine((tr): boolean => {
-      return tr.getForm(Form1040).getValue(tr, '3a') > 0;
+      return tr.getForm(Form1040).qualifiedDividends(tr) > 0;
     }, 'Need QD/CG Tax Worksheet'),
   };
 };
@@ -89,8 +89,8 @@ export class ScheduleDTaxWorksheet extends Form {
   readonly name = 'Schedule D Tax Worksheet';
 
   readonly lines = {
-    '1': new ReferenceLine(Form1040, '11b', 'Taxable income'),
-    '2': new ReferenceLine(Form1040, '3a', 'Qualified dividends'),
+    '1': new SymbolicLine(Form1040, 'taxableIncome', 'Taxable income'),
+    '2': new SymbolicLine(Form1040, 'qualifiedDividends', 'Qualified dividends'),
     '3': new UnsupportedLine('Form 4952@4g'),
     '4': new UnsupportedLine('Form 4952@4e'),
     '5': new ComputedLine((tr): number => 0),

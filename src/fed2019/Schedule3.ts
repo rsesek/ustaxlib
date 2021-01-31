@@ -31,7 +31,7 @@ export default class Schedule3 extends Form<Schedule3Input> {
 
       if (totalForeignTax < limit) {
         const sched2l2 = new ReferenceLine(Schedule2, '2', undefined, 0);
-        return Math.min(totalForeignTax, f1040.getValue(tr, '12a') + sched2l2.value(tr));
+        return Math.min(totalForeignTax, f1040.tax(tr) + sched2l2.value(tr));
       }
       return tr.getForm(Form1116).getValue(tr, '33');
     }, 'Foreign tax credit'),

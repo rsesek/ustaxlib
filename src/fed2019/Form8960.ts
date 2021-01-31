@@ -4,7 +4,7 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
 import { Form, TaxReturn } from '../core';
-import { ComputedLine, ReferenceLine, UnsupportedLine, sumFormLines } from '../core/Line';
+import { Line, ComputedLine, ReferenceLine, SymbolicLine, UnsupportedLine, sumFormLines } from '../core/Line';
 import { clampToZero, undefinedToZero } from '../core/Math';
 
 import { Constants } from './TaxReturn';
@@ -17,14 +17,14 @@ export default class Form8960 extends Form {
   readonly lines = {
     // Part 1
     // Section 6013 elections not supported.
-    '1': new ReferenceLine(Form1040, '2b', 'Taxable interest'),
+    '1': new SymbolicLine(Form1040, 'taxableInterest', 'Taxable interest'),
     '2': new ReferenceLine(Form1040, '3b', 'Ordinary dividends'),
     '3': new UnsupportedLine('Annuities'),
     '4a': new UnsupportedLine('Rental real estate, royalties, partnerships, S corporations, trusts, etc'),
     '4b': new UnsupportedLine('Adjustment for net income or loss derived in the ordinary course of a nonsection 1411 trade or business'),
     '4c': new ComputedLine((tr): number => this.getValue(tr, '4a') + this.getValue(tr, '4b')),
     '5a': new ComputedLine((tr): number => {
-      return (new ReferenceLine(Form1040, '6')).value(tr) +
+      return (new SymbolicLine(Form1040, 'capitalGainOrLoss')).value(tr) +
              undefinedToZero(new ReferenceLine(Schedule1, '4', undefined, 0).value(tr));
     }, 'Net gain or loss'),
     '5b': new UnsupportedLine('Net gain or loss from disposition of property that is not subject to net investment income tax'),
@@ -48,7 +48,7 @@ export default class Form8960 extends Form {
 
     // Part 3
     '12': new ComputedLine((tr): number => this.getValue(tr, '8') - this.getValue(tr, '11'), 'Net investment income'),
-    '13': new ReferenceLine(Form1040, '8b', 'Modified adjusted gross income'),
+    '13': new SymbolicLine(Form1040, 'adjustedGrossIncome', 'Modified adjusted gross income'),
     '14': new ComputedLine((tr): number => {
       return Form8960.filingStatusLimit(tr);
     }, 'Threshold'),

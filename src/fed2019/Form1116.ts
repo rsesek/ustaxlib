@@ -4,7 +4,7 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
 import { Form, Person, TaxReturn } from '../core';
-import { ComputedLine, InputLine, ReferenceLine, UnsupportedLine, sumFormLines } from '../core/Line';
+import { Line, ComputedLine, InputLine, ReferenceLine, SymbolicLine, UnsupportedLine, sumFormLines } from '../core/Line';
 import { UnsupportedFeatureError } from '../core/Errors';
 import { reduceBySum } from '../core/Math';
 
@@ -48,7 +48,7 @@ export default class Form1116 extends Form<Form1116Input> {
     '1a': new Input('grossForeignIncome'),
     // 1b not supported - services as an employee.
     '2': new UnsupportedLine('Expenses definitely related to the income'),
-    '3a': new ReferenceLine(Form1040, '9', 'Deductions'),
+    '3a': new SymbolicLine(Form1040, 'deduction', 'Deductions'),
     '3b': new UnsupportedLine('Other deductions'),
     '3c': new ComputedLine((tr): number => {
       return this.getValue(tr, '3a') + this.getValue(tr, '3b');
@@ -58,7 +58,7 @@ export default class Form1116 extends Form<Form1116Input> {
       const f1040 = tr.findForm(Form1040);
       // Take total income, but do not net capital gains out with losses, so remove
       // line 6.
-      let grossIncome = f1040.getValue(tr, '7b') - f1040.getValue(tr, '6');
+      let grossIncome = f1040.totalIncome(tr) - f1040.capitalGainOrLoss(tr);
       const f8949 = tr.findForm(Form8949);
       if (f8949) {
         const keys: (keyof Form8949['lines'])[] = ['boxA', 'boxB', 'boxC', 'boxD', 'boxE', 'boxF'];
@@ -98,10 +98,10 @@ export default class Form1116 extends Form<Form1116Input> {
     '16': new UnsupportedLine('Adjustments to line 15'),
     '17': new ComputedLine((tr): number => this.getValue(tr, '15') + this.getValue(tr, '16')),
     // TODO - This does not handle necessary adjustments.
-    '18': new ReferenceLine(Form1040, '11b'),
+    '18': new SymbolicLine(Form1040, 'taxableIncome'),
     '19': new ComputedLine((tr): number => this.getValue(tr, '17') / this.getValue(tr, '18')),
     '20': new ComputedLine((tr): number => {
-      let value = tr.getForm(Form1040).getValue(tr, '12a');
+      let value = tr.getForm(Form1040).tax(tr);
       const sched2 = tr.findForm(Schedule2);
       if (sched2)
         value += sched2.getValue(tr, '2');
