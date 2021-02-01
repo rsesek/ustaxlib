@@ -20,6 +20,6 @@ test('standard deduction', () => {
     const tr = new TaxReturn();
     const f = new Form1040({ filingStatus });
     tr.addForm(f);
-    expect(f.getValue(tr, '9')).toBe(filingStatusToResult[filingStatus]);
+    expect(f.getValue(tr, '12')).toBe(filingStatusToResult[filingStatus]);
   }
 });

@@ -59,7 +59,7 @@ export const Constants = Object.assign(Object.assign({}, Constants2019, {
     },
     rate15MaxIncome: {
       [FilingStatus.MarriedFilingJoint]: 496600,
-      [FilingStatus.MarriedFilingSeparate]: 441450,
+      [FilingStatus.MarriedFilingSeparate]: 248300,
       [FilingStatus.Single]: 441450,
     },
   },

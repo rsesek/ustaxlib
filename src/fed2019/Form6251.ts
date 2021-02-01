@@ -119,8 +119,7 @@ export default class Form6251 extends Form {
       if (schedDTW)
         return schedDTW.getValue(tr, '13');
 
-      const qdcgtw = tr.getForm(QDCGTaxWorksheet);
-      return qdcgtw.getValue(tr, '6');
+      return tr.getForm(QDCGTaxWorksheet).dividendsAndCapitalGains(tr);
     }),
     '14': new ReferenceLine(ScheduleD, '19', undefined, 0),
     '15': new ComputedLine((tr): number => {
@@ -143,8 +142,7 @@ export default class Form6251 extends Form {
       if (schedDTW)
         return clampToZero(schedDTW.getValue(tr, '14'));
 
-      const qdcgtw = tr.getForm(QDCGTaxWorksheet);
-      return clampToZero(qdcgtw.getValue(tr, '7'));
+      return clampToZero(tr.getForm(QDCGTaxWorksheet).taxableIncomeLessDividendsAndCapitalGains(tr));
     }),
     '21': new ComputedLine((tr): number => clampToZero(this.getValue(tr, '19') - this.getValue(tr, '20'))),
     '22': new ComputedLine((tr): number => Math.min(this.getValue(tr, '12'), this.getValue(tr, '13'))),
@@ -160,8 +158,7 @@ export default class Form6251 extends Form {
       if (schedDTW)
         return clampToZero(schedDTW.getValue(tr, '21'));
 
-      const qdcgtw = tr.getForm(QDCGTaxWorksheet);
-      return clampToZero(qdcgtw.getValue(tr, '7'));
+      return clampToZero(tr.getForm(QDCGTaxWorksheet).taxableIncomeLessDividendsAndCapitalGains(tr));
     }),
     '28': new ComputedLine((tr): number => this.getValue(tr, '26') + this.getValue(tr, '27')),
     '29': new ComputedLine((tr): number => clampToZero(this.getValue(tr, '25') - this.getValue(tr, '28'))),

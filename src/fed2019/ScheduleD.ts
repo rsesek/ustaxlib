@@ -10,7 +10,7 @@ import { NotFoundError, UnsupportedFeatureError } from '../core/Errors';
 
 import Form8949, { Form8949Box } from './Form8949';
 import Form1099DIV from './Form1099DIV';
-import Form1040, { FilingStatus, QDCGTaxWorksheet, computeTax } from './Form1040';
+import Form1040, { FilingStatus, computeTax } from './Form1040';
 
 export default class ScheduleD extends Form {
   readonly name = 'Schedule D';
@@ -75,8 +75,7 @@ export default class ScheduleD extends Form {
       if (l16 >= 0)
         return 0;
       const filingStatus = tr.getForm(Form1040).filingStatus;
-      const limit = filingStatus == FilingStatus.MarriedFilingSeparate ? -1500 : -3000;
-      return Math.max(l16, limit);
+      return Math.max(l16, tr.constants.capitalLossLimit[filingStatus]);
     }, 'Net capital loss'),
 
     '22': new ComputedLine((tr): boolean => {

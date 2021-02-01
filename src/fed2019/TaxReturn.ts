@@ -80,6 +80,12 @@ export const Constants = {
     },
   },
 
+  capitalLossLimit: {
+    [FilingStatus.MarriedFilingJoint]: -3000,
+    [FilingStatus.MarriedFilingSeparate]: -1500,
+    [FilingStatus.Single]: -3000,
+  },
+
   qualifiedBusinessIncomeDeductionThreshold: {
     [FilingStatus.MarriedFilingJoint]: 321450, // RP-18-57, Section 3.27 indicates this should be 321400, but it does not match the 24% tax bracket nor Sched D Tax Worksheet line 19.
     [FilingStatus.MarriedFilingSeparate]: 160725,

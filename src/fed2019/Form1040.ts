@@ -103,8 +103,7 @@ export default class Form1040 extends Form<Form1040Input> {
 
     // If there are qualified dividends, use the QDCGTW.
     if (this.qualifiedDividends(tr) > 0) {
-      const qdcgtw = tr.getForm(QDCGTaxWorksheet);
-      return qdcgtw.getValue(tr, '27');
+      return tr.getForm(QDCGTaxWorksheet).totalTax(tr);
     }
 
     // Otherwise, compute just on taxable income.
@@ -238,6 +237,18 @@ export function computeTax(income: number, tr: TaxReturn): number {
 export class QDCGTaxWorksheet extends Form {
   readonly name = 'QDCG Tax Worksheet';
 
+  dividendsAndCapitalGains(tr: TaxReturn): number {
+    return clampToZero(this.getValue(tr, '4') - this.getValue(tr, '5'));
+  }
+
+  taxableIncomeLessDividendsAndCapitalGains(tr: TaxReturn): number {
+    return clampToZero(this.getValue(tr, '1') - this.getValue(tr, '6'));
+  }
+
+  totalTax(tr: TaxReturn): number {
+    return Math.min(this.getValue(tr, '25'), this.getValue(tr, '26'));
+  }
+
   readonly lines = {
     '1': new SymbolicLine(Form1040, 'taxableIncome', 'Taxable income'),
     '2': new ReferenceLine(Form1040, '3a', 'Qualified dividends'),
@@ -249,8 +260,8 @@ export class QDCGTaxWorksheet extends Form {
     }),
     '4': new ComputedLine((tr): number => this.getValue(tr, '2') + this.getValue(tr, '3')),
     '5': new UnsupportedLine('Form 4952@4g (Investment interest expense deduction)'),
-    '6': new ComputedLine((tr): number => clampToZero(this.getValue(tr, '4') - this.getValue(tr, '5'))),
-    '7': new ComputedLine((tr): number => clampToZero(this.getValue(tr, '1') - this.getValue(tr, '6'))),
+    '6': new ComputedLine((tr) => this.dividendsAndCapitalGains(tr)),
+    '7': new ComputedLine((tr) => this.taxableIncomeLessDividendsAndCapitalGains(tr)),
     '8': new ComputedLine((tr): number => {
       const fs = tr.getForm(Form1040).filingStatus;
       return tr.constants.capitalGains.rate0MaxIncome[fs];
@@ -290,8 +301,6 @@ export class QDCGTaxWorksheet extends Form {
     '26': new ComputedLine((tr): number => {
       return computeTax(this.getValue(tr, '1'), tr);
     }, 'Tax on line 1'),
-    '27': new ComputedLine((tr): number => {
-      return Math.min(this.getValue(tr, '25'), this.getValue(tr, '26'));
-    }, 'Tax on all taxable income')
+    '27': new ComputedLine((tr) => this.totalTax(tr), 'Tax on all taxable income')
   };
 };
