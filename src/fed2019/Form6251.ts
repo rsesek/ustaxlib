@@ -4,7 +4,7 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
 import { Form, TaxReturn } from '../core';
-import { AccumulatorLine, ComputedLine, ReferenceLine, UnsupportedLine, sumFormLines } from '../core/Line';
+import { AccumulatorLine, ComputedLine, InputLine, ReferenceLine, UnsupportedLine, sumFormLines } from '../core/Line';
 import { Literal, clampToZero } from '../core/Math';
 
 import Form1040, { QDCGTaxWorksheet, FilingStatus } from './Form1040';
@@ -14,7 +14,14 @@ import Schedule2 from './Schedule2';
 import Schedule3 from './Schedule3';
 import ScheduleD, { ScheduleDTaxWorksheet } from './ScheduleD';
 
-export default class Form6251 extends Form {
+export interface Form6251Input {
+  exerciseOfIncentiveStockOptions?: number;
+  dispositionOfProperty?: number;
+}
+
+class Input<T extends keyof Form6251Input> extends InputLine<Form6251Input, T> {}
+
+export default class Form6251 extends Form<Form6251Input> {
   readonly name = '6251';
 
   readonly lines = {
@@ -25,11 +32,11 @@ export default class Form6251 extends Form {
       if (income > 0)
         return income;
       return f1040.adjustedGrossIncome(tr) - f1040.deduction(tr) - f1040.qualifiedBusinessIncomeDeduction(tr);
-    }),
+    }, 'Regular taxable income'),
     '2a': new ComputedLine((tr): number => {
       // Not supported: Schedule A, line 7.
       return tr.getForm(Form1040).deduction(tr);
-    }),
+    }, 'Deduction'),
     '2b': new ReferenceLine(Schedule1, '1', 'Tax refund', 0),  // Not supported - line 8 SALT.
     '2c': new UnsupportedLine('Investment interest expense'),
     '2d': new UnsupportedLine('Depletion'),
@@ -37,9 +44,9 @@ export default class Form6251 extends Form {
     '2f': new UnsupportedLine('Alternative tax net operating loss deduction'),
     '2g': new AccumulatorLine(Form1099INT, '9', 'Interest from specified private activity bonds exempt from the regular tax'),
     '2h': new UnsupportedLine('Qualified small business stock'),
-    '2i': new UnsupportedLine('Exercise of incentive stock options'),
+    '2i': new Input('exerciseOfIncentiveStockOptions', 'Exercise of incentive stock options', 0),
     '2j': new UnsupportedLine('Estates and trusts (amount from Schedule K-1 (Form 1041), box 12, code A)'),
-    '2k': new UnsupportedLine('Disposition of property'),
+    '2k': new Input('dispositionOfProperty', 'Disposition of property', 0),
     '2l': new UnsupportedLine('Depreciation on assets placed in service after 1986'),
     '2m': new UnsupportedLine('Passive activities'),
     '2n': new UnsupportedLine('Loss limitations'),
@@ -72,10 +79,10 @@ export default class Form6251 extends Form {
       const wl5 = wl4 * Literal(0.25);
       const wl6 = clampToZero(wl1 - wl5);
       return wl6;
-    }),
+    }, 'Exemption'),
     '6': new ComputedLine((tr): number => {
       return clampToZero(this.getValue(tr, '4') - this.getValue(tr, '5'));
-    }),
+    }, 'AMT taxable income less exemption'),
     '7': new ComputedLine((tr): number => {
       // Not supported - Form 2555.
       // Not supported - Form1040 directly reporting cap gains on line 6.
@@ -107,7 +114,7 @@ export default class Form6251 extends Form {
       }
       // Not supported - subtracting Schedule3@1 for the AMT FTC.
       return value;
-    }),
+    }, 'Regular tax, adjusted for AMT'),
     '11': new ComputedLine((tr): number => {
       return clampToZero(this.getValue(tr, '9') - this.getValue(tr, '10'));
     }, 'AMT'),
