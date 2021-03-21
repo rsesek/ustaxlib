@@ -3,7 +3,7 @@
 // version 3.0. The full text of the license can be found in LICENSE.txt.
 // SPDX-License-Identifier: GPL-3.0-only
 
-export { Line } from './Line';
+export { Line, FormatType } from './Line';
 export { default as Form } from './Form';
 export { default as Person } from './Person';
 export { default as TaxReturn } from './TaxReturn';

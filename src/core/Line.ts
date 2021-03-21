@@ -7,14 +7,27 @@ import TaxReturn from './TaxReturn';
 import * as Trace from './Trace';
 import Form, { FormClass } from './Form';
 
+export enum FormatType {
+  Dollar = '$',
+  Decimal = '.',
+  Percent = '%',
+  String = 's',
+}
+
+interface LineOptions {
+  formatType?: FormatType;
+}
+
 export abstract class Line<T> {
   private _description?: string;
+  private _options?: LineOptions;
 
   _id: string;  // _id is set by Form.init().
   form: Form;  // Set by Form.init();
 
-  constructor(description?: string) {
+  constructor(description?: string, options?: LineOptions) {
     this._description = description;
+    this._options = options;
   }
 
   get id(): string {
@@ -25,6 +38,10 @@ export abstract class Line<T> {
     return this._description;
   }
 
+  get options(): LineOptions {
+    return this._options || {};
+  }
+
   abstract value(tr: TaxReturn): T;
 };
 
@@ -33,8 +50,8 @@ type ComputeFunc<T> = (tr: TaxReturn) => T;
 export class ComputedLine<T> extends Line<T> {
   private _compute: ComputeFunc<T>;
 
-  constructor(compute: ComputeFunc<T>, description?: string) {
-    super(description);
+  constructor(compute: ComputeFunc<T>, description?: string, options?: LineOptions) {
+    super(description, options);
     this._compute = compute;
   }
 
@@ -57,8 +74,8 @@ export class ReferenceLine<F extends Form,
   // If creating a ReferenceLine and F is the same class as the
   // the one the Line is in, erase |form|'s type with |as any| to
   // keep TypeScript happy.
-  constructor(form: FormClass<F>, line: L, description?: string, fallback?: T) {
-    super(description || `Reference ${form.name}@${line}`);
+  constructor(form: FormClass<F>, line: L, description?: string, fallback?: T, options?: LineOptions) {
+    super(description || `Reference ${form.name}@${line}`, options);
     this._form = form;
     this._line = line;
     this._fallback = fallback;
@@ -85,8 +102,8 @@ export class SymbolicLine<F extends Form & { [key in K]: ComputeFunc<ReturnType<
   private _form: FormClass<F>;
   private _key: K;
 
-  constructor(form: FormClass<F>, key: K, description?: string) {
-    super(description || `Reference ${form.name}/${key}`);
+  constructor(form: FormClass<F>, key: K, description?: string, options?: LineOptions) {
+    super(description || `Reference ${form.name}/${key}`, options);
     this._form = form;
     this._key = key;
   }
@@ -106,8 +123,8 @@ export class InputLine<U = unknown, T extends keyof U = any> extends Line<U[T]> 
 
   form: Form<U>;
 
-  constructor(input: T, description?: string, fallback?: U[T]) {
-    super(description || `Input from ${input}`);
+  constructor(input: T, description?: string, fallback?: U[T], options?: LineOptions) {
+    super(description || `Input from ${input}`, options);
     this._input = input;
     this._fallback = fallback;
   }
@@ -130,8 +147,8 @@ export class AccumulatorLine<F extends Form,
   private _form: FormClass<F>;
   private _line: L;
 
-  constructor(form: FormClass<F>, line: L, description?: string) {
-    super(description || `Accumulator ${form.name}@${line}`);
+  constructor(form: FormClass<F>, line: L, description?: string, options?: LineOptions) {
+    super(description || `Accumulator ${form.name}@${line}`, options);
     this._form = form;
     this._line = line;
   }

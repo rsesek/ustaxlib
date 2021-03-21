@@ -4,7 +4,7 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
 import { Form, Person, TaxReturn } from '../core';
-import { Line, ComputedLine, InputLine, ReferenceLine, SymbolicLine, UnsupportedLine, sumFormLines } from '../core/Line';
+import { Line, ComputedLine, InputLine, ReferenceLine, SymbolicLine, UnsupportedLine, sumFormLines, FormatType } from '../core/Line';
 import { UnsupportedFeatureError } from '../core/Errors';
 import { reduceBySum } from '../core/Math';
 
@@ -71,7 +71,7 @@ export default class Form1116 extends Form<Form1116Input> {
     }),
     '3f': new ComputedLine((tr): number => {
       return Number.parseFloat((this.getValue(tr, '3d') / this.getValue(tr, '3e')).toFixed(4));
-    }),
+    }, undefined, { formatType: FormatType.Decimal }),
     '3g': new ComputedLine((tr): number => {
       return this.getValue(tr, '3c') * this.getValue(tr, '3f');
     }),

@@ -4,7 +4,7 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
 import { Form, Person, TaxReturn } from '../core';
-import { Line, AccumulatorLine, ComputedLine, InputLine, ReferenceLine, UnsupportedLine } from '../core/Line';
+import { Line, AccumulatorLine, ComputedLine, InputLine, ReferenceLine, UnsupportedLine, FormatType } from '../core/Line';
 import { clampToZero, undefinedToZero } from '../core/Math';
 
 export interface Form8606Input {
@@ -44,7 +44,7 @@ export default class Form8606 extends Form<Form8606Input> {
              undefinedToZero(this.getValue(tr, '7')) +
              undefinedToZero(this.getValue(tr, '8'));
     }),
-    '10': new ComputedLine((tr): number => this.getValue(tr, '5') / this.getValue(tr, '9')),
+    '10': new ComputedLine((tr): number => this.getValue(tr, '5') / this.getValue(tr, '9'), undefined, { formatType: FormatType.Decimal }),
     '11': new ComputedLine((tr): number => this.getValue(tr, '8') * this.getValue(tr, '10'), 'Nontaxable portion converted to Roth'),
     '12': new ComputedLine((tr): number => this.getValue(tr, '7') * this.getValue(tr, '10'), 'Nontaxable portion of distributions not converted to Roth'),
     '13': new ComputedLine((tr): number => this.getValue(tr, '11') + this.getValue(tr, '12'), 'Nontaxable portion of all distributions'),
