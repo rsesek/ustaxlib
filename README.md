@@ -38,6 +38,7 @@ provides access to the values computed by `Line`s.
 Currently ustaxlib supports the following models:
 
 - [**fed2019**](src/fed2019/README.md)
+- [**fed2020**](src/fed2020/README.md)
 
 ## Getting Started
 
