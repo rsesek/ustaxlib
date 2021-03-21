@@ -39,6 +39,7 @@ Currently ustaxlib supports the following models:
 
 - [**fed2019**](src/fed2019/README.md)
 - [**fed2020**](src/fed2020/README.md)
+- [**fed2021**](src/fed2021/README.md)
 
 ## Getting Started
 
