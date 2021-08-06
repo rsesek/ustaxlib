@@ -129,6 +129,14 @@ export const Constants = {
       [FilingStatus.MarriedFilingSeparate]: 97400,
     },
   },
+
+  mortgatgeInterestDeduction: {
+    limit: {
+      [FilingStatus.MarriedFilingJoint]: 750_000,
+      [FilingStatus.Single]: 750_000,
+      [FilingStatus.MarriedFilingSeparate]: 375_000,
+    },
+  },
 };
 
 export default class TaxReturn extends BaseTaxReturn {

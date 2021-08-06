@@ -24,6 +24,7 @@ export { default as TaxReturn } from './TaxReturn';
 export { default as W2 } from './W2';
 
 export * from './Form1040';
+export * from './Form1098';
 export * from './Form1099B';
 export * from './Form1099R';
 export * from './Form1116';

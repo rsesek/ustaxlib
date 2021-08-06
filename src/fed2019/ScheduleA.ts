@@ -8,6 +8,7 @@ import { Line, ComputedLine, InputLine, ReferenceLine, SymbolicLine, Unsupported
 import { clampToZero } from '../core/Math';
 
 import Form1040, { FilingStatus } from './Form1040';
+import { Form1098, MortgageInterestDeductionWorksheet } from './Form1098';
 
 export interface ScheduleAInput {
   medicalAndDentalExpenses?: number;
@@ -58,8 +59,11 @@ export default class ScheduleA extends Form<ScheduleAInput> {
     '7': new ComputedLine((tr): number => sumFormLines(tr, this, ['5e', '6'])),
 
     // Interest you paid
-    // TODO - Form 1098
-    '8a': new UnsupportedLine('Home mortgage interest and points'),
+    '8a': new ComputedLine((tr): number => {
+      if (tr.findForms(Form1098).length == 0)
+        return 0;
+      return tr.getForm(MortgageInterestDeductionWorksheet).deductibleMortgateInterest(tr);
+    }, 'Home mortgage interest and points'),
     '8b': new Input('unreportedMortgageInterest', 'Home mortgage interest not reported on Form 1098', 0),
     '8c': new Input('unreportedMortagePoints', 'Points not reported on Form 1098', 0),
     '8d': new Input('mortgageInsurancePremiums', 'Mortgage insurance premiums', 0),

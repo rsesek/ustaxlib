@@ -28,6 +28,7 @@ export { default as ScheduleD } from '../fed2019/ScheduleD';
 export { default as W2 } from '../fed2019/W2';
 
 export { FilingStatus, Form1040Input, computeTax } from '../fed2019/Form1040';
+export * from '../fed2019/Form1098';
 export * from '../fed2019/Form1099B';
 export * from '../fed2019/Form1099R';
 export * from '../fed2019/Form1116';

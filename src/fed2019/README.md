@@ -22,6 +22,7 @@ The following forms are at least partially supported:
     1040._
 - **Schedule A:** Itemized deductions
 - **Schedule D:** Capital gains and losses
+- **Form 1098:** Mortgage interest deduction
 - **Form 1099-B:** Proceeds from broker transactions
 - **Form 1099-DIV:** Dividend income
 - **Form 1099-INT:** Interest income
