@@ -4,7 +4,7 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
 import { Form, Person, TaxReturn } from '../core';
-import { Line, AccumulatorLine, ComputedLine, ReferenceLine, SymbolicLine, UnsupportedLine, sumFormLines, sumLineOfForms } from '../core/Line';
+import { Line, AccumulatorLine, ComputedLine, InputLine, ReferenceLine, SymbolicLine, UnsupportedLine, sumFormLines, sumLineOfForms } from '../core/Line';
 import { Literal, clampToZero } from '../core/Math';
 import { NotFoundError, UnsupportedFeatureError } from '../core/Errors';
 
@@ -19,7 +19,12 @@ export default class ScheduleD extends Form {
     // 1a not supported (Totals for all short-term transactions reported on Form 1099-B for which basis was reported to the IRS and for which you have no adjustments)
     '4': new UnsupportedLine(),  // Short-term gain from Form 6252 and short-term gain or (loss) from Forms 4684, 6781, and 8824
     '5': new UnsupportedLine(),  // Net short-term gain or (loss) from partnerships, S corporations, estates, and trusts from Schedule(s) K-1
-    '6': new UnsupportedLine(),  // Short-term capital loss carryover. Enter the amount, if any, from line 8 of your Capital Loss Carryover Worksheet in the instructions
+    '6': new ComputedLine((tr): number => {
+      const ws = tr.findForm(CapitalLossCarryoverWorksheet);
+      if (!ws)
+        return 0;
+      return -ws.getValue(tr, '6');
+    }, 'Short-term capital loss carryover'),
 
     '7': new ComputedLine((tr): number => {
       // 1-3 are computed by Form8949.
@@ -36,7 +41,12 @@ export default class ScheduleD extends Form {
     '11': new UnsupportedLine(),  // Gain from Form 4797, Part I; long-term gain from Forms 2439 and 6252; and long-term gain or (loss) from Forms 4684, 6781, and 8824
     '12': new UnsupportedLine(),  // Net long-term gain or (loss) from partnerships, S corporations, estates, and trusts from Schedule(s) K-1
     '13': new AccumulatorLine(Form1099DIV, '2a', 'Capital gain distributions'),
-    '14': new UnsupportedLine('Long-term capital loss carryover'),
+    '14': new ComputedLine((tr): number => {
+      const ws = tr.findForm(CapitalLossCarryoverWorksheet);
+      if (!ws)
+        return 0;
+      return -ws.getValue(tr, '13');
+    }, 'Long-term capital loss carryover'),
 
     '15': new ComputedLine((tr): number => {
       let value = sumFormLines(tr, this, ['11', '12', '13', '14']);
@@ -177,5 +187,52 @@ export class ScheduleDTaxWorksheet extends Form {
       return computeTax(income, tr);
     }, 'Income tax'),
     '47': new ComputedLine((tr): number => Math.min(this.getValue(tr, '45'), this.getValue(tr, '46')), 'Tax on all taxable income'),
+  };
+};
+
+export interface CapitalLossCarryoverWorksheetInput {
+  priorYearTaxableIncome: number;
+  priorYearSchedDGainOrLoss: number;  // This is the value reported on F1040.
+  priorYearNetShortTermGainOrLoss: number;
+  priorYearNetLongTermGainOrLoss: number;
+};
+
+export class CapitalLossCarryoverWorksheet extends Form<CapitalLossCarryoverWorksheetInput> {
+  readonly name = 'Capital Loss Carryover Worksheet';
+
+  readonly lines = {
+    '1': new InputLine<CapitalLossCarryoverWorksheetInput>('priorYearTaxableIncome'),
+    '2': new ComputedLine((tr): number => Math.abs(this.getInput('priorYearSchedDGainOrLoss')), 'Prior year net loss as a positive amount'),
+    '3': new ComputedLine((tr): number => clampToZero(sumFormLines(tr, this, ['1', '2']))),
+    '4': new ComputedLine((tr): number => Math.min(this.getValue(tr, '2'), this.getValue(tr, '3'))),
+    '5': new ComputedLine((tr): number => {
+      const stgl = this.getInput('priorYearNetShortTermGainOrLoss');
+      if (stgl > 0)
+        return 0;
+      return Math.abs(stgl);
+    }, 'Prior year short-term capital loss as a positive amount'),
+    '6': new ComputedLine((tr): number => clampToZero(this.getInput('priorYearNetLongTermGainOrLoss'))),
+    '7': new ComputedLine((tr): number => sumFormLines(tr, this, ['4', '6'])),
+    '8': new ComputedLine((tr): number => {
+      const l5 = this.getValue(tr, '5');
+      if (l5 <= 0)
+        return 0;
+      return clampToZero(l5 - this.getValue(tr, '7'))
+    }, 'Short-term capital loss carryover'),
+    '9': new ComputedLine((tr): number => {
+      const ltgl = this.getInput('priorYearNetLongTermGainOrLoss');
+      if (ltgl > 0)
+        return 0;
+      return Math.abs(ltgl);
+    }, 'Prior year long-term capital loss as a positive amount'),
+    '10': new ComputedLine((tr): number => clampToZero(this.getInput('priorYearNetShortTermGainOrLoss'))),
+    '11': new ComputedLine((tr): number => clampToZero(this.getValue(tr, '4') - this.getValue(tr, '5'))),
+    '12': new ComputedLine((tr): number => sumFormLines(tr, this, ['10', '11'])),
+    '13': new ComputedLine((tr): number => {
+      const l9 = this.getValue(tr, '9');
+      if (l9 <= 0)
+        return 0;
+      return clampToZero(l9 - this.getValue(tr, '12'));
+    }, 'Long-term capital loss carryover'),
   };
 };
