@@ -36,7 +36,7 @@ export default abstract class Form<I = unknown> {
 
   getLine<K extends keyof this['lines']>(id: K): this['lines'][K] {
     if (!(id in this.lines))
-      throw new NotFoundError(`Form ${this.name} does not have line ${id}`);
+      throw new NotFoundError(`Form ${this.name} does not have line ${id.toString()}`);
     // This coercion is safe: the method's generic constraint for K ensures
     // a valid key in |lines|, and the abstract declaration of |lines| ensures
     // the correct index type.
@@ -50,9 +50,9 @@ export default abstract class Form<I = unknown> {
 
   getInput<K extends keyof I>(name: K): I[K] {
     if (!(name in this._input)) {
-      throw new NotFoundError(`No input with key ${name} on form ${this.name}`);
+      throw new NotFoundError(`No input with key ${String(name)} on form ${this.name}`);
     }
-    Trace.mark(`${this.name} input: ${name}`);
+    Trace.mark(`${this.name} input: ${String(name)}`);
     return this._input[name];
   }
 

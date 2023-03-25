@@ -75,7 +75,7 @@ export class ReferenceLine<F extends Form,
   // the one the Line is in, erase |form|'s type with |as any| to
   // keep TypeScript happy.
   constructor(form: FormClass<F>, line: L, description?: string, fallback?: T, options?: LineOptions) {
-    super(description || `Reference ${form.name}@${line}`, options);
+    super(description || `Reference ${form.name}@${line.toString()}`, options);
     this._form = form;
     this._line = line;
     this._fallback = fallback;
@@ -103,7 +103,7 @@ export class SymbolicLine<F extends Form & { [key in K]: ComputeFunc<ReturnType<
   private _key: K;
 
   constructor(form: FormClass<F>, key: K, description?: string, options?: LineOptions) {
-    super(description || `Reference ${form.name}/${key}`, options);
+    super(description || `Reference ${form.name}/${String(key)}`, options);
     this._form = form;
     this._key = key;
   }
@@ -124,7 +124,7 @@ export class InputLine<U = unknown, T extends keyof U = any> extends Line<U[T]> 
   form: Form<U>;
 
   constructor(input: T, description?: string, fallback?: U[T], options?: LineOptions) {
-    super(description || `Input from ${input}`, options);
+    super(description || `Input from ${String(input)}`, options);
     this._input = input;
     this._fallback = fallback;
   }
@@ -148,7 +148,7 @@ export class AccumulatorLine<F extends Form,
   private _line: L;
 
   constructor(form: FormClass<F>, line: L, description?: string, options?: LineOptions) {
-    super(description || `Accumulator ${form.name}@${line}`, options);
+    super(description || `Accumulator ${form.name}@${line.toString()}`, options);
     this._form = form;
     this._line = line;
   }
