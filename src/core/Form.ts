@@ -9,7 +9,7 @@ import * as Trace from './Trace';
 import { Line } from './Line';
 import { InconsistencyError, NotFoundError } from './Errors';
 
-export default abstract class Form<I = unknown> {
+export default abstract class Form<I extends object = any> {
   abstract readonly name: string;
 
   abstract readonly lines: { [key: string]: Line<any> };

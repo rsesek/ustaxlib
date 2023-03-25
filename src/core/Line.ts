@@ -117,7 +117,7 @@ export class SymbolicLine<F extends Form & { [key in K]: ComputeFunc<ReturnType<
   }
 }
 
-export class InputLine<U = unknown, T extends keyof U = any> extends Line<U[T]> {
+export class InputLine<U extends object, T extends keyof U = any> extends Line<U[T]> {
   private _input: T;
   private _fallback: U[T];
 
